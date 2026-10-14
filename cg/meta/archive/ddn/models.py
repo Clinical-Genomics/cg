@@ -1,12 +1,8 @@
 import logging
-from pathlib import Path
 
-from housekeeper.store.models import File
 from pydantic import BaseModel, Field
 
-from cg.meta.archive.ddn.constants import OSTYPE, ROOT_TO_TRIM, JobStatus
-from cg.meta.archive.models import FileTransferData
-from cg.store.models import Sample
+from cg.meta.archive.ddn.constants import OSTYPE, JobStatus
 
 LOG = logging.getLogger(__name__)
 
@@ -15,31 +11,11 @@ def get_request_log(body: dict):
     return "Sending request with body: \n" + f"{body}"
 
 
-class MiriaObject(FileTransferData):
+class MiriaObject(BaseModel):
     """Model for representing a singular object transfer."""
 
     destination: str
     source: str
-
-    @classmethod
-    def create_from_file_and_sample(
-        cls, file: File, sample: Sample, is_archiving: bool = True
-    ) -> "MiriaObject":
-        """Instantiates the class from a File and Sample object."""
-        if is_archiving:
-            return cls(destination=sample.internal_id, source=file.full_path)
-        return cls(
-            destination=Path(file.full_path).parent.as_posix(),
-            source=Path(sample.internal_id, Path(file.path).name).as_posix(),
-        )
-
-    def trim_path(self, attribute_to_trim: str):
-        """Trims the given attribute (source or destination) from its root directory."""
-        setattr(
-            self,
-            attribute_to_trim,
-            f"/{Path(getattr(self, attribute_to_trim)).relative_to(ROOT_TO_TRIM)}",
-        )
 
     def add_repositories(self, source_prefix: str, destination_prefix: str):
         """Prepends the given repositories to the source and destination paths."""
@@ -55,11 +31,6 @@ class TransferPayload(BaseModel):
     createFolder: bool = True
     settings: list[dict] = []
     metadataList: list[dict] = []
-
-    def trim_paths(self, attribute_to_trim: str):
-        """Trims the source path from its root directory for all objects in the transfer."""
-        for miria_file in self.files_to_transfer:
-            miria_file.trim_path(attribute_to_trim=attribute_to_trim)
 
     def add_repositories(self, source_prefix: str, destination_prefix: str):
         """Prepends the given repositories to the source and destination paths all objects in the
