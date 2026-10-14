@@ -7,7 +7,7 @@ from cg.constants import Workflow
 from cg.exc import AnalysisNotReadyError, CaseWorkflowMismatchError, SeqeraError
 from cg.services.analysis_starter.configurator.abstract_model import CaseConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
-from cg.services.analysis_starter.input_fetcher.input_fetcher import InputValidator
+from cg.services.analysis_starter.input_fetcher.input_fetcher import AnalysisInputValidator
 from cg.services.analysis_starter.submitters.submitter import Submitter
 from cg.services.analysis_starter.tracker.tracker import Tracker
 from cg.store.models import Case
@@ -20,7 +20,7 @@ class AnalysisStarter:
     def __init__(
         self,
         configurator: Configurator,
-        input_fetcher: InputValidator,
+        input_fetcher: AnalysisInputValidator,
         store: Store,
         submitter: Submitter,
         tracker: Tracker,
