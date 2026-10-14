@@ -289,3 +289,7 @@ def test_get_analysis_starter_for_workflow_nallo(
 
     # THEN the factory should have created a NextflowTracker correctly
     assert isinstance(analysis_starter.tracker, NextflowTracker)
+
+
+def test_get_analysis_starter_for_workflow_trana():
+    pass
