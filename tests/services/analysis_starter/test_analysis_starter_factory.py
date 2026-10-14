@@ -145,7 +145,6 @@ def test_analysis_starter_factory_mip_dna():
         Workflow.RNAFUSION,
         Workflow.TAXPROFILER,
         Workflow.TOMTE,
-        Workflow.TRANA,
     ],
 )
 def test_get_analysis_starter_for_workflow_nextflow_fastq(
