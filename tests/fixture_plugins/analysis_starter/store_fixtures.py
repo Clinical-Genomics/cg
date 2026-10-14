@@ -187,3 +187,19 @@ def mock_store_for_tomte_file_creators(nextflow_sample_id: str) -> Store:
     mock_store.get_case_workflow = Mock(return_value=Workflow.TOMTE)
     mock_store.get_case_priority = Mock(return_value=SlurmQos.NORMAL)
     return mock_store
+
+
+@pytest.fixture
+def mock_store_for_trana_file_creators(nextflow_sample_id: str) -> Store:
+    """Fixture to provide a mock store for the Trana sample sheet creator."""
+    mock_sample: Sample = create_autospec(Sample)
+    mock_sample.internal_id = nextflow_sample_id
+    mock_sample.name = nextflow_sample_id
+
+    mock_case: Case = create_autospec(Case, samples=[mock_sample])
+
+    mock_store: Store = create_autospec(Store)
+    mock_store.get_case_by_internal_id = Mock(return_value=mock_case)
+    mock_store.get_case_workflow = Mock(return_value=Workflow.TRANA)
+    mock_store.get_case_priority = Mock(return_value=SlurmQos.NORMAL)
+    return mock_store

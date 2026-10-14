@@ -48,6 +48,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.tomte_params_file_creator import (
     TomteParamsFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.trana_params_file_creator import (
+    TranaParamsFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo_sample_sheet_creator import (
     NalloSampleSheetCreator,
 )
@@ -65,6 +68,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.tomte_sample_sheet_creator import (
     TomteSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.trana_sample_sheet_creator import (
+    TranaSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.balsamic_configurator import (
     BalsamicConfigurator,
@@ -98,6 +104,7 @@ class ConfiguratorFactory:
                 | Workflow.RNAFUSION
                 | Workflow.TAXPROFILER
                 | Workflow.TOMTE
+                | Workflow.TRANA
             ):
                 return self._get_nextflow_configurator(workflow)
             case _:
@@ -153,6 +160,8 @@ class ConfiguratorFactory:
                 return TomteParamsFileCreator(
                     lims_api=self.lims_api, params=params, status_db=self.store
                 )
+            case Workflow.TRANA:
+                return TranaParamsFileCreator(params)
             case _:
                 raise NotImplementedError(f"There is no params file creator for {workflow}")
 
@@ -180,6 +189,10 @@ class ConfiguratorFactory:
                 )
             case Workflow.TOMTE:
                 return TomteSampleSheetCreator(
+                    housekeeper_api=self.housekeeper_api, store=self.store
+                )
+            case Workflow.TRANA:
+                return TranaSampleSheetCreator(
                     housekeeper_api=self.housekeeper_api, store=self.store
                 )
             case _:

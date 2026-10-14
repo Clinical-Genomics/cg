@@ -8,10 +8,10 @@ from sqlalchemy.orm import Query
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
 from cg.exc import AnalysisNotReadyError
-from cg.services.analysis_starter.input_fetcher.implementations.data_exists_validator import (
+from cg.services.analysis_starter.analysis_input_validator.implementations.data_exists_validator import (
     DataExistsValidator,
 )
-from cg.services.analysis_starter.input_fetcher.implementations.data_exists_validator import (
+from cg.services.analysis_starter.analysis_input_validator.implementations.data_exists_validator import (
     Path as file_path,
 )
 from cg.store.models import Case, Sample

@@ -12,6 +12,7 @@ from cg.models.cg_config import (
     RnafusionConfig,
     TaxprofilerConfig,
     TomteConfig,
+    TranaConfig,
 )
 from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
     PipelineExtension,
@@ -38,6 +39,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.tomte_params_file_creator import (
     TomteParamsFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.trana_params_file_creator import (
+    TranaParamsFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo_sample_sheet_creator import (
     NalloSampleSheetCreator,
 )
@@ -55,6 +59,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.tomte_sample_sheet_creator import (
     TomteSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.trana_sample_sheet_creator import (
+    TranaSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
@@ -110,6 +117,13 @@ def configurator_scenario(
             pipeline_extension=TomteExtension,
             sample_sheet_creator=TomteSampleSheetCreator,
             store="mock_store_for_tomte_file_creators",
+        ),
+        Workflow.TRANA: AnalysisStarterScenario(
+            nextflow_config=TranaConfig,
+            params_file_creator=TranaParamsFileCreator,
+            pipeline_extension=PipelineExtension,
+            sample_sheet_creator=TranaSampleSheetCreator,
+            store="mock_store_for_trana_file_creators",
         ),
     }
 

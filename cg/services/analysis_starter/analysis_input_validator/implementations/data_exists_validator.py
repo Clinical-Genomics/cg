@@ -6,7 +6,9 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
 from cg.constants.housekeeper_tags import SequencingFileTag
 from cg.exc import AnalysisNotReadyError
-from cg.services.analysis_starter.input_fetcher.input_fetcher import AnalysisInputValidator
+from cg.services.analysis_starter.analysis_input_validator.analysis_input_validator import (
+    AnalysisInputValidator,
+)
 from cg.store.models import Case
 from cg.store.store import Store
 
