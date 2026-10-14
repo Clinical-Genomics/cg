@@ -1,5 +1,4 @@
 import logging
-from typing import Type
 
 import rich_click as click
 from housekeeper.store.models import Archive, File
@@ -15,7 +14,8 @@ from cg.store.models import Case, Order, Sample
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
-ARCHIVE_HANDLERS: dict[str, Type[ArchiveHandler]] = {
+
+ARCHIVE_HANDLERS: dict[str, type[ArchiveHandler]] = {
     ArchiveLocations.KAROLINSKA_BUCKET: DDNDataFlowClient
 }
 
