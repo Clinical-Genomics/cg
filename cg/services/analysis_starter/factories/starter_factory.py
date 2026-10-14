@@ -16,7 +16,10 @@ from cg.services.analysis_starter.analysis_input_validator.implementations.fastq
 )
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.configurator import Configurator
-from cg.services.analysis_starter.constants import IMPLEMENTED_FASTQ_WORKFLOWS
+from cg.services.analysis_starter.constants import (
+    IMPLEMENTED_FASTQ_WORKFLOWS,
+    WORKFLOWS_WITHOUT_COMPRESSION,
+)
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_client import (
     SeqeraPlatformClient,
@@ -82,7 +85,7 @@ class AnalysisStarterFactory:
                 spring_archive_api=spring_archive_api,
                 status_db=self.store,
             )
-        elif workflow in [Workflow.NALLO, Workflow.TRANA]:
+        elif workflow in WORKFLOWS_WITHOUT_COMPRESSION:
             return DataExistsValidator(status_db=self.store, housekeeper_api=self.housekeeper_api)
         raise NotImplementedError(f"No input validator for workflow {workflow}")
 
