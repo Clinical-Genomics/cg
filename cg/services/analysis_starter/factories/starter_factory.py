@@ -82,9 +82,9 @@ class AnalysisStarterFactory:
                 spring_archive_api=spring_archive_api,
                 status_db=self.store,
             )
-        elif workflow == Workflow.NALLO:
+        elif workflow in [Workflow.NALLO, Workflow.TRANA]:
             return DataExistsValidator(status_db=self.store, housekeeper_api=self.housekeeper_api)
-        raise NotImplementedError(f"No input fetcher for workflow {workflow}")
+        raise NotImplementedError(f"No input validator for workflow {workflow}")
 
     def _get_submitter(self, workflow: Workflow) -> Submitter:
         if workflow in [

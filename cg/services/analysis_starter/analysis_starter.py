@@ -29,7 +29,7 @@ class AnalysisStarter:
         workflow: Workflow,
     ):
         self.configurator = configurator
-        self.input_fetcher = analysis_input_validator
+        self.analysis_input_validator = analysis_input_validator
         self.store = store
         self.submitter = submitter
         self.tracker = tracker
@@ -55,7 +55,7 @@ class AnalysisStarter:
         LOG.info(f"Starting case {case_id}")
         self._ensure_case_matches_workflow(case_id)
         self.tracker.ensure_analysis_not_ongoing(case_id)
-        self.input_fetcher.ensure_files_are_ready(case_id)
+        self.analysis_input_validator.ensure_files_are_ready(case_id)
         case_config: CaseConfig = self.configurator.configure(case_id=case_id, **flags)
         self._run_and_track(case_id=case_id, case_config=case_config)
 

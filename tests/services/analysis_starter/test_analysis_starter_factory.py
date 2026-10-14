@@ -18,6 +18,7 @@ from cg.models.cg_config import (
     RnafusionConfig,
     RunInstruments,
     SeqeraPlatformConfig,
+    SlurmConfig,
     TaxprofilerConfig,
     TomteConfig,
     TranaConfig,
@@ -77,7 +78,7 @@ def test_analysis_starter_factory_balsamic(cg_balsamic_config: BalsamicConfig, w
 
     # THEN the analysis starter should have been configured correctly
     assert isinstance(analysis_starter.configurator, BalsamicConfigurator)
-    assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
+    assert isinstance(analysis_starter.analysis_input_validator, FastqFetcher)
     assert isinstance(analysis_starter.submitter, SubprocessSubmitter)
     assert isinstance(analysis_starter.tracker, BalsamicTracker)
     assert analysis_starter.workflow == workflow
@@ -98,7 +99,7 @@ def test_analysis_starter_factory_microsalt(cg_context: CGConfig, mocker: Mocker
 
     # THEN the Factory should have it configured correctly
     assert isinstance(analysis_starter.configurator, MicrosaltConfigurator)
-    assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
+    assert isinstance(analysis_starter.analysis_input_validator, FastqFetcher)
     assert isinstance(analysis_starter.submitter, SubprocessSubmitter)
 
 
@@ -135,7 +136,7 @@ def test_analysis_starter_factory_mip_dna():
 
     # THEN the analysis starter should have been configured correctly
     assert isinstance(analysis_starter.configurator, MIPDNAConfigurator)
-    assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
+    assert isinstance(analysis_starter.analysis_input_validator, FastqFetcher)
     assert isinstance(analysis_starter.submitter, SubprocessSubmitter)
     assert isinstance(analysis_starter.tracker, MIPDNATracker)
 
@@ -212,7 +213,7 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
     assert isinstance(analysis_starter.configurator, NextflowConfigurator)
 
     # THEN the factory should have created a FastqFetcher correctly
-    assert isinstance(analysis_starter.input_fetcher, FastqFetcher)
+    assert isinstance(analysis_starter.analysis_input_validator, FastqFetcher)
     mock_archive_api_init.assert_called_once_with(
         ANY,
         status_db=cg_config.status_db,
@@ -279,7 +280,7 @@ def test_get_analysis_starter_for_workflow_nallo(
     assert isinstance(analysis_starter.configurator, NextflowConfigurator)
 
     # THEN the AnalysisStarter should have created a DataExistsValidator correctly
-    assert isinstance(analysis_starter.input_fetcher, DataExistsValidator)
+    assert isinstance(analysis_starter.analysis_input_validator, DataExistsValidator)
     mock_validator_init.assert_called_once_with(
         ANY, housekeeper_api=cg_config.housekeeper_api, status_db=cg_config.status_db
     )
@@ -291,5 +292,55 @@ def test_get_analysis_starter_for_workflow_nallo(
     assert isinstance(analysis_starter.tracker, NextflowTracker)
 
 
-def test_get_analysis_starter_for_workflow_trana():
-    pass
+def test_get_analysis_starter_for_workflow_trana(
+    mocker: MockerFixture,
+):
+    """Test that the AnalysisStarterFactory creates a Nallo AnalysisStarter correctly."""
+    # GIVEN a CGConfig with a Trana pipeline configuration
+    cg_config: CGConfig = create_autospec(
+        CGConfig,
+        run_instruments=create_autospec(
+            RunInstruments,
+            illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
+        ),
+        seqera_platform=Mock(),
+        trana=create_autospec(
+            TranaConfig,
+            platform="platform",
+            resources="resources",
+            config="config",
+            params="params",
+            root="root",
+            repository="repository",
+            revision="revision",
+            profile="profile",
+            pre_run_script="pre_run_script",
+            slurm=create_autospec(SlurmConfig, account="slurm account"),
+        ),
+    )
+
+    # GIVEN an AnalysisStarterFactory
+    analysis_starter_factory = AnalysisStarterFactory(cg_config)
+
+    # GIVEN a DataExistsValidator constructor
+    mock_validator_init: MagicMock = mocker.spy(DataExistsValidator, "__init__")
+
+    # WHEN fetching the AnalysisStarter for Trana
+    analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_workflow(
+        Workflow.TRANA
+    )
+
+    # THEN the AnalysisStarter should have a Nextflow configurator
+    assert isinstance(analysis_starter.configurator, NextflowConfigurator)
+
+    # THEN the AnalysisStarter should have created a DataExistsValidator correctly
+    assert isinstance(analysis_starter.analysis_input_validator, DataExistsValidator)
+    mock_validator_init.assert_called_once_with(
+        ANY, housekeeper_api=cg_config.housekeeper_api, status_db=cg_config.status_db
+    )
+
+    # THEN the factory should have created a SeqeraPlatformSubmitter correctly
+    assert isinstance(analysis_starter.submitter, SeqeraPlatformSubmitter)
+
+    # THEN the factory should have created a NextflowTracker correctly
+    assert isinstance(analysis_starter.tracker, NextflowTracker)
