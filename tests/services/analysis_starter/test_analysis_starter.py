@@ -135,7 +135,7 @@ def analysis_starter_scenario(
     "attribute_name, function_name, error, expected_exit",
     [
         ("tracker", "ensure_analysis_not_ongoing", None, True),
-        ("input_fetcher", "ensure_files_are_ready", AnalysisNotReadyError, True),
+        ("analysis_input_validator", "ensure_files_are_ready", AnalysisNotReadyError, True),
         ("tracker", "ensure_analysis_not_ongoing", Exception, False),
     ],
     ids=["Success", "Fastqs missing", "General error"],
@@ -322,7 +322,7 @@ def test_start(
     mock_configurator.configure.return_value = mock_case_config
 
     # GIVEN a FastqFetcher
-    input_fetcher: TypedMock[FastqFetcher] = create_typed_mock(FastqFetcher)
+    fastq_fetcher: TypedMock[FastqFetcher] = create_typed_mock(FastqFetcher)
 
     # GIVEN a Store with a case with the correct workflow
     store: Store = create_autospec(Store)
@@ -335,7 +335,7 @@ def test_start(
     # GIVEN an analysis starter initialised with the previously mocked classes
     analysis_starter = AnalysisStarter(
         configurator=mock_configurator,
-        analysis_input_validator=input_fetcher.as_type,
+        analysis_input_validator=fastq_fetcher.as_type,
         store=store,
         submitter=mock_submitter,
         tracker=mock_tracker,
@@ -347,7 +347,7 @@ def test_start(
 
     # THEN the analysis should be started successfully
     mock_tracker.ensure_analysis_not_ongoing.assert_called_once_with(case_id)
-    input_fetcher.as_mock.ensure_files_are_ready.assert_called_once_with(case_id)
+    fastq_fetcher.as_mock.ensure_files_are_ready.assert_called_once_with(case_id)
     mock_configurator.configure.assert_called_once_with(case_id=case_id, **flags)
     mock_tracker.set_case_as_running.assert_called_once_with(case_id)
     mock_submitter.submit.assert_called_once_with(mock_case_config)

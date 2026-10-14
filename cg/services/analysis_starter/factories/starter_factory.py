@@ -17,7 +17,7 @@ from cg.services.analysis_starter.analysis_input_validator.implementations.fastq
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.constants import (
-    IMPLEMENTED_FASTQ_WORKFLOWS,
+    IMPLEMENTED_WORKFLOWS_WITH_COMPRESSION,
     WORKFLOWS_WITHOUT_COMPRESSION,
 )
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
@@ -67,7 +67,7 @@ class AnalysisStarterFactory:
         )
 
     def _get_input_validator(self, workflow: Workflow) -> AnalysisInputValidator:
-        if workflow in IMPLEMENTED_FASTQ_WORKFLOWS:
+        if workflow in IMPLEMENTED_WORKFLOWS_WITH_COMPRESSION:
             spring_archive_api = SpringArchiveAPI(
                 status_db=self.store,
                 housekeeper_api=self.housekeeper_api,

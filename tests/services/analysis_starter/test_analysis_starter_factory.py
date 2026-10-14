@@ -169,7 +169,6 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
      - RNAFUSION
      - Taxprofiler
      - Tomte
-     - Trana
     """
     # GIVEN a CGConfig with valid Seqera platform, data flow and Nextflow pipeline configurations
     cg_config: CGConfig = create_autospec(
@@ -295,7 +294,7 @@ def test_get_analysis_starter_for_workflow_nallo(
 def test_get_analysis_starter_for_workflow_trana(
     mocker: MockerFixture,
 ):
-    """Test that the AnalysisStarterFactory creates a Nallo AnalysisStarter correctly."""
+    """Test that the AnalysisStarterFactory creates a Trana AnalysisStarter correctly."""
     # GIVEN a CGConfig with a Trana pipeline configuration
     cg_config: CGConfig = create_autospec(
         CGConfig,
