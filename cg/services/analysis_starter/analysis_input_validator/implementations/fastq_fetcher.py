@@ -10,7 +10,9 @@ from cg.exc import AnalysisNotReadyError, DecompressionCouldNotStartError
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.compress import CompressAPI, files
 from cg.models.compression_data import CaseCompressionData, CompressionData, SampleCompressionData
-from cg.services.analysis_starter.input_fetcher.input_fetcher import AnalysisInputValidator
+from cg.services.analysis_starter.analysis_input_validator.analysis_input_validator import (
+    AnalysisInputValidator,
+)
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 

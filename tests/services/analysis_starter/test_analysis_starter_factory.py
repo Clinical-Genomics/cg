@@ -22,6 +22,12 @@ from cg.models.cg_config import (
     TomteConfig,
     TranaConfig,
 )
+from cg.services.analysis_starter.analysis_input_validator.implementations.data_exists_validator import (
+    DataExistsValidator,
+)
+from cg.services.analysis_starter.analysis_input_validator.implementations.fastq_fetcher import (
+    FastqFetcher,
+)
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.implementations.balsamic_configurator import (
     BalsamicConfigurator,
@@ -33,10 +39,6 @@ from cg.services.analysis_starter.configurator.implementations.mip_dna import MI
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.factories import starter_factory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
-from cg.services.analysis_starter.input_fetcher.implementations.data_exists_validator import (
-    DataExistsValidator,
-)
-from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
 from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_client import (
     SeqeraPlatformClient,
 )
