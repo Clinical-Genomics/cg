@@ -19,6 +19,7 @@ from cg.apps.tb import TrailblazerAPI
 from cg.clients.arnold.api import ArnoldAPIClient
 from cg.clients.chanjo2.client import Chanjo2APIClient
 from cg.clients.janus.api import JanusAPIClient
+from cg.constants.constants import Workflow
 from cg.constants.observations import BalsamicObservationPanel, LoqusdbInstance
 from cg.constants.priority import SlurmQos
 from cg.meta.delivery.delivery import DeliveryAPI
@@ -912,3 +913,37 @@ class CGConfig(BaseModel):
             )
             self.delivery_service_factory_ = factory
         return factory
+
+    def get_pipeline_config(self, workflow: Workflow):
+        pipeline_config = None
+        match workflow:
+            case Workflow.BALSAMIC | Workflow.BALSAMIC_PON | Workflow.BALSAMIC_UMI:
+                pipeline_config = self.balsamic
+            case Workflow.FLUFFY:
+                pipeline_config = self.fluffy
+            case Workflow.MICROSALT:
+                pipeline_config = self.microsalt
+            case Workflow.MIP_DNA:
+                pipeline_config = self.mip_rd_dna
+            case Workflow.MIP_RNA:
+                pipeline_config = self.mip_rd_rna
+            case Workflow.MUTANT:
+                pipeline_config = self.mutant
+            case Workflow.NALLO:
+                pipeline_config = self.nallo
+            case Workflow.RAREDISEASE:
+                pipeline_config = self.raredisease
+            case Workflow.RNAFUSION:
+                pipeline_config = self.rnafusion
+            case Workflow.TAXPROFILER:
+                pipeline_config = self.taxprofiler
+            case Workflow.TOMTE:
+                pipeline_config = self.tomte
+            case Workflow.TRANA_16S:
+                pipeline_config = self.trana_16s
+            case Workflow.TRANA_ITS:
+                pipeline_config = self.trana_its
+        if pipeline_config:
+            return pipeline_config
+        else:
+            raise NotImplementedError(f"There is no pipeline config for {workflow}")
