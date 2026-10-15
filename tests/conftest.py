@@ -2152,7 +2152,7 @@ def context_config(
             },
             "tower_workflow": "tomte",
         },
-        "trana_16s": {
+        "trana-16s": {
             "binary_path": nextflow_binary,
             "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",
@@ -2174,7 +2174,7 @@ def context_config(
             },
             "tower_workflow": "trana",
         },
-        "trana_its": {
+        "trana-its": {
             "binary_path": nextflow_binary,
             "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
             "compute_env": "nf_tower_compute_env",

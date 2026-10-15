@@ -111,23 +111,27 @@ class ConfiguratorFactory:
                 raise NotImplementedError
 
     def _get_nextflow_configurator(self, workflow: Workflow) -> NextflowConfigurator:
+        pipeline_config = cast(CommonAppConfig, self.cg_config.get_pipeline_config(workflow))
         config_file_creator: NextflowConfigFileCreator = self._get_nextflow_config_file_creator(
-            workflow
+            pipeline_config
         )
-        params_file_creator: ParamsFileCreator = self._get_params_file_creator(workflow)
+        params_file_creator: ParamsFileCreator = self._get_params_file_creator(
+            workflow=workflow, pipeline_config=pipeline_config
+        )
         sample_sheet_creator: SampleSheetCreator = self._get_sample_sheet_creator(workflow)
         extension: PipelineExtension = self._get_pipeline_extension(workflow)
         return NextflowConfigurator(
             config_file_creator=config_file_creator,
             params_file_creator=params_file_creator,
-            pipeline_config=self._get_pipeline_config(workflow),
+            pipeline_config=pipeline_config,
             sample_sheet_creator=sample_sheet_creator,
             store=self.store,
             pipeline_extension=extension,
         )
 
-    def _get_nextflow_config_file_creator(self, workflow: Workflow) -> NextflowConfigFileCreator:
-        pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
+    def _get_nextflow_config_file_creator(
+        self, pipeline_config: CommonAppConfig
+    ) -> NextflowConfigFileCreator:
         return NextflowConfigFileCreator(
             account=pipeline_config.slurm.account,
             platform=pipeline_config.platform,
@@ -136,8 +140,14 @@ class ConfiguratorFactory:
             workflow_config_path=pipeline_config.config,
         )
 
-    def _get_params_file_creator(self, workflow: Workflow) -> ParamsFileCreator:
-        params: str = self._get_pipeline_config(workflow).params
+    def _get_params_file_creator(
+        self, workflow: Workflow, pipeline_config: CommonAppConfig
+    ) -> ParamsFileCreator:
+        params = getattr(pipeline_config, "params", None)
+        if not params:
+            raise NotImplementedError(
+                f"No params in pipeline config {pipeline_config.model_dump()}"
+            )
         match workflow:
             case Workflow.NALLO:
                 return NalloParamsFileCreator(params)
@@ -164,26 +174,6 @@ class ConfiguratorFactory:
                 return TranaParamsFileCreator(params)
             case _:
                 raise NotImplementedError(f"There is no params file creator for {workflow}")
-
-    def _get_pipeline_config(self, workflow: Workflow) -> CommonAppConfig:
-        pipeline_config = None
-        match workflow:
-            case Workflow.NALLO:
-                pipeline_config = self.cg_config.nallo
-            case Workflow.RAREDISEASE:
-                pipeline_config = self.cg_config.raredisease
-            case Workflow.RNAFUSION:
-                pipeline_config = self.cg_config.rnafusion
-            case Workflow.TAXPROFILER:
-                pipeline_config = self.cg_config.taxprofiler
-            case Workflow.TOMTE:
-                pipeline_config = self.cg_config.tomte
-            case Workflow.TRANA_16S:
-                pipeline_config = self.cg_config.trana_16s
-        if pipeline_config:
-            return pipeline_config
-        else:
-            raise NotImplementedError(f"There is no pipeline config for {workflow}")
 
     def _get_sample_sheet_creator(self, workflow: Workflow) -> SampleSheetCreator:
         match workflow:

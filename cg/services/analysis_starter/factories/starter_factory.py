@@ -1,10 +1,11 @@
 import logging
+from typing import cast
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants import Workflow
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.compress import CompressAPI
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import CGConfig, CommonAppConfig
 from cg.services.analysis_starter.analysis_input_validator.analysis_input_validator import (
     AnalysisInputValidator,
 )
@@ -121,7 +122,9 @@ class AnalysisStarterFactory:
             return NextflowTracker(
                 store=self.store,
                 trailblazer_api=self.cg_config.trailblazer_api,
-                workflow_root=getattr(self.cg_config, workflow).root,
+                workflow_root=cast(
+                    CommonAppConfig, self.cg_config.get_pipeline_config(workflow)
+                ).root,
             )
         elif workflow == Workflow.MICROSALT:
             return MicrosaltTracker(
