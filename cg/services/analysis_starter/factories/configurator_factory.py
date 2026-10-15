@@ -166,7 +166,24 @@ class ConfiguratorFactory:
                 raise NotImplementedError(f"There is no params file creator for {workflow}")
 
     def _get_pipeline_config(self, workflow: Workflow) -> CommonAppConfig:
-        return getattr(self.cg_config, workflow)
+        pipeline_config = None
+        match workflow:
+            case Workflow.NALLO:
+                pipeline_config = self.cg_config.nallo
+            case Workflow.RAREDISEASE:
+                pipeline_config = self.cg_config.raredisease
+            case Workflow.RNAFUSION:
+                pipeline_config = self.cg_config.rnafusion
+            case Workflow.TAXPROFILER:
+                pipeline_config = self.cg_config.taxprofiler
+            case Workflow.TOMTE:
+                pipeline_config = self.cg_config.tomte
+            case Workflow.TRANA_16S:
+                pipeline_config = self.cg_config.trana_16s
+        if pipeline_config:
+            return pipeline_config
+        else:
+            raise NotImplementedError(f"There is no pipeline config for {workflow}")
 
     def _get_sample_sheet_creator(self, workflow: Workflow) -> SampleSheetCreator:
         match workflow:
