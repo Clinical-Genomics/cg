@@ -141,7 +141,8 @@ class Workflow(StrEnum):
     SPRING = "spring"
     TAXPROFILER = "taxprofiler"
     TOMTE = "tomte"
-    TRANA = "trana"
+    TRANA_16S = "trana-16s"
+    TRANA_ITS = "trana-its"
 
 
 DNA_WORKFLOWS_WITH_RNA_UPLOAD: list[Workflow] = [
