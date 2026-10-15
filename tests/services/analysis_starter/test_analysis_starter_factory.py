@@ -169,6 +169,8 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
      - RNAFUSION
      - Taxprofiler
      - Tomte
+     - Trana-16S
+     - Trana-ITS
     """
     # GIVEN a CGConfig with valid Seqera platform, data flow and Nextflow pipeline configurations
     cg_config: CGConfig = create_autospec(
@@ -185,8 +187,19 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
         seqera_platform=seqera_platform_config,
         taxprofiler=taxprofiler_config_object,
         tomte=tomte_config_object,
-        trana=trana_config_object,
+        trana_16s=trana_config_object,
     )
+    # GIVEN
+
+    configs = {
+        Workflow.RAREDISEASE: raredisease_config_object,
+        Workflow.RNAFUSION: rnafusion_config_object,
+        Workflow.TAXPROFILER: taxprofiler_config_object,
+        Workflow.TOMTE: tomte_config_object,
+        Workflow.TRANA_16S: trana_config_object,
+    }
+
+    cg_config.get_pipeline_config = lambda workflow: configs[workflow]
 
     # GIVEN an AnalysisStarterFactory
     analysis_starter_factory = AnalysisStarterFactory(cg_config)

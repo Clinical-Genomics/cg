@@ -105,6 +105,7 @@ class ConfiguratorFactory:
                 | Workflow.TAXPROFILER
                 | Workflow.TOMTE
                 | Workflow.TRANA_16S
+                | Workflow.TRANA_ITS
             ):
                 return self._get_nextflow_configurator(workflow)
             case _:
@@ -170,7 +171,7 @@ class ConfiguratorFactory:
                 return TomteParamsFileCreator(
                     lims_api=self.lims_api, params=params, status_db=self.store
                 )
-            case Workflow.TRANA_16S:
+            case Workflow.TRANA_16S | Workflow.TRANA_ITS:
                 return TranaParamsFileCreator(params)
             case _:
                 raise NotImplementedError(f"There is no params file creator for {workflow}")
@@ -198,7 +199,7 @@ class ConfiguratorFactory:
                 return TomteSampleSheetCreator(
                     housekeeper_api=self.housekeeper_api, store=self.store
                 )
-            case Workflow.TRANA_16S:
+            case Workflow.TRANA_16S | Workflow.TRANA_ITS:
                 return TranaSampleSheetCreator(
                     housekeeper_api=self.housekeeper_api, store=self.store
                 )
