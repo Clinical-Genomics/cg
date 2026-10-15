@@ -118,7 +118,7 @@ def configurator_scenario(
             sample_sheet_creator=TomteSampleSheetCreator,
             store="mock_store_for_tomte_file_creators",
         ),
-        Workflow.TRANA: AnalysisStarterScenario(
+        Workflow.TRANA_16S: AnalysisStarterScenario(
             nextflow_config=TranaConfig,
             params_file_creator=TranaParamsFileCreator,
             pipeline_extension=PipelineExtension,

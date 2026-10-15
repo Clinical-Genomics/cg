@@ -96,7 +96,7 @@ class AnalysisStarterFactory:
             Workflow.RNAFUSION,
             Workflow.TAXPROFILER,
             Workflow.TOMTE,
-            Workflow.TRANA,
+            Workflow.TRANA_16S,
         ]:
             return self._get_seqera_platform_submitter()
         else:
@@ -116,7 +116,7 @@ class AnalysisStarterFactory:
             Workflow.RNAFUSION,
             Workflow.TAXPROFILER,
             Workflow.TOMTE,
-            Workflow.TRANA,
+            Workflow.TRANA_16S,
         ]:
             return NextflowTracker(
                 store=self.store,

@@ -610,7 +610,8 @@ class CGConfig(BaseModel):
     statina: StatinaConfig | None = None
     taxprofiler: TaxprofilerConfig | None = None
     tomte: TomteConfig | None = None
-    trana: TranaConfig | None = None
+    trana_16s: TranaConfig | None = Field(None, alias="trana-16s")
+    trana_its: TranaConfig | None = Field(None, alias="trana-its")
 
     # These are meta APIs that gets instantiated in the code
     meta_apis: dict = {}

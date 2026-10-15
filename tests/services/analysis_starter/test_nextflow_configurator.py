@@ -79,7 +79,7 @@ from cg.store.store import Store
         Workflow.RNAFUSION,
         Workflow.TAXPROFILER,
         Workflow.TOMTE,
-        Workflow.TRANA,
+        Workflow.TRANA_16S,
     ],
 )
 def test_get_config(
@@ -170,7 +170,7 @@ def test_get_config_missing_required_files(mocker: MockerFixture):
         Workflow.RNAFUSION,
         Workflow.TAXPROFILER,
         Workflow.TOMTE,
-        Workflow.TRANA,
+        Workflow.TRANA_16S,
     ],
 )
 def test_get_case_config_flags(
@@ -277,7 +277,7 @@ def test_get_config_resume_already_completed_analysis(
         Workflow.RNAFUSION,
         Workflow.TAXPROFILER,
         Workflow.TOMTE,
-        Workflow.TRANA,
+        Workflow.TRANA_16S,
     ],
 )
 def test_get_case_config_none_flags(
@@ -341,7 +341,7 @@ def test_get_case_config_none_flags(
             TomteSampleSheetCreator,
         ),
         (
-            Workflow.TRANA,
+            Workflow.TRANA_16S,
             TranaParamsFileCreator,
             TranaConfig,
             TranaSampleSheetCreator,

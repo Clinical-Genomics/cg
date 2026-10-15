@@ -64,7 +64,7 @@ class DataExistsValidator(AnalysisInputValidator):
     def _get_raw_data_tags_for_workflow(self, workflow: Workflow) -> set[str]:
         if workflow == Workflow.NALLO:
             return {SequencingFileTag.BAM}
-        elif workflow == Workflow.TRANA:
+        elif workflow == Workflow.TRANA_16S:
             return {SequencingFileTag.FASTQ}
 
         raise NotImplementedError

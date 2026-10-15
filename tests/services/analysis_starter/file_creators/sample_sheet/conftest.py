@@ -178,5 +178,5 @@ def sample_sheet_scenario(
             taxprofiler_sample_sheet_expected_content,
         ),
         Workflow.TOMTE: (tomte_sample_sheet_creator, tomte_sample_sheet_expected_content),
-        Workflow.TRANA: (trana_sample_sheet_creator, trana_sample_sheet_expected_content),
+        Workflow.TRANA_16S: (trana_sample_sheet_creator, trana_sample_sheet_expected_content),
     }

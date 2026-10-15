@@ -200,6 +200,6 @@ def mock_store_for_trana_file_creators(nextflow_sample_id: str) -> Store:
 
     mock_store: Store = create_autospec(Store)
     mock_store.get_case_by_internal_id = Mock(return_value=mock_case)
-    mock_store.get_case_workflow = Mock(return_value=Workflow.TRANA)
+    mock_store.get_case_workflow = Mock(return_value=Workflow.TRANA_16S)
     mock_store.get_case_priority = Mock(return_value=SlurmQos.NORMAL)
     return mock_store

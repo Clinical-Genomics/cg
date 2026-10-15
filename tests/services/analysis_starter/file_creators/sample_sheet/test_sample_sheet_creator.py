@@ -203,7 +203,7 @@ def test_parse_fastq_header_raises_error():
         Workflow.RNAFUSION,
         Workflow.TAXPROFILER,
         Workflow.TOMTE,
-        Workflow.TRANA,
+        Workflow.TRANA_16S,
     ],
 )
 def test_get_content_no_rows_raises(

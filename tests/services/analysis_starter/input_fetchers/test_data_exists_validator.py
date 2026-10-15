@@ -66,7 +66,7 @@ def test_ensure_files_are_ready_fastq_success(mocker: MockerFixture):
     # GIVEN a store that returns a Fastq case
     status_db: Store = create_autospec(Store)
     sample: Sample = create_autospec(Sample, internal_id="sample_id")
-    case: Case = create_autospec(Case, data_analysis=Workflow.TRANA, samples=[sample])
+    case: Case = create_autospec(Case, data_analysis=Workflow.TRANA_16S, samples=[sample])
     status_db.get_case_by_internal_id_strict = Mock(return_value=case)
 
     # GIVEN that the samples have Fastq files in Housekeeper

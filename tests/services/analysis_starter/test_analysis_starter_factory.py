@@ -303,7 +303,7 @@ def test_get_analysis_starter_for_workflow_trana(
             illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
         ),
         seqera_platform=Mock(),
-        trana=create_autospec(
+        trana_16s=create_autospec(
             TranaConfig,
             platform="platform",
             resources="resources",
@@ -326,7 +326,7 @@ def test_get_analysis_starter_for_workflow_trana(
 
     # WHEN fetching the AnalysisStarter for Trana
     analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_workflow(
-        Workflow.TRANA
+        Workflow.TRANA_16S
     )
 
     # THEN the AnalysisStarter should have a Nextflow configurator
