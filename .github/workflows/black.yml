@@ -14,8 +14,16 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Set up Black
-        uses: psf/black@stable
+      - name: Install and configure Poetry
+        uses: snok/install-poetry@v1
         with:
-          options: ". --check --line-length 100"
-          version: "~=26.1.0"
+          virtualenvs-create: false
+
+      - name: Install Dependencies
+        run: poetry install --no-interaction --no-root --all-extras
+
+      - name: Check formatting with Black
+        run: black . --check
+
+      - name: Check for unused code with Vulture
+        run: vulture
