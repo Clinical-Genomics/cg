@@ -123,7 +123,14 @@ def configurator_scenario(
             params_file_creator=TranaParamsFileCreator,
             pipeline_extension=PipelineExtension,
             sample_sheet_creator=TranaSampleSheetCreator,
-            store="mock_store_for_trana_file_creators",
+            store="mock_store_for_trana_16s_file_creators",
+        ),
+        Workflow.TRANA_ITS: AnalysisStarterScenario(
+            nextflow_config=TranaConfig,
+            params_file_creator=TranaParamsFileCreator,
+            pipeline_extension=PipelineExtension,
+            sample_sheet_creator=TranaSampleSheetCreator,
+            store="mock_store_for_trana_its_creators",
         ),
     }
 
