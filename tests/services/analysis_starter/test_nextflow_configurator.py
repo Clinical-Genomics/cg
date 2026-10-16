@@ -80,6 +80,7 @@ from cg.store.store import Store
         Workflow.TAXPROFILER,
         Workflow.TOMTE,
         Workflow.TRANA_16S,
+        Workflow.TRANA_ITS,
     ],
 )
 def test_get_config(

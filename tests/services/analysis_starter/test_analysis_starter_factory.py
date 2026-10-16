@@ -317,20 +317,22 @@ def test_get_analysis_starter_for_workflow_trana(
             illumina=create_autospec(IlluminaConfig, demultiplexed_runs_dir="some_dir"),
         ),
         seqera_platform=Mock(),
-        trana_16s=create_autospec(
-            TranaConfig,
-            platform="platform",
-            resources="resources",
-            config="config",
-            params="params",
-            root="root",
-            repository="repository",
-            revision="revision",
-            profile="profile",
-            pre_run_script="pre_run_script",
-            slurm=create_autospec(SlurmConfig, account="slurm account"),
-        ),
     )
+
+    trana_config = create_autospec(
+        TranaConfig,
+        platform="platform",
+        resources="resources",
+        config="config",
+        params="params",
+        root="root",
+        repository="repository",
+        revision="revision",
+        profile="profile",
+        pre_run_script="pre_run_script",
+        slurm=create_autospec(SlurmConfig, account="slurm account"),
+    )
+    cg_config.get_pipeline_config = Mock(return_value=trana_config)
 
     # GIVEN an AnalysisStarterFactory
     analysis_starter_factory = AnalysisStarterFactory(cg_config)

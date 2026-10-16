@@ -91,17 +91,30 @@ class AnalysisStarterFactory:
         raise NotImplementedError(f"No input validator for workflow {workflow}")
 
     def _get_submitter(self, workflow: Workflow) -> Submitter:
-        if workflow in [
-            Workflow.NALLO,
-            Workflow.RAREDISEASE,
-            Workflow.RNAFUSION,
-            Workflow.TAXPROFILER,
-            Workflow.TOMTE,
-            Workflow.TRANA_16S,
-        ]:
-            return self._get_seqera_platform_submitter()
-        else:
-            return SubprocessSubmitter()
+        match workflow:
+            case (
+                Workflow.NALLO
+                | Workflow.RAREDISEASE
+                | Workflow.RNAFUSION
+                | Workflow.TAXPROFILER
+                | Workflow.TOMTE
+                | Workflow.TRANA_16S
+                | Workflow.TRANA_ITS
+            ):
+                return self._get_seqera_platform_submitter()
+            case (
+                Workflow.BALSAMIC
+                | Workflow.BALSAMIC_PON
+                | Workflow.BALSAMIC_UMI
+                | Workflow.FLUFFY
+                | Workflow.MICROSALT
+                | Workflow.MIP_DNA
+                | Workflow.MIP_RNA
+                | Workflow.MUTANT
+            ):
+                return SubprocessSubmitter()
+            case _:
+                raise NotImplementedError(f"No submitter configured for workflow {workflow}")
 
     def _get_seqera_platform_submitter(self) -> SeqeraPlatformSubmitter:
         client = SeqeraPlatformClient(config=self.cg_config.seqera_platform)
@@ -111,42 +124,41 @@ class AnalysisStarterFactory:
         )
 
     def _get_tracker(self, workflow: Workflow) -> Tracker:
-        if workflow in [
-            Workflow.NALLO,
-            Workflow.RAREDISEASE,
-            Workflow.RNAFUSION,
-            Workflow.TAXPROFILER,
-            Workflow.TOMTE,
-            Workflow.TRANA_16S,
-        ]:
-            return NextflowTracker(
-                store=self.store,
-                trailblazer_api=self.cg_config.trailblazer_api,
-                workflow_root=cast(
-                    CommonAppConfig, self.cg_config.get_pipeline_config(workflow)
-                ).root,
-            )
-        elif workflow == Workflow.MICROSALT:
-            return MicrosaltTracker(
-                store=self.store,
-                subprocess_submitter=SubprocessSubmitter(),
-                trailblazer_api=self.cg_config.trailblazer_api,
-                workflow_root=self.cg_config.microsalt.root,
-            )
-        elif workflow in [
-            Workflow.BALSAMIC,
-            Workflow.BALSAMIC_UMI,
-        ]:
-            return BalsamicTracker(
-                store=self.store,
-                trailblazer_api=self.cg_config.trailblazer_api,
-                workflow_root=str(self.cg_config.balsamic.root),
-            )
-        elif workflow == Workflow.MIP_DNA:
-            return MIPDNATracker(
-                store=self.store,
-                trailblazer_api=self.cg_config.trailblazer_api,
-                workflow_root=self.cg_config.mip_rd_dna.root,
-            )
-        else:
-            raise NotImplementedError(f"No {workflow} tracker")
+        match workflow:
+            case (
+                Workflow.NALLO
+                | Workflow.RAREDISEASE
+                | Workflow.RNAFUSION
+                | Workflow.TAXPROFILER
+                | Workflow.TOMTE
+                | Workflow.TRANA_16S
+                | Workflow.TRANA_ITS
+            ):
+                return NextflowTracker(
+                    store=self.store,
+                    trailblazer_api=self.cg_config.trailblazer_api,
+                    workflow_root=cast(
+                        CommonAppConfig, self.cg_config.get_pipeline_config(workflow)
+                    ).root,
+                )
+            case Workflow.MICROSALT:
+                return MicrosaltTracker(
+                    store=self.store,
+                    subprocess_submitter=SubprocessSubmitter(),
+                    trailblazer_api=self.cg_config.trailblazer_api,
+                    workflow_root=self.cg_config.microsalt.root,
+                )
+            case Workflow.BALSAMIC | Workflow.BALSAMIC_UMI:
+                return BalsamicTracker(
+                    store=self.store,
+                    trailblazer_api=self.cg_config.trailblazer_api,
+                    workflow_root=str(self.cg_config.balsamic.root),
+                )
+            case Workflow.MIP_DNA:
+                return MIPDNATracker(
+                    store=self.store,
+                    trailblazer_api=self.cg_config.trailblazer_api,
+                    workflow_root=self.cg_config.mip_rd_dna.root,
+                )
+            case _:
+                raise NotImplementedError(f"No {workflow} tracker")
