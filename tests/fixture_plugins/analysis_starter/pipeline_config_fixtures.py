@@ -207,9 +207,3 @@ def taxprofiler_config_object(get_nextflow_config_dict: Callable) -> Taxprofiler
 def tomte_config_object(get_nextflow_config_dict: Callable) -> TomteConfig:
     config: dict = get_nextflow_config_dict(workflow=Workflow.TOMTE)
     return TomteConfig(**config)
-
-
-@pytest.fixture
-def trana_config_object(get_nextflow_config_dict: Callable) -> TranaConfig:
-    config: dict = get_nextflow_config_dict(workflow=Workflow.TRANA_16S)
-    return TranaConfig(**config)
