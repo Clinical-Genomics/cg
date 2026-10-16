@@ -157,7 +157,6 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
     seqera_platform_config: SeqeraPlatformConfig,
     taxprofiler_config_object: TaxprofilerConfig,
     tomte_config_object: TomteConfig,
-    trana_config_object: TranaConfig,
     workflow: Workflow,
     mocker: MockerFixture,
 ):
@@ -169,8 +168,6 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
      - RNAFUSION
      - Taxprofiler
      - Tomte
-     - Trana-16S
-     - Trana-ITS
     """
     # GIVEN a CGConfig with valid Seqera platform, data flow and Nextflow pipeline configurations
     cg_config: CGConfig = create_autospec(
@@ -187,7 +184,6 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
         seqera_platform=seqera_platform_config,
         taxprofiler=taxprofiler_config_object,
         tomte=tomte_config_object,
-        trana_16s=trana_config_object,
     )
     # GIVEN
 

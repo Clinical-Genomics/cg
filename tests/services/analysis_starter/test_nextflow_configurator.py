@@ -172,6 +172,7 @@ def test_get_config_missing_required_files(mocker: MockerFixture):
         Workflow.TAXPROFILER,
         Workflow.TOMTE,
         Workflow.TRANA_16S,
+        Workflow.TRANA_ITS,
     ],
 )
 def test_get_case_config_flags(
@@ -279,6 +280,7 @@ def test_get_config_resume_already_completed_analysis(
         Workflow.TAXPROFILER,
         Workflow.TOMTE,
         Workflow.TRANA_16S,
+        Workflow.TRANA_ITS,
     ],
 )
 def test_get_case_config_none_flags(
@@ -347,8 +349,14 @@ def test_get_case_config_none_flags(
             TranaConfig,
             TranaSampleSheetCreator,
         ),
+        (
+            Workflow.TRANA_ITS,
+            TranaParamsFileCreator,
+            TranaConfig,
+            TranaSampleSheetCreator,
+        ),
     ],
-    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler", "Tomte", "Trana"],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler", "Tomte", "Trana 16S", "Trana ITS"],
 )
 def test_configure(
     workflow: Workflow,
