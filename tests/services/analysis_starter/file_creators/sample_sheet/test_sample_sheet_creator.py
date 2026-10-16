@@ -204,6 +204,7 @@ def test_parse_fastq_header_raises_error():
         Workflow.TAXPROFILER,
         Workflow.TOMTE,
         Workflow.TRANA_16S,
+        Workflow.TRANA_ITS,
     ],
 )
 def test_get_content_no_rows_raises(

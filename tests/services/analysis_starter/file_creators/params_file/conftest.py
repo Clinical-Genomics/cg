@@ -126,4 +126,5 @@ def params_file_scenario(
             taxprofiler,
         ),
         Workflow.TRANA_16S: (TranaParamsFileCreator, expected_trana_params_file_content, trana),
+        Workflow.TRANA_ITS: (TranaParamsFileCreator, expected_trana_params_file_content, trana),
     }

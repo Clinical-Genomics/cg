@@ -196,7 +196,6 @@ def test_get_analysis_starter_for_workflow_nextflow_fastq(
         Workflow.RNAFUSION: rnafusion_config_object,
         Workflow.TAXPROFILER: taxprofiler_config_object,
         Workflow.TOMTE: tomte_config_object,
-        Workflow.TRANA_16S: trana_config_object,
     }
 
     cg_config.get_pipeline_config = lambda workflow: configs[workflow]
@@ -304,7 +303,9 @@ def test_get_analysis_starter_for_workflow_nallo(
     assert isinstance(analysis_starter.tracker, NextflowTracker)
 
 
+@pytest.mark.parametrize("workflow", [Workflow.TRANA_16S, Workflow.TRANA_ITS])
 def test_get_analysis_starter_for_workflow_trana(
+    workflow: Workflow,
     mocker: MockerFixture,
 ):
     """Test that the AnalysisStarterFactory creates a Trana AnalysisStarter correctly."""
@@ -339,7 +340,7 @@ def test_get_analysis_starter_for_workflow_trana(
 
     # WHEN fetching the AnalysisStarter for Trana
     analysis_starter: AnalysisStarter = analysis_starter_factory.get_analysis_starter_for_workflow(
-        Workflow.TRANA_16S
+        workflow
     )
 
     # THEN the AnalysisStarter should have a Nextflow configurator

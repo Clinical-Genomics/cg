@@ -179,4 +179,5 @@ def sample_sheet_scenario(
         ),
         Workflow.TOMTE: (tomte_sample_sheet_creator, tomte_sample_sheet_expected_content),
         Workflow.TRANA_16S: (trana_sample_sheet_creator, trana_sample_sheet_expected_content),
+        Workflow.TRANA_ITS: (trana_sample_sheet_creator, trana_sample_sheet_expected_content),
     }

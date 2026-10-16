@@ -453,7 +453,14 @@ def test_tomte_params_file_creator(mocker: MockerFixture):
 
 
 @pytest.mark.parametrize(
-    "workflow", [Workflow.NALLO, Workflow.RNAFUSION, Workflow.TAXPROFILER, Workflow.TRANA_16S]
+    "workflow",
+    [
+        Workflow.NALLO,
+        Workflow.RNAFUSION,
+        Workflow.TAXPROFILER,
+        Workflow.TRANA_16S,
+        Workflow.TRANA_ITS,
+    ],
 )
 def test_nextflow_params_file_creator(
     workflow: Workflow,
