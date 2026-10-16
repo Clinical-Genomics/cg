@@ -17,17 +17,17 @@ LOG = logging.getLogger(__name__)
 
 
 @click.group(context_settings=CLICK_CONTEXT_SETTINGS)
-def trana_16s():
+def trana_its():
     """"""
     pass
 
 
-@trana_16s.command()
+@trana_its.command()
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def config_case(cg_config: CGConfig, case_id: str):
     """
-    Configure a trana_16s case so that it is ready to be run.
+    Configure a trana_its case so that it is ready to be run.
 
     \b
     Creates the following files in the case run directory:
@@ -36,18 +36,18 @@ def config_case(cg_config: CGConfig, case_id: str):
         - CASE_ID_samplesheet.csv
     """
     factory = ConfiguratorFactory(cg_config)
-    configurator = cast(NextflowConfigurator, factory.get_configurator(Workflow.TRANA_16S))
+    configurator = cast(NextflowConfigurator, factory.get_configurator(Workflow.TRANA_ITS))
     configurator.configure(case_id=case_id)
 
 
-@trana_16s.command()
+@trana_its.command()
 @OPTION_REVISION
 @OPTION_RESUME
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def run(cg_config: CGConfig, case_id: str, resume: bool, revision: str | None):
     """
-    Run a preconfigured trana_16s case.
+    Run a preconfigured trana_its case.
 
     \b
     Assumes that the following files exist in the case run directory:
@@ -57,18 +57,18 @@ def run(cg_config: CGConfig, case_id: str, resume: bool, revision: str | None):
     """
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
-        Workflow.TRANA_16S
+        Workflow.TRANA_ITS
     )
     analysis_starter.run(case_id=case_id, resume=resume, revision=revision)
 
 
-@trana_16s.command()
+@trana_its.command()
 @OPTION_REVISION
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def start(cg_config: CGConfig, case_id: str, revision: str | None):
     """
-    Start a trana_16s case.
+    Start a trana_its case.
 
     \b
     Configures the case and writes the following files:
@@ -79,18 +79,18 @@ def start(cg_config: CGConfig, case_id: str, revision: str | None):
     """
     factory = AnalysisStarterFactory(cg_config)
     analysis_starter: AnalysisStarter = factory.get_analysis_starter_for_workflow(
-        Workflow.TRANA_16S
+        Workflow.TRANA_ITS
     )
     analysis_starter.start(case_id=case_id, revision=revision)
 
 
-@trana_16s.command()
+@trana_its.command()
 @click.pass_obj
 def start_available(cg_config: CGConfig) -> None:
-    """Starts all available trana_16s cases."""
+    """Starts all available trana_its cases."""
     LOG.info("Starting trana 16s workflow for all available cases.")
     analysis_starter = AnalysisStarterFactory(cg_config).get_analysis_starter_for_workflow(
-        Workflow.TRANA_16S
+        Workflow.TRANA_ITS
     )
     succeeded: bool = analysis_starter.start_available()
     if not succeeded:
