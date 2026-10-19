@@ -6,6 +6,7 @@ import requests
 from cg.constants.priority import SlurmQos
 from cg.models.cg_config import SeqeraPlatformConfig
 from cg.services.analysis_starter.submitters.seqera_platform.dtos import WorkflowLaunchRequest
+from cg.utils.http import raise_for_status_with_body
 
 LOG = logging.getLogger(__name__)
 
@@ -31,7 +32,7 @@ class SeqeraPlatformClient:
             params=params,
             url=url,
         )
-        response.raise_for_status()
+        raise_for_status_with_body(response)
         return response.json()
 
     def get_workflow(self, workflow_id: str) -> dict[str, Any]:
@@ -46,5 +47,5 @@ class SeqeraPlatformClient:
             params=params,
             url=url,
         )
-        response.raise_for_status()
+        raise_for_status_with_body(response)
         return response.json()
