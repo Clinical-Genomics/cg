@@ -18,6 +18,8 @@ from cg.cli.workflow.raw_data.base import raw_data
 from cg.cli.workflow.rnafusion.base import rnafusion
 from cg.cli.workflow.taxprofiler.base import taxprofiler
 from cg.cli.workflow.tomte.base import tomte
+from cg.cli.workflow.trana_16s.trana_16s_commands import trana_16s
+from cg.cli.workflow.trana_its.trana_its_commands import trana_its
 
 
 @click.group(context_settings=CLICK_CONTEXT_SETTINGS)
@@ -40,3 +42,5 @@ workflow.add_command(raw_data)
 workflow.add_command(rnafusion)
 workflow.add_command(taxprofiler)
 workflow.add_command(tomte)
+workflow.add_command(trana_16s)
+workflow.add_command(trana_its)

@@ -23,20 +23,21 @@ class AlignmentFileTag(StrEnum):
 class ScoutTag(StrEnum):
     """Tags for Scout."""
 
-    ARCHIVED: str = "archived"
-    SOLVED: str = "solved"
+    ARCHIVED = "archived"
+    SOLVED = "solved"
 
 
 class SequencingFileTag(StrEnum):
     """Tags for sequencing files."""
 
-    CGSTATS_LOG: str = "log"
-    DEMUX_LOG: str = "log"
-    FASTQ: str = "fastq"
-    RUN_PARAMETERS: str = "run-parameters"
-    SAMPLE_SHEET: str = "samplesheet"
-    SPRING: str = "spring"
-    SPRING_METADATA: str = "spring-metadata"
+    BAM = "bam"
+    CGSTATS_LOG = "log"
+    DEMUX_LOG = "log"
+    FASTQ = "fastq"
+    RUN_PARAMETERS = "run-parameters"
+    SAMPLE_SHEET = "samplesheet"
+    SPRING = "spring"
+    SPRING_METADATA = "spring-metadata"
 
 
 HK_MULTIQC_HTML_TAG = "multiqc-html"
