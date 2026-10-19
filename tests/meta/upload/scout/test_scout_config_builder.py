@@ -590,8 +590,8 @@ def test_raredisease_config_builder(mocker: MockerFixture):
     # GIVEN sample files
     alignment_path: File = create_autospec(File, full_path="sort_md.cram")
     mt_bam: File = create_autospec(File, full_path="sort_md.cram")
-    upd_regions_bed: File = create_autospec(File, full_path="chromograph_regions.bed")
-    upd_sites_bed: File = create_autospec(File, full_path="chromograph_sites.bed")
+    upd_regions_bed: File = create_autospec(File, full_path="upd_regions.bigBed")
+    upd_sites_bed: File = create_autospec(File, full_path="upd_sites.bigBed")
     vcf2cytosure: File = create_autospec(File, full_path="sample_id.cgh")
     mitodel_file: File = create_autospec(File, full_path="mitodel.txt")
 
@@ -681,6 +681,10 @@ def test_raredisease_config_builder(mocker: MockerFixture):
             return mitodel_file
         if tags == {"bigwig", "tiddit-coverage", "sample_id"}:
             return tiddit_coverage
+        if tags == {"upd", "regions", "bigbed", "sample_id"}:
+            return upd_regions_bed
+        if tags == {"upd", "sites", "bigbed", "sample_id"}:
+            return upd_sites_bed
         raise Exception
 
     mocker.patch.object(
@@ -776,14 +780,14 @@ def test_raredisease_config_builder(mocker: MockerFixture):
                 chromograph_images=ChromographImages(
                     autozygous="chromograph_autozyg_chr",
                     coverage="chromograph_coverage_chr",
-                    upd_regions=upd_regions_bed.full_path,
-                    upd_sites=upd_sites_bed.full_path,
+                    upd_regions=chromograph_regions.full_path,
+                    upd_sites=chromograph_sites.full_path,
                 ),
                 rhocall_bed=None,
                 rhocall_wig=None,
                 tiddit_coverage_wig=tiddit_coverage.full_path,
-                upd_regions_bed=None,
-                upd_sites_bed=None,
+                upd_regions_bed=upd_regions_bed.full_path,
+                upd_sites_bed=upd_sites_bed.full_path,
                 vcf2cytosure=vcf2cytosure.full_path,
                 mitodel_file=mitodel_file.full_path,
                 reviewer=Reviewer(
