@@ -1,5 +1,6 @@
 from datetime import datetime
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Callable, cast
 from unittest.mock import Mock, create_autospec
 
@@ -102,6 +103,50 @@ def test_get_config(
     # THEN the pipeline extension should have been called with ensure_required_files_exist
     cast(Mock, extension.do_required_files_exist).assert_called_once_with(
         case_run_directory=Path(nextflow_root, nextflow_case_id)
+    )
+
+
+def test_get_config_uses_configured_case_and_work_directories(
+    nextflow_case_id: str,
+    mocker: MockerFixture,
+):
+    pipeline_config = SimpleNamespace(
+        root="/root",
+        case_run_directory="/launch/raredisease",
+        work_dir="/work/raredisease",
+        repository="https://repo.scilifelab.se",
+        revision="rev123",
+        profile="profile",
+        pre_run_script="some_script.sh",
+    )
+    store_mock = create_autospec(Store)
+    store_mock.get_case_workflow = Mock(return_value=Workflow.RAREDISEASE)
+    store_mock.get_case_priority = Mock(return_value=SlurmQos.NORMAL)
+    pipeline_extension = create_autospec(PipelineExtension)
+    configurator = NextflowConfigurator(
+        config_file_creator=create_autospec(NextflowConfigFileCreator),
+        params_file_creator=create_autospec(RarediseaseParamsFileCreator),
+        pipeline_config=pipeline_config,
+        sample_sheet_creator=create_autospec(RarediseaseSampleSheetCreator),
+        store=store_mock,
+        pipeline_extension=pipeline_extension,
+    )
+    mocker.patch.object(Path, "exists", return_value=True)
+
+    case_config = configurator.get_config(case_id=nextflow_case_id)
+
+    expected_case_directory = Path("/launch/raredisease", nextflow_case_id)
+    assert (
+        case_config.nextflow_config_file
+        == Path(expected_case_directory, f"{nextflow_case_id}_nextflow_config.json").as_posix()
+    )
+    assert (
+        case_config.params_file
+        == Path(expected_case_directory, f"{nextflow_case_id}_params_file.yaml").as_posix()
+    )
+    assert case_config.work_dir == Path("/work/raredisease", nextflow_case_id).as_posix()
+    cast(Mock, pipeline_extension.do_required_files_exist).assert_called_once_with(
+        case_run_directory=expected_case_directory
     )
 
 

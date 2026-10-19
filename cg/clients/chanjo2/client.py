@@ -4,6 +4,7 @@ import requests
 
 from cg.clients.chanjo2.models import CoveragePostRequest, CoveragePostResponse
 from cg.clients.chanjo2.utils import handle_client_errors
+from cg.utils.http import raise_for_status_with_body
 
 
 class Chanjo2APIClient:
@@ -27,6 +28,6 @@ class Chanjo2APIClient:
         response: requests.Response = requests.post(
             url=endpoint, headers=self.headers, json=post_data
         )
-        response.raise_for_status()
+        raise_for_status_with_body(response)
         response_json: dict = response.json()
         return CoveragePostResponse.model_validate(response_json)
