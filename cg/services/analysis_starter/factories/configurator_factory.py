@@ -14,6 +14,9 @@ from cg.services.analysis_starter.configurator.extensions.pipeline_extension imp
 )
 from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
 from cg.services.analysis_starter.configurator.extensions.tomte_extension import TomteExtension
+from cg.services.analysis_starter.configurator.extensions.trana_16s_extension import (
+    Trana16SExtension,
+)
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
 )
@@ -233,6 +236,8 @@ class ConfiguratorFactory:
                     workflow
                 )
                 return TomteExtension(gene_panel_file_creator=gene_panel_creator)
+            case Workflow.TRANA_16S:
+                return Trana16SExtension(self.cg_config.trana_16s)
             case _:
                 return PipelineExtension()
 
