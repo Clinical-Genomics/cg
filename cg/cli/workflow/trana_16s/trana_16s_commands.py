@@ -95,3 +95,10 @@ def start_available(cg_config: CGConfig) -> None:
     succeeded: bool = analysis_starter.start_available()
     if not succeeded:
         raise click.Abort
+
+
+@trana_16s.command()
+@click.pass_obj
+def store(cg_config: CGConfig) -> None:
+    """Store Trana_16s cases"""
+    pass
