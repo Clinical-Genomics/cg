@@ -135,7 +135,7 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
     def include_sample_files(
         self, config_sample: ScoutRarediseaseIndividual, hk_version: Version
     ) -> None:
-        """Include sample level files that are optional for mip samples."""
+        """Include sample level files that are optional for raredisease samples."""
         LOG.info("Including RAREDISEASE specific sample level files")
         sample_id: str = config_sample.sample_id
         config_sample.vcf2cytosure = self.get_sample_file(
@@ -181,6 +181,12 @@ class RarediseaseConfigBuilder(ScoutConfigBuilder):
         )
         config_sample.tiddit_coverage_wig = self.get_sample_file(
             hk_tags=self.sample_tags.tiddit_coverage_wig, hk_version=hk_version, sample_id=sample_id
+        )
+        config_sample.upd_regions_bed = self.get_sample_file(
+            hk_tags=self.sample_tags.upd_regions_bed, hk_version=hk_version, sample_id=sample_id
+        )
+        config_sample.upd_sites_bed = self.get_sample_file(
+            hk_tags=self.sample_tags.upd_sites_bed, hk_version=hk_version, sample_id=sample_id
         )
         self.include_reviewer_files(config_sample=config_sample, hk_version=hk_version)
 
