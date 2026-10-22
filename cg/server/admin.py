@@ -993,7 +993,7 @@ class UserView(BaseView):
     column_filters = ["is_admin", "order_portal_login", "customers"]
     column_hide_backrefs = False
     column_list = ("name", "email", "is_admin", "order_portal_login", "customers")
-    column_searchable_list = ["name", "email"]
+    column_searchable_list = ["name", "email", "customers.name", "customers.internal_id"]
     create_modal = True
     edit_modal = True
 
