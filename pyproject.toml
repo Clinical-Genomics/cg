@@ -71,9 +71,12 @@ pytest-cov = ["pytest-cov"]
 pytest-mock = ["pytest-mock"]
 pytest-freezegun = ["pytest-freezegun"]
 pytest = ["pytest"]
-ruff = ["ruff"]
+ruff = ["ruff==0.7.4"]
 pytest-xdist = ["pytest-xdist"]
 pytest-httpserver = ["pytest-httpserver"]
+vulture = ["vulture==2.16"]
+black = ["black==26.1.0"]
+isort = ["isort==5.13.2"]
 
 [tool.pytest.ini_options]
 markers = [
