@@ -21,8 +21,8 @@ def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata)
     if analysis := config.status_db.get_analysis_by_entry_id_strict(event.analysis_id):
         analysis.uploaded_at = event.uploaded_at
 
-        config.trailblazer_api.set_analysis_uploaded(
-            analysis.case.internal_id, uploaded_at=event.uploaded_at
-        )
+        config.trailblazer_api.set_analysis_uploaded(analysis.id, uploaded_at=event.uploaded_at)
 
-        LOG.info(f"Case {analysis.case.internal_id} set as uploaded in Trailblazer.")
+        LOG.info(
+            f"Analysis {analysis.id} of case {analysis.case.internal_id} set as uploaded in Trailblazer."
+        )
