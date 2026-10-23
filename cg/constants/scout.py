@@ -129,6 +129,8 @@ RAREDISEASE_SAMPLE_TAGS: dict[str, set[str]] = dict(
     reviewer_catalog={"expansionhunter", "variant-catalog"},
     mitodel_file={"mitodel"},
     tiddit_coverage_wig={"bigwig", "tiddit-coverage"},
+    upd_regions_bed={"upd", "regions", "bigbed"},
+    upd_sites_bed={"upd", "sites", "bigbed"},
 )
 
 NALLO_SAMPLE_TAGS: dict[str, set[str]] = dict(
