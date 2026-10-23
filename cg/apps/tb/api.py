@@ -177,12 +177,12 @@ class TrailblazerAPI:
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
         return TrailblazerAnalysis.model_validate(response)
 
-    def set_analysis_uploaded(self, case_id: str, uploaded_at: datetime) -> None:
+    def set_analysis_uploaded(self, analysis_id: int, uploaded_at: datetime) -> None:
         """Set a uploaded at date for a trailblazer analysis."""
-        request_body = {"case_id": case_id, "uploaded_at": str(uploaded_at)}
+        request_body = {"analysis_id": analysis_id, "uploaded_at": str(uploaded_at)}
 
         LOG.debug(f"Setting analysis uploaded at for {request_body}")
-        LOG.info(f"{case_id} - uploaded at set to {uploaded_at}")
+        LOG.info(f"{analysis_id} - uploaded at set to {uploaded_at}")
         self.query_trailblazer(
             command="set-analysis-uploaded", request_body=request_body, method=APIMethods.PUT
         )

@@ -136,7 +136,7 @@ class NiptUploadAPI:
             analysis.uploaded_at = dt.datetime.now()
             self.status_db.session.commit()
             self.trailblazer_api.set_analysis_uploaded(
-                case_id=case_id, uploaded_at=analysis.uploaded_at
+                analysis_id=analysis.id, uploaded_at=analysis.uploaded_at
             )
 
         return analysis
