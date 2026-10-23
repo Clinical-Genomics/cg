@@ -27,20 +27,26 @@ class SlackNotification(BaseModel):
 
 def _build_slack_notification(notification: SlackNotification) -> dict:
 
-    return {
-        "blocks": [
-            {
-                "type": "section",
-                "text": {
-                    "type": "mrkdwn",
-                    "text": f"*{notification.title}*\n{notification.message}",
-                },
+    text_blocks: list[dict] = [
+        {
+            "type": "section",
+            "text": {
+                "type": "mrkdwn",
+                "text": f"*{notification.title}*\n{notification.message}",
             },
+        }
+    ]
+
+    if notification.error_text is not None:
+        text_blocks.append(
             {
                 "type": "section",
                 "text": {"type": "mrkdwn", "text": f"```{notification.error_text}\n```"},
-            },
-        ],
+            }
+        )
+
+    return {
+        "blocks": text_blocks,
     }
 
 
@@ -55,4 +61,4 @@ def notify(recipient: str, notification: SlackNotification):
         headers=headers,
     )
     if response.status_code != HTTPStatus.OK:
-        LOG.error(f"Could not notify prod team: {response.status_code} - {response.text}")
+        LOG.error(f"Could not notify: {response.status_code} - {response.text}")

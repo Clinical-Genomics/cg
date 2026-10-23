@@ -110,11 +110,12 @@ def is_single_sample_case(case: MIPDNACase | RarediseaseCase | ExistingCase, sto
     return contains_one_sample
 
 
-def is_sample_related_in_case(
+def is_sample_lineal_in_case(
     sample: MIPDNASample | RarediseaseSample | ExistingSample,
     case: MIPDNACase | RarediseaseCase,
     store: Store,
 ):
+    """Check that a sample either has a parent or is a parent to another sample in the case."""
     if not (sample.mother or sample.father):
         sample_name: str = get_sample_name(sample=sample, store=store)
         if not any(

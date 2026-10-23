@@ -445,12 +445,13 @@ class SeqeraPlatformConfig(BaseModel):
 
 
 class DataFlowConfig(BaseModel):
+    archive_repository: str
     database_name: str
-    user: str
+    data_mover_housekeeper_mnt: Path
+    local_storage: str
     password: str
     url: str
-    local_storage: str
-    archive_repository: str
+    user: str
 
 
 class PacbioConfig(BaseModel):

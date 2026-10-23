@@ -1,7 +1,7 @@
 from typing import Callable
 
 from cg.services.orders.validation.rules.case.rules import (
-    validate_case_contains_related_samples,
+    validate_case_lineal_or_collateral_relations,
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
@@ -46,7 +46,6 @@ from cg.services.orders.validation.rules.case_sample.rules import (
 )
 
 RAREDISEASE_CASE_RULES: list[Callable] = [
-    validate_case_contains_related_samples,
     validate_case_internal_ids_exist,
     validate_case_names_available,
     validate_case_names_not_repeated,
@@ -56,6 +55,7 @@ RAREDISEASE_CASE_RULES: list[Callable] = [
     validate_gene_panels_exist,
     validate_gene_panels_unique,
     validate_samples_in_case_have_same_prep_category,
+    validate_case_lineal_or_collateral_relations,
     validate_subject_ids_unique,
 ]
 

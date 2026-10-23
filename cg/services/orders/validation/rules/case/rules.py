@@ -41,7 +41,7 @@ from cg.services.orders.validation.rules.case.utils import (
     is_double_normal,
     is_double_tumour,
     is_normal_only_wgs,
-    is_sample_related_in_case,
+    is_sample_lineal_in_case,
     is_single_sample_case,
 )
 from cg.services.orders.validation.rules.case_sample.utils import get_repeated_case_name_errors
@@ -194,9 +194,10 @@ def validate_samples_in_case_have_same_prep_category(
     return errors
 
 
-def validate_case_contains_related_samples(
-    order: MIPDNAOrder | RarediseaseOrder, store: Store, **kwargs
+def validate_case_lineal_relations(
+    order: MIPDNAOrder, store: Store, **kwargs
 ) -> list[SamplesNotRelatedError]:
+    """Validate lineal relations in the case, i.e. samples are either parents or children."""
     errors: list[SamplesNotRelatedError] = []
     for case_index, case in order.enumerated_new_cases:
         if not does_case_exist(case=case, store=store):  # Error should be raised elsewhere
@@ -204,15 +205,53 @@ def validate_case_contains_related_samples(
         if is_single_sample_case(case=case, store=store):  # This should always pass
             continue
         case_has_error = False
-        isolated_samples: list[str] = []
+        nonlineal_samples: list[str] = []
         for _, sample in case.enumerated_samples:
-            if not is_sample_related_in_case(sample=sample, case=case, store=store):
+            if not is_sample_lineal_in_case(sample=sample, case=case, store=store):
                 case_has_error = True
-                isolated_samples.append(get_sample_name(sample=sample, store=store))
+                nonlineal_samples.append(get_sample_name(sample=sample, store=store))
         if case_has_error:
             error = SamplesNotRelatedError(
                 case_index=case_index,
-                message=f"Samples {isolated_samples} are not related to other samples within the case.",
+                message=f"Samples {nonlineal_samples} are not related to other samples within the case.",
+            )
+            errors.append(error)
+    return errors
+
+
+def validate_case_lineal_or_collateral_relations(
+    order: RarediseaseOrder, store: Store, **kwargs
+) -> list[SamplesNotRelatedError]:
+    """Validate lineal or collateral relations in the case, i.e. samples
+    can be parents or children but also e.g. siblings or cousins.
+
+    All samples are assumed to be collateral only if there are no lineal relations.
+    """
+    errors: list[SamplesNotRelatedError] = []
+    for case_index, case in order.enumerated_new_cases:
+        if not does_case_exist(case=case, store=store):  # Error should be raised elsewhere
+            continue
+        if is_single_sample_case(case=case, store=store):  # This should always pass
+            continue
+        case_has_error = False
+
+        # Collect samples which are not parents nor have parents
+        nonlineal_samples: list[str] = []
+        for sample in case.samples:
+            if not is_sample_lineal_in_case(sample=sample, case=case, store=store):
+                nonlineal_samples.append(get_sample_name(sample=sample, store=store))
+
+        if nonlineal_samples:
+            if len(nonlineal_samples) == len(case.samples):
+                # If the case consists of ONLY nonlineal samples, they are assumed to be collateral
+                pass
+            else:
+                case_has_error = True
+
+        if case_has_error:
+            error = SamplesNotRelatedError(
+                case_index=case_index,
+                message=f"Samples {nonlineal_samples} are not related to other samples within the case.",
             )
             errors.append(error)
     return errors

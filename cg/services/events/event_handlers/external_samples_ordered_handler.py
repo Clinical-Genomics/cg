@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field
 from cg.models.cg_config import CGConfig
 from cg.services import transfer_to_cluster_service
 from cg.services.events.constants import CUSTOMER_INTERNAL_ID_FIELD, SAMPLE_NAME_ARRAY_FIELD
+from cg.services.events.event_metadata import EventMetadata
 from cg.store.models import Customer, Sample
 from cg.store.store import Store
 
@@ -16,11 +17,12 @@ class ExternalSamplesOrderedEvent(BaseModel):
     sample_names: list[str] = Field(alias=SAMPLE_NAME_ARRAY_FIELD)
 
 
-def handle(config: CGConfig, event_payload: dict):
+def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata):
     """
     Trigger the transfer of sample files for samples specified in the payload
     if they have an entry in the ExternalSample table.
     """
+    LOG.debug(f"Received event payload {event_payload} with metadata {event_metadata.model_dump()}")
     event = ExternalSamplesOrderedEvent.model_validate(event_payload)
     status_db: Store = config.status_db
     customer: Customer = status_db.get_customer_by_internal_id_strict(internal_id=event.customer)

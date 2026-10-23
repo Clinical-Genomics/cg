@@ -36,3 +36,8 @@ echo "Create inbox failed"
 ERROR_RSYNC_FUNCTION = """
 echo "Rsync failed"
 """
+
+ERROR_TRANSFER_TO_CLUSTER_FUNCTION = """
+echo "Rsync failed"
+    {failure_event}
+"""

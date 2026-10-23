@@ -9,24 +9,18 @@ from cg.services.deliver_files.constants import DeliveryDestination, DeliveryStr
 from cg.services.deliver_files.deliver_files_service.deliver_files_service import (
     DeliverFilesService,
 )
-from cg.services.deliver_files.factory import (
-    DeliveryServiceFactory,
-)
+from cg.services.deliver_files.factory import DeliveryServiceFactory
 from cg.services.deliver_files.file_fetcher.abstract import FetchDeliveryFilesService
 from cg.services.deliver_files.file_fetcher.analysis_raw_data_service import (
     RawDataAndAnalysisDeliveryFileFetcher,
 )
 from cg.services.deliver_files.file_fetcher.analysis_service import AnalysisDeliveryFileFetcher
 from cg.services.deliver_files.file_fetcher.raw_data_service import RawDataDeliveryFileFetcher
-from cg.services.deliver_files.file_formatter.files.mutant_service import (
-    MutantFileFormatter,
-)
 from cg.services.deliver_files.file_formatter.files.concatenation_service import (
     SampleFileConcatenationFormatter,
 )
-from cg.services.deliver_files.file_formatter.files.sample_service import (
-    SampleFileFormatter,
-)
+from cg.services.deliver_files.file_formatter.files.mutant_service import MutantFileFormatter
+from cg.services.deliver_files.file_formatter.files.sample_service import SampleFileFormatter
 from cg.services.deliver_files.file_formatter.path_name.abstract import PathNameFormatter
 from cg.services.deliver_files.file_formatter.path_name.flat_structure import (
     FlatStructurePathFormatter,
@@ -132,8 +126,21 @@ class DeliveryServiceScenario(BaseModel):
             delivery_destination=DeliveryDestination.BASE,
             delivery_structure=DeliveryStructure.FLAT,
         ),
+        DeliveryServiceScenario(
+            app_tag="MWSMCTR003",
+            data_analysis=Workflow.MICROSALT,
+            delivery_type=DataDelivery.FASTQ_QC,
+            expected_tag_fetcher=SampleAndCaseDeliveryTagsFetcher,
+            expected_file_fetcher=RawDataAndAnalysisDeliveryFileFetcher,
+            expected_file_mover=CustomerInboxDestinationFilesMover,
+            expected_sample_file_formatter=SampleFileConcatenationFormatter,
+            expected_path_name_formatter=NestedStructurePathFormatter,
+            store_name="microbial_store",
+            delivery_destination=DeliveryDestination.CUSTOMER,
+            delivery_structure=DeliveryStructure.NESTED,
+        ),
     ],
-    ids=["microbial-fastq", "SARS-COV2", "Targeted", "FOHM Upload", "base"],
+    ids=["microbial-fastq", "SARS-COV2", "Targeted", "FOHM Upload", "base", "microsalt fastq-qc"],
 )
 def test_build_delivery_service(scenario: DeliveryServiceScenario, request: FixtureRequest):
     # GIVEN a delivery service builder with mocked store and hk_api

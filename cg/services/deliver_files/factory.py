@@ -92,13 +92,14 @@ class DeliveryServiceFactory:
         args:
             delivery_type: The type of delivery to perform.
         """
-        if delivery_type in [DataDelivery.FASTQ_QC, DataDelivery.FASTQ_SCOUT]:
+        if delivery_type == DataDelivery.FASTQ_SCOUT:
             return DataDelivery.FASTQ
         if delivery_type == DataDelivery.ANALYSIS_SCOUT:
             return DataDelivery.ANALYSIS_FILES
         if delivery_type in [
             DataDelivery.FASTQ_ANALYSIS_SCOUT,
             DataDelivery.FASTQ_QC_ANALYSIS,
+            DataDelivery.FASTQ_QC,
         ]:
             return DataDelivery.FASTQ_ANALYSIS
         if delivery_type == DataDelivery.RAW_DATA_SCOUT:
