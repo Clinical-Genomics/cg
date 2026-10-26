@@ -269,6 +269,7 @@ def _get_ticket_markups(ticket_str: str) -> str:
 class ApplicationView(BaseView):
     """Admin view for Model.Application"""
 
+    can_export = True
     page_size = 100
 
     column_list = [column.name for column in inspect(Application).columns] + ["order_types"]
@@ -364,6 +365,7 @@ class ApplicationView(BaseView):
 class ApplicationVersionView(BaseView):
     """Admin view for Model.ApplicationVersion"""
 
+    can_export = True
     column_default_sort = ("valid_from", True)
     column_editable_list = [
         "valid_from",
@@ -396,6 +398,7 @@ class ApplicationVersionView(BaseView):
 class ApplicationLimitationsView(BaseView):
     """Admin view for Model.ApplicationLimitations."""
 
+    can_export = True
     column_list = (
         "application",
         "workflow",
@@ -420,6 +423,7 @@ class ApplicationLimitationsView(BaseView):
 class BedView(BaseView):
     """Admin view for Model.Bed"""
 
+    can_export = True
     column_default_sort = "name"
     column_editable_list = ["comment"]
     column_exclude_list = ["created_at"]
@@ -444,6 +448,7 @@ class BedView(BaseView):
 class BedVersionView(BaseView):
     """Admin view for Model.BedVersion"""
 
+    can_export = True
     column_default_sort = ("updated_at", True)
     column_editable_list = ["shortname", "filename", "comment", "designer", "checksum"]
     column_exclude_list = ["created_at"]
@@ -457,6 +462,7 @@ class BedVersionView(BaseView):
 class CustomerView(BaseView):
     """Admin view for Model.Customer"""
 
+    can_export = True
     column_editable_list = [
         "collaborations",
         "comment",
@@ -494,6 +500,7 @@ class CustomerView(BaseView):
 class CollaborationView(BaseView):
     """Admin view for Model.CustomerGroup"""
 
+    can_export = True
     column_editable_list = ["name"]
     column_filters = []
     column_hide_backrefs = False
@@ -504,6 +511,7 @@ class CollaborationView(BaseView):
 class CaseView(BaseView):
     """Admin view for Model.Case"""
 
+    can_export = True
     column_default_sort = ("created_at", True)
     column_editable_list = ["action", "comment"]
     column_list = [
@@ -614,6 +622,7 @@ class CaseView(BaseView):
 class InvoiceView(BaseView):
     """Admin view for Model.Invoice"""
 
+    can_export = True
     column_default_sort = ("created_at", True)
     column_editable_list = ["comment"]
     column_list = (
@@ -653,6 +662,7 @@ class InvoiceView(BaseView):
 class AnalysisView(BaseView):
     """Admin view for Model.Analysis"""
 
+    can_export = True
     column_default_sort = ("created_at", True)
     column_editable_list = ["is_primary", "comment"]
     column_filters = ["workflow", "workflow_version", "is_primary"]
@@ -740,6 +750,7 @@ class IlluminaFlowCellView(BaseView):
 class OrganismView(BaseView):
     """Admin view for Model.Organism"""
 
+    can_export = True
     column_default_sort = ("created_at", True)
     column_editable_list = ["internal_id", "name", "reference_genome", "comment"]
     column_searchable_list = ["internal_id", "name", "reference_genome"]
@@ -748,6 +759,7 @@ class OrganismView(BaseView):
 class OrderView(BaseView):
     """Admin view for Model.Order"""
 
+    can_export = True
     column_default_sort = ("order_date", True)
     column_editable_list = ["is_open"]
     column_formatters = {
@@ -778,6 +790,7 @@ class OrderView(BaseView):
 class PanelView(BaseView):
     """Admin view for Model.Panel"""
 
+    can_export = True
     column_editable_list = ["current_version", "name"]
     column_filters = ["customer.internal_id"]
     column_formatters = {"customer": view_customer_link}
@@ -789,6 +802,7 @@ class PanelView(BaseView):
 class PoolView(BaseView):
     """Admin view for Model.Pool"""
 
+    can_export = True
     column_default_sort = ("created_at", True)
     column_filters = ["customer.internal_id", "application_version.application"]
     column_formatters = {
@@ -831,6 +845,7 @@ class PoolView(BaseView):
 class SampleView(BaseView):
     """Admin view for Model.Sample."""
 
+    can_export = True
     column_list = [
         "internal_id",
         "name",
@@ -997,6 +1012,7 @@ class CaseSampleView(BaseView):
 class UserView(BaseView):
     """Admin view for Model.User"""
 
+    can_export = True
     column_default_sort = "name"
     column_editable_list = ["order_portal_login"]
     column_filters = ["is_admin", "order_portal_login", "customers"]
