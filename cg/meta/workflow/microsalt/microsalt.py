@@ -5,6 +5,7 @@ from pathlib import Path
 
 import rich_click as click
 
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.constants.constants import FileExtensions
 from cg.constants.tb import AnalysisStatus
@@ -145,12 +146,15 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                     continue
 
                 result: QualityResult = self.quality_checker.quality_control(metrics_file_path)
-                self.trailblazer_api.add_comment(case_id=case.internal_id, comment=result.summary)
+                analysis: TrailblazerAnalysis = self.trailblazer_api.get_latest_analysis_strict(
+                    case.internal_id
+                )
+                self.trailblazer_api.add_comment(analysis_id=analysis.id, comment=result.summary)
                 if result.passes_qc:
                     cases_to_store.append(case)
                 else:
                     self.trailblazer_api.set_analysis_status(
-                        case_id=case.internal_id, status=AnalysisStatus.FAILED
+                        analysis_id=analysis.id, status=AnalysisStatus.FAILED
                     )
             else:
                 cases_to_store.append(case)

@@ -130,6 +130,13 @@ class TrailblazerAPI:
         if response:
             return TrailblazerAnalysis.model_validate(response)
 
+    def get_latest_analysis_strict(self, case_id: str) -> TrailblazerAnalysis:
+        request_body = {
+            "case_id": case_id,
+        }
+        response = self.query_trailblazer(command="get-latest-analysis", request_body=request_body)
+        return TrailblazerAnalysis.model_validate(response)
+
     def get_latest_analysis_status(self, case_id: str) -> str | None:
         latest_analysis = self.get_latest_analysis(case_id=case_id)
         if latest_analysis:
@@ -187,22 +194,22 @@ class TrailblazerAPI:
             command="set-analysis-uploaded", request_body=request_body, method=APIMethods.PUT
         )
 
-    def set_analysis_status(self, case_id: str, status: str) -> None:
+    def set_analysis_status(self, analysis_id: int, status: str) -> None:
         """Set an analysis to a given status."""
-        request_body = {"case_id": case_id, "status": status}
+        request_body = {"analysis_id": analysis_id, "status": status}
 
         LOG.debug(f"Request body: {request_body}")
-        LOG.info(f"Setting analysis status to {status} for case {case_id}")
+        LOG.info(f"Setting analysis status to {status} for analysis {analysis_id}.")
         self.query_trailblazer(
             command="set-analysis-status", request_body=request_body, method=APIMethods.PUT
         )
 
-    def add_comment(self, case_id: str, comment: str):
+    def add_comment(self, analysis_id: int, comment: str):
         """Adding a comment to a trailblazer analysis."""
-        request_body = {"case_id": case_id, "comment": comment}
+        request_body = {"analysis_id": analysis_id, "comment": comment}
 
         LOG.debug(f"Request body: {request_body}")
-        LOG.info(f"Adding comment: {comment} to case {case_id}")
+        LOG.info(f"Adding comment: {comment} to analysis {analysis_id}")
         self.query_trailblazer(
             command="add-comment", request_body=request_body, method=APIMethods.PUT
         )
