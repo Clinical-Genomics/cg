@@ -4225,3 +4225,11 @@ def capture_kit() -> str:
 def case(analysis_store: Store) -> Case:
     """Return a case models object."""
     return analysis_store.get_cases()[0]
+
+
+NEXTFLOW_WORKFLOWS: list = [
+    Workflow.RAREDISEASE,
+    Workflow.RNAFUSION,
+    Workflow.TAXPROFILER,
+    Workflow.TOMTE,
+]
