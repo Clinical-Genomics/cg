@@ -47,7 +47,7 @@ def config_case(cg_config: CGConfig, case_id: str):
 @click.pass_obj
 def run(cg_config: CGConfig, case_id: str, resume: bool, revision: str | None):
     """
-    Run a preconfigured trana_16s case.
+    Run a preconfigured Trana 16S case.
 
     \b
     Assumes that the following files exist in the case run directory:
@@ -68,7 +68,7 @@ def run(cg_config: CGConfig, case_id: str, resume: bool, revision: str | None):
 @click.pass_obj
 def start(cg_config: CGConfig, case_id: str, revision: str | None):
     """
-    Start a trana_16s case.
+    Start a Trana 16S case.
 
     \b
     Configures the case and writes the following files:
@@ -87,7 +87,7 @@ def start(cg_config: CGConfig, case_id: str, revision: str | None):
 @trana_16s.command()
 @click.pass_obj
 def start_available(cg_config: CGConfig) -> None:
-    """Starts all available trana_16s cases."""
+    """Starts all available Trana 16S cases."""
     LOG.info("Starting trana 16s workflow for all available cases.")
     analysis_starter = AnalysisStarterFactory(cg_config).get_analysis_starter_for_workflow(
         Workflow.TRANA_16S
