@@ -14,6 +14,7 @@ from cg.services.analysis_starter.configurator.extensions.pipeline_extension imp
 )
 from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
 from cg.services.analysis_starter.configurator.extensions.tomte_extension import TomteExtension
+from cg.services.analysis_starter.configurator.extensions.trana_extension import TranaExtension
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
 )
@@ -26,6 +27,9 @@ from cg.services.analysis_starter.configurator.file_creators.microsalt_config im
 )
 from cg.services.analysis_starter.configurator.file_creators.mip_dna_config import (
     MIPDNAConfigFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.case_deliverables_file_creator import (
+    CaseDeliverablesFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
@@ -233,6 +237,12 @@ class ConfiguratorFactory:
                     workflow
                 )
                 return TomteExtension(gene_panel_file_creator=gene_panel_creator)
+            case Workflow.TRANA_16S:
+                case_deliverables_file_creator = CaseDeliverablesFileCreator()
+                return TranaExtension(
+                    case_deliverables_file_creator=case_deliverables_file_creator,
+                    trana_config=self.cg_config.trana_16s.pipeline_deliverables,
+                )
             case _:
                 return PipelineExtension()
 

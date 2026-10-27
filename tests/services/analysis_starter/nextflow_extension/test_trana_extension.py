@@ -1,5 +1,7 @@
 from pathlib import Path
+from unittest.mock import create_autospec
 
+from cg.models.cg_config import TranaConfig
 from cg.services.analysis_starter.configurator.extensions.trana_extension import TranaExtension
 from cg.services.analysis_starter.configurator.file_creators.nextflow.case_deliverables_file_creator import (
     CaseDeliverablesFileCreator,
@@ -13,13 +15,21 @@ def test_configure():
         CaseDeliverablesFileCreator
     )
 
+    # GIVEN a Trana config
+    trana_config = create_autospec(TranaConfig, pipeline_deliverables=Path("path/to/template.yaml"))
+
     # GIVEN a Trana extension
     trana_extension = TranaExtension(
         case_deliverables_file_creator=case_deliverables_file_creator.as_type,
+        trana_config=trana_config,
     )
 
     # WHEN configure is called
     trana_extension.configure(case_id="case_id", case_run_directory=Path("path/to/case"))
 
     # THEN the case deliverables file should have been created
-    case_deliverables_file_creator.as_mock.create.assert_called_once()
+    case_deliverables_file_creator.as_mock.create.assert_called_once_with(
+        case_id="case_id",
+        file_path=Path("path/to/case/case_id_deliverables.yaml"),
+        pipeline_deliverables=Path("path/to/template.yaml"),
+    )
