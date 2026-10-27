@@ -12,6 +12,8 @@ from cg.cli.workflow.raredisease.base import config_case as raredisease_config_c
 from cg.cli.workflow.rnafusion.base import config_case as rnafusion_config_case
 from cg.cli.workflow.taxprofiler.base import config_case as taxprofiler_config_case
 from cg.cli.workflow.tomte.base import config_case as tomte_config_case
+from cg.cli.workflow.trana_16s.trana_16s_commands import config_case as trana_16s_config_case
+from cg.cli.workflow.trana_its.trana_its_commands import config_case as trana_its_config_case
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
@@ -27,8 +29,10 @@ LOG = logging.getLogger(__name__)
         rnafusion_config_case,
         taxprofiler_config_case,
         tomte_config_case,
+        trana_16s_config_case,
+        trana_its_config_case,
     ],
-    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler", "Tomte"],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler", "Tomte", "Trana 16S", "Trana ITS"],
 )
 def test_nextflow_case_config(
     case_config_command: BaseCommand,

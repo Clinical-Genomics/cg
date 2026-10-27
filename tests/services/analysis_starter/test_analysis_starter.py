@@ -15,6 +15,9 @@ from cg.constants import Workflow
 from cg.constants.priority import Priority, SlurmQos
 from cg.exc import AnalysisNotReadyError, CaseWorkflowMismatchError, SeqeraError
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_starter.analysis_input_validator.implementations.fastq_fetcher import (
+    FastqFetcher,
+)
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet import creator
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion_sample_sheet_creator import (
@@ -33,7 +36,6 @@ from cg.services.analysis_starter.configurator.models.microsalt import Microsalt
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 from cg.services.analysis_starter.configurator.models.nextflow import NextflowCaseConfig
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
-from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
 from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_submitter import (
     SeqeraPlatformSubmitter,
 )
@@ -133,7 +135,7 @@ def analysis_starter_scenario(
     "attribute_name, function_name, error, expected_exit",
     [
         ("tracker", "ensure_analysis_not_ongoing", None, True),
-        ("input_fetcher", "ensure_files_are_ready", AnalysisNotReadyError, True),
+        ("analysis_input_validator", "ensure_files_are_ready", AnalysisNotReadyError, True),
         ("tracker", "ensure_analysis_not_ongoing", Exception, False),
     ],
     ids=["Success", "Fastqs missing", "General error"],
@@ -162,7 +164,7 @@ def test_analysis_starter_start_available_error_handling(
     # GIVEN an analysis starter
     analysis_starter = AnalysisStarter(
         configurator=create_autospec(NextflowConfigurator),
-        input_fetcher=create_autospec(FastqFetcher),
+        analysis_input_validator=create_autospec(FastqFetcher),
         store=mock_store.as_type,
         submitter=submitter,
         tracker=create_autospec(NextflowTracker),
@@ -320,7 +322,7 @@ def test_start(
     mock_configurator.configure.return_value = mock_case_config
 
     # GIVEN a FastqFetcher
-    input_fetcher: TypedMock[FastqFetcher] = create_typed_mock(FastqFetcher)
+    fastq_fetcher: TypedMock[FastqFetcher] = create_typed_mock(FastqFetcher)
 
     # GIVEN a Store with a case with the correct workflow
     store: Store = create_autospec(Store)
@@ -333,7 +335,7 @@ def test_start(
     # GIVEN an analysis starter initialised with the previously mocked classes
     analysis_starter = AnalysisStarter(
         configurator=mock_configurator,
-        input_fetcher=input_fetcher.as_type,
+        analysis_input_validator=fastq_fetcher.as_type,
         store=store,
         submitter=mock_submitter,
         tracker=mock_tracker,
@@ -345,7 +347,7 @@ def test_start(
 
     # THEN the analysis should be started successfully
     mock_tracker.ensure_analysis_not_ongoing.assert_called_once_with(case_id)
-    input_fetcher.as_mock.ensure_files_are_ready.assert_called_once_with(case_id)
+    fastq_fetcher.as_mock.ensure_files_are_ready.assert_called_once_with(case_id)
     mock_configurator.configure.assert_called_once_with(case_id=case_id, **flags)
     mock_tracker.set_case_as_running.assert_called_once_with(case_id)
     mock_submitter.submit.assert_called_once_with(mock_case_config)
@@ -365,7 +367,7 @@ def test_start_fails_workflow_mismatch():
     # GIVEN an analysis starter for raredisease
     analysis_starter = AnalysisStarter(
         configurator=create_autospec(NextflowConfigurator),
-        input_fetcher=create_autospec(FastqFetcher),
+        analysis_input_validator=create_autospec(FastqFetcher),
         store=store,
         submitter=create_autospec(SeqeraPlatformSubmitter),
         tracker=create_autospec(NextflowTracker),
@@ -408,7 +410,7 @@ def test_start_subprocess_error_raised_in_run_and_track(
     # GIVEN an analysis starter initialised with the previously mocked classes
     analysis_starter = AnalysisStarter(
         configurator=mock_configurator,
-        input_fetcher=create_autospec(FastqFetcher),
+        analysis_input_validator=create_autospec(FastqFetcher),
         store=store,
         submitter=mock_submitter,
         tracker=mock_tracker,
@@ -445,7 +447,7 @@ def test_start_seqera_related_error_raised_in_run_and_track(error_type: type[Exc
     # GIVEN an analysis starter
     analysis_starter = AnalysisStarter(
         configurator=create_autospec(NextflowConfigurator),
-        input_fetcher=create_autospec(FastqFetcher),
+        analysis_input_validator=create_autospec(FastqFetcher),
         store=store,
         submitter=submitter,
         tracker=tracker.as_type,
@@ -501,7 +503,7 @@ def test_run(
     # GIVEN an analysis starter initialised with the previously mocked classes
     analysis_starter = AnalysisStarter(
         configurator=mock_configurator,
-        input_fetcher=create_autospec(FastqFetcher),
+        analysis_input_validator=create_autospec(FastqFetcher),
         store=store,
         submitter=mock_submitter,
         tracker=mock_tracker,
