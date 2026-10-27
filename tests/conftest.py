@@ -4134,7 +4134,7 @@ def downsample_data(
     )
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def downsample_api(
     downsample_context: CGConfig,
 ) -> DownsampleAPI:
