@@ -14,4 +14,14 @@ class TranaExtension(PipelineExtension):
         self.case_deliverables_file_creator = case_deliverables_file_creator
 
     def configure(self, case_id: str, case_run_directory: Path) -> None:
-        pass
+        self.case_deliverables_file_creator.create(
+            case_id=case_id,
+            file_path=self._get_case_deliverables_file_path(
+                case_id=case_id, case_run_directory=case_run_directory
+            ),
+            pipeline_deliverables="config",  # TODO add this
+        )
+
+    @staticmethod
+    def _get_case_deliverables_file_path(case_id: str, case_run_directory: Path) -> Path:
+        return case_run_directory.joinpath(f"{case_id}_deliverables.yaml")
