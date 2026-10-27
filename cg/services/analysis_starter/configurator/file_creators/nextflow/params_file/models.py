@@ -48,8 +48,8 @@ class TomteParameters(WorkflowParameters):
     """Model for Tomte parameters."""
 
     gene_panel_clinical_filter: Path
-    tissue: str
     genome: str = GenomeVersion.HG38
+    tissue: str
 
     @field_validator("tissue", mode="before")
     @classmethod
@@ -66,3 +66,7 @@ class TomteParameters(WorkflowParameters):
             return GenomeVersion.GRCh38.value
         elif genome == GenomeVersion.HG19:
             return GenomeVersion.GRCh37.value
+
+
+class TranaParameters(WorkflowParameters):
+    """Model for Trana parameters."""

@@ -1815,6 +1815,7 @@ def context_config(
     rnafusion_dir: Path,
     taxprofiler_dir: Path,
     tomte_dir: Path,
+    trana_dir: Path,
     illumina_sequencing_runs_directory: Path,
     illumina_demultiplexed_runs_directory: Path,
     downsample_dir: Path,
@@ -2150,6 +2151,50 @@ def context_config(
                 "mail_user": email_address,
             },
             "tower_workflow": "tomte",
+        },
+        "trana-16s": {
+            "binary_path": nextflow_binary,
+            "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
+            "compute_env": "nf_tower_compute_env",
+            "conda_binary": conda_binary,
+            "conda_env": "S_trana",
+            "platform": str(nf_analysis_platform_config_path),
+            "params": str(nf_analysis_pipeline_params_path),
+            "config": str(nf_analysis_pipeline_config_path),
+            "resources": str(nf_analysis_pipeline_resource_optimisation_path),
+            "launch_directory": Path("path", "to", "launchdir").as_posix(),
+            "pre_run_script": "",
+            "profile": "myprofile",
+            "repository": "https://some_url",
+            "revision": "1.0.0",
+            "root": str(trana_dir),
+            "slurm": {
+                "account": "development",
+                "mail_user": email_address,
+            },
+            "tower_workflow": "trana",
+        },
+        "trana-its": {
+            "binary_path": nextflow_binary,
+            "pipeline_deliverables": "path/to/pipeline_deliverables.yaml",
+            "compute_env": "nf_tower_compute_env",
+            "conda_binary": conda_binary,
+            "conda_env": "S_trana",
+            "platform": str(nf_analysis_platform_config_path),
+            "params": str(nf_analysis_pipeline_params_path),
+            "config": str(nf_analysis_pipeline_config_path),
+            "resources": str(nf_analysis_pipeline_resource_optimisation_path),
+            "launch_directory": Path("path", "to", "launchdir").as_posix(),
+            "pre_run_script": "",
+            "profile": "myprofile",
+            "repository": "https://some_url",
+            "revision": "1.0.0",
+            "root": str(trana_dir),
+            "slurm": {
+                "account": "development",
+                "mail_user": email_address,
+            },
+            "tower_workflow": "trana",
         },
         "rnafusion": {
             "binary_path": nextflow_binary,
@@ -3389,6 +3434,13 @@ def tomte_dir(tmpdir_factory, apps_dir: Path) -> str:
 
 
 @pytest.fixture(scope="function")
+def trana_dir(tmpdir_factory, apps_dir: Path) -> str:
+    """Return the path to the trana apps dir."""
+    trana_dir = tmpdir_factory.mktemp("trana")
+    return Path(trana_dir).absolute().as_posix()
+
+
+@pytest.fixture(scope="function")
 def tomte_metrics_deliverables_path(tomte_dir: Path, tomte_case_id: str) -> Path:
     """Path to deliverables file."""
     return Path(tomte_dir, tomte_case_id, f"{tomte_case_id}_metrics_deliverables").with_suffix(
@@ -4082,7 +4134,7 @@ def downsample_data(
     )
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def downsample_api(
     downsample_context: CGConfig,
 ) -> DownsampleAPI:
@@ -4173,3 +4225,11 @@ def capture_kit() -> str:
 def case(analysis_store: Store) -> Case:
     """Return a case models object."""
     return analysis_store.get_cases()[0]
+
+
+NEXTFLOW_WORKFLOWS: list = [
+    Workflow.RAREDISEASE,
+    Workflow.RNAFUSION,
+    Workflow.TAXPROFILER,
+    Workflow.TOMTE,
+]

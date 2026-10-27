@@ -13,11 +13,11 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.constants.constants import CaseActions
-from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.exc import MetricsQCError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
 from cg.store.models import Case
+from tests.conftest import NEXTFLOW_WORKFLOWS
 
 
 @pytest.mark.parametrize(
