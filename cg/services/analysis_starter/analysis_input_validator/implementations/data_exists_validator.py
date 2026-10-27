@@ -55,10 +55,12 @@ class DataExistsValidator(AnalysisInputValidator):
         error_message = ""
         if samples_without_files:
             samples_without_files_str = "\n".join(samples_without_files)
-            error_message += f"The following samples are missing BAM files in Housekeeper: \n{samples_without_files_str}"
+            error_message += f"The following samples are missing raw data in Housekeeper: \n{samples_without_files_str}"
         if missing_files:
             missing_files_str = "\n".join(missing_files)
-            error_message += f"\nThe following BAM files are missing on disk: \n{missing_files_str}"
+            error_message += (
+                f"\nThe following raw data files are missing on disk: \n{missing_files_str}"
+            )
         raise AnalysisNotReadyError(error_message)
 
     def _get_raw_data_tags_for_workflow(self, workflow: Workflow) -> set[str]:

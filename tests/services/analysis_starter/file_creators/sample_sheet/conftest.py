@@ -33,9 +33,6 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
     TomteSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.trana_sample_sheet_creator import (
-    HEADERS as TRANA_HEADERS,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.trana_sample_sheet_creator import (
     TranaSampleSheetCreator,
 )
 
@@ -148,7 +145,7 @@ def trana_sample_sheet_expected_content(
     row2: list[str] = [nextflow_sample_id, fastq_path_2.as_posix(), "", "control_sample"]
     control_row1: list[str] = ["control_sample", fastq_path_1.as_posix(), "", ""]
     control_row2: list[str] = ["control_sample", fastq_path_2.as_posix(), "", ""]
-    return [TRANA_HEADERS, row1, row2, control_row1, control_row2]
+    return [["sample", "fastq_1", "fastq_2", "neg_control"], row1, row2, control_row1, control_row2]
 
 
 @pytest.fixture

@@ -9,7 +9,7 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 )
 from cg.store.models import Case, Sample
 
-HEADERS: list[str] = ["sample", "fastq_1", "fastq_2", "control"]
+HEADERS: list[str] = ["sample", "fastq_1", "fastq_2", "neg_control"]
 
 
 class TranaSampleSheetCreator(NextflowFastqSampleSheetCreator):
