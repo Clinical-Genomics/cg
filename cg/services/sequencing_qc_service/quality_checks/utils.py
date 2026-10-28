@@ -1,5 +1,6 @@
 import logging
 
+from cg.constants.constants import ControlOptions
 from cg.constants.devices import DeviceType
 from cg.constants.priority import Priority
 from cg.constants.sequencing import SeqLibraryPrepCategory
@@ -161,9 +162,11 @@ def raw_data_case_pass_qc(case: Case) -> bool:
     if is_case_ready_made_library(case):
         return ready_made_library_case_pass_sequencing_qc(case)
     if is_first_sample_yield_based_and_processed(case):
-        return all(sample_has_enough_hifi_yield(sample) for sample in case.samples)
+        return all(
+            sample_has_enough_hifi_yield_negative_control_pass(sample) for sample in case.samples
+        )
     elif is_first_sample_reads_based_and_processed(case):
-        return all(sample_has_enough_reads(sample) for sample in case.samples)
+        return all(sample_has_enough_reads_negative_control_pass(sample) for sample in case.samples)
     LOG.warning(f"Not all samples for case {case.internal_id} have been post-processed.")
     return False
 
@@ -244,6 +247,13 @@ def sample_has_enough_reads(sample: Sample) -> bool:
     return enough_reads
 
 
+def sample_has_enough_reads_negative_control_pass(sample: Sample) -> bool:
+    if sample.control is ControlOptions.NEGATIVE:
+        return True
+    else:
+        return sample_has_enough_reads(sample)
+
+
 def sample_has_enough_hifi_yield(sample: Sample) -> bool:
     """
     Return true if:
@@ -271,6 +281,13 @@ def sample_has_enough_hifi_yield(sample: Sample) -> bool:
     if not enough_hifi_yield:
         LOG.warning(f"Sample {sample.internal_id} does not have enough HiFi yield.")
     return enough_hifi_yield
+
+
+def sample_has_enough_hifi_yield_negative_control_pass(sample: Sample) -> bool:
+    if sample.control is ControlOptions.NEGATIVE:
+        return True
+    else:
+        return sample_has_enough_hifi_yield(sample)
 
 
 def is_sample_express_priority(sample: Sample) -> bool:

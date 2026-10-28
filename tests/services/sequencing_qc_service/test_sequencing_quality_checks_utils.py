@@ -3,6 +3,7 @@ from unittest.mock import create_autospec
 
 import pytest
 
+from cg.constants.constants import ControlOptions
 from cg.constants.devices import DeviceType
 from cg.constants.priority import Priority
 from cg.constants.sequencing import SeqLibraryPrepCategory
@@ -593,7 +594,7 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_zero_hifi_yield(
         application=create_autospec(Application, expected_express_hifi_yield=0),
     )
     allowed_sample_with_yield: Sample = create_autospec(
-        Sample, delivered_at=None, hifi_yield=0, application_version=application_version
+        Sample, hifi_yield=0, application_version=application_version
     )
 
     # GIVEN a case with a PacBio application express priority, with the sample above
@@ -823,4 +824,88 @@ def test_raw_data_read_based_case_pass_qc_second_sample_missing_sample_run_metri
     passes = raw_data_case_pass_qc(case)
 
     # THEN the case fails QC
+    assert not passes
+
+
+def test_raw_data_case_pass_qc_negative_control_read_based():
+    # GIVEN a read based negative control
+    sample: Sample = create_autospec(
+        Sample,
+        control=ControlOptions.NEGATIVE,
+        delivered_at=None,
+        reads=1,
+        expected_reads_for_sample=10,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
+    )
+
+    # GIVEN a case with the sample above
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN checking if the cases passes sequencing QC
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case should pass QC
+    assert passes
+
+
+def test_raw_data_case_pass_qc_negative_control_read_based_zero_reads():
+    # GIVEN a read based negative control with zero reads
+    sample: Sample = create_autospec(
+        Sample,
+        control=ControlOptions.NEGATIVE,
+        delivered_at=None,
+        reads=0,
+        expected_reads_for_sample=10,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
+    )
+
+    # GIVEN a case with the sample above
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN checking if the cases passes sequencing QC
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case should not pass QC
+    assert not passes
+
+
+def test_raw_data_case_pass_qc_negative_control_hifi_yield_based():
+    # GIVEN a read based negative control
+    sample: Sample = create_autospec(
+        Sample,
+        control=ControlOptions.NEGATIVE,
+        delivered_at=None,
+        hifi_yield=1,
+        expected_hifi_yield=10,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
+    )
+
+    # GIVEN a case with the sample above
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN checking if the cases passes sequencing QC
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case should pass QC
+    assert passes
+
+
+def test_raw_data_case_pass_qc_negative_control_hifi_yield_based_zero_hifi_yield():
+    # GIVEN a read based negative control
+    sample: Sample = create_autospec(
+        Sample,
+        control=ControlOptions.NEGATIVE,
+        delivered_at=None,
+        hifi_yield=0,
+        expected_hifi_yield=10,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
+    )
+
+    # GIVEN a case with the sample above
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN checking if the cases passes sequencing QC
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case should not pass QC
     assert not passes
