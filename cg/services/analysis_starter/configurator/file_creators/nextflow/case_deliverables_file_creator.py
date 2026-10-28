@@ -11,6 +11,45 @@ class CaseDeliverablesFileCreator:
     def __init__(self, status_db: Store):
         self.status_db = status_db
 
+    def _fill_placeholders(self, input_str: str, case_dir: Path, case: Case, sample: Sample | None):
+        replacements = {
+            "PATHTOCASE": case_dir,
+            "CASEID": case.internal_id,
+        }
+        if sample:
+            replacements.update(
+                {
+                    "SAMPLEID": sample.internal_id,
+                    "SAMPLENAME": sample.name,
+                }
+            )
+
+        output = input_str
+        for placeholder, value in replacements.items():
+            output = output.replace(placeholder, str(value))
+
+        return output
+
+    def _make_filetype_dict(
+        self, template: dict, case_directory: Path, case: Case, sample: Sample | None
+    ) -> dict:
+        new_dict = {}
+        for key, value in template.items():
+            if isinstance(value, str):
+                new_dict[key] = self._fill_placeholders(
+                    value, case_dir=case_directory, case=case, sample=sample
+                )
+            elif isinstance(value, list):
+                new_dict[key] = [
+                    self._fill_placeholders(
+                        input_str=path, case_dir=case_directory, case=case, sample=sample
+                    )
+                    for path in value
+                ]
+            else:
+                new_dict[key] = template[key]
+        return new_dict
+
     def create(
         self,
         case_id: str,
@@ -18,92 +57,31 @@ class CaseDeliverablesFileCreator:
         file_path: Path,
         pipeline_deliverables: Path,
     ):
-        """
-        - read the pipeline deliverables file
-        - in that content, replace all placeholders (e.g. SAMPLEID, CASEID, PATHTOCASE, et al)
-        - for SAMPLEID, expand to one row for each sample in the case
-        - write the result to file_path (analysis dir)
-        """
         template: list[dict[str, Any]] = read_yaml(pipeline_deliverables)
-        output: list[dict] = []
+        result: list[dict] = []
 
         case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
         samples: list[Sample] = case.samples
-        """
-        {
-            "PATHTOCASE": case_directory,
-            "SAMPLE"
-        }
-        """
 
-        for dictionary in template:
-            # TODO if dictionary contains SAMPLEID or SAMPLENAME
-            # for sample in samples
-            #     take every occurence of SAMPLEID and replace it with sample_internal_id
-            #     do the same for SAMPLENAME
-            #     expand dictionary with entries for every sample
-
-            replaced_dictionary = {}
-            if dictionary["id"] == "SAMPLEID":
+        for file_type in template:
+            if file_type["id"] == "SAMPLEID":
                 for sample in samples:
-                    sample_dict = {}
-                    for key, value in dictionary.items():
-                        if isinstance(value, str):
-                            sample_dict[key] = (
-                                dictionary[key]
-                                .replace("SAMPLENAME", sample.name)
-                                .replace("SAMPLEID", sample.internal_id)
-                                .replace("CASEID", case.internal_id)
-                                .replace("PATHTOCASE", case_directory.as_posix())
-                            )
-                        elif isinstance(value, list):
-                            new_paths: list[str] = []
-                            for path in value:
-                                new_paths.append(
-                                    path.replace("SAMPLENAME", sample.name)
-                                    .replace("SAMPLEID", sample.internal_id)
-                                    .replace("CASEID", case.internal_id)
-                                    .replace("PATHTOCASE", case_directory.as_posix())
-                                )
-                            sample_dict[key] = new_paths
-                        else:
-                            sample_dict[key] = value
-                    output.append(sample_dict)
-            else:
-                case_dict = {}
-                for key, value in dictionary.items():
-                    if isinstance(value, list):
-                        case_dict[key] = [
-                            path.replace("CASEID", case_id).replace(
-                                "PATHTOCASE", str(case_directory)
-                            )
-                            for path in value
-                        ]
-                    elif isinstance(value, str):
-                        case_dict[key] = value.replace("CASEID", case_id).replace(
-                            "PATHTOCASE", str(case_directory)
+                    result.append(
+                        self._make_filetype_dict(
+                            template=file_type,
+                            case_directory=case_directory,
+                            case=case,
+                            sample=sample,
                         )
-                    else:
-                        case_dict[key] = value
-                output.append(case_dict)
-        write_yaml(content=output, file_path=file_path)
-
-
-"""
-            for key, value in dictionary.items():
-                if isinstance(value, str):
-                    if "SAMPLEID" in value or "SAMPLENAME" in value:
-                        for sample in samples:
-                            sample_dict = {}
-            for key, value in dictionary.items():
-                if isinstance(value, list):
-                    replaced_dictionary[key] = [
-                        path.replace("CASEID", case_id).replace("PATHTOCASE", str(case_directory))
-                        for path in value
-                    ]
-                elif isinstance(value, str):
-                    replaced_dictionary[key] = value.replace("CASEID", case_id).replace(
-                        "PATHTOCASE", str(case_directory)
                     )
-            output.append(replaced_dictionary)
-"""
+            else:
+                result.append(
+                    self._make_filetype_dict(
+                        template=file_type,
+                        case_directory=case_directory,
+                        case=case,
+                        sample=None,
+                    )
+                )
+
+        write_yaml(content=result, file_path=file_path)
