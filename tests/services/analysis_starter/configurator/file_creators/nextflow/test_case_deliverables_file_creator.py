@@ -16,39 +16,36 @@ from cg.store.store import Store
 def pipeline_deliverables_content() -> str:
     return dedent("""
     - file_type: cram-picard-duplicates
-    id: SAMPLEID
-    paths: 
-      - PATHTOCASE/alignment/SAMPLEID_sorted_md.cram
-    mandatory: false
-
+      id: SAMPLEID
+      paths:
+        - PATHTOCASE/alignment/SAMPLEID_sorted_md.cram
+      mandatory: false
     - file_type: copy-number-caller
-    id: CASEID
-    paths: 
-      - PATHTOCASE/smncopynumbercaller/out/CASEID.json
-    mandatory: true
+      id: CASEID
+      paths:
+        - PATHTOCASE/smncopynumbercaller/out/CASEID.json
+      mandatory: true
     """)
 
 
 @pytest.fixture
 def expected_case_deliverables_content() -> str:
-    return dedent("""
+    return dedent("""    ---
     - file_type: cram-picard-duplicates
-    id: sample_1
-    paths: 
-      - path/to/case/alignment/sample_1_sorted_md.cram
-    mandatory: false
-
+      id: sample_1
+      paths:
+        - path/to/case/alignment/sample_1_sorted_md.cram
+      mandatory: false
     - file_type: cram-picard-duplicates
-    id: sample_2
-    paths: 
-      - path/to/case/alignment/sample_2_sorted_md.cram
-    mandatory: false
-
+      id: sample_2
+      paths:
+        - path/to/case/alignment/sample_2_sorted_md.cram
+      mandatory: false
     - file_type: copy-number-caller
-    id: case_id
-    paths: 
-      - path/to/case/smncopynumbercaller/out/case_id.json
-    mandatory: true
+      id: case_id
+      paths:
+        - path/to/case/smncopynumbercaller/out/case_id.json
+      mandatory: true
     """)
 
 

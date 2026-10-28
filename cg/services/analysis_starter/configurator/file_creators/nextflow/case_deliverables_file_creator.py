@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from cg.io.yaml import read_yaml, write_yaml
 from cg.store.store import Store
 
 
@@ -20,4 +21,6 @@ class CaseDeliverablesFileCreator:
         - for SAMPLEID, expand to one row for each sample in the case
         - write the result to file_path (analysis dir)
         """
-        pass
+        template: list[dict] = read_yaml(pipeline_deliverables)
+
+        write_yaml(content=template, file_path=file_path)
