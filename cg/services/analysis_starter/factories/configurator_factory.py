@@ -6,7 +6,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
 from cg.meta.workflow.fastq import BalsamicFastqHandler, MicrosaltFastqHandler, MipFastqHandler
-from cg.models.cg_config import CGConfig, CommonAppConfig, RarediseaseConfig
+from cg.models.cg_config import CGConfig, CommonAppConfig, RarediseaseConfig, TranaConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.nallo import NalloExtension
 from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
@@ -237,11 +237,12 @@ class ConfiguratorFactory:
                     workflow
                 )
                 return TomteExtension(gene_panel_file_creator=gene_panel_creator)
-            case Workflow.TRANA_16S:
+            case Workflow.TRANA_16S | Workflow.TRANA_ITS:
                 case_deliverables_file_creator = CaseDeliverablesFileCreator()
+                pipeline_config = cast(TranaConfig, self.cg_config.get_pipeline_config(workflow))
                 return TranaExtension(
                     case_deliverables_file_creator=case_deliverables_file_creator,
-                    trana_config=self.cg_config.trana_16s.pipeline_deliverables,
+                    trana_config=pipeline_config,
                 )
             case _:
                 return PipelineExtension()
