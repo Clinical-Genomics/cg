@@ -1,7 +1,11 @@
 from pathlib import Path
 
+from cg.store.store import Store
+
 
 class CaseDeliverablesFileCreator:
+    def __init__(self, status_db: Store):
+        self.status_db = status_db
 
     def create(
         self,
