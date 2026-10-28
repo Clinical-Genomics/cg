@@ -259,7 +259,7 @@ def sample_has_enough_reads(sample: Sample) -> bool:
     return enough_reads
 
 
-def negative_sample_has_enough_reads(sample: Sample) -> bool:
+def negative_control_sample_has_enough_reads(sample: Sample) -> bool:
     if sample.delivered_at is not None:
         LOG.debug(f"Sample {sample.internal_id} has already been delivered - passing check")
         return True
@@ -299,7 +299,7 @@ def sample_has_enough_hifi_yield(sample: Sample) -> bool:
     return enough_hifi_yield
 
 
-def negative_sample_has_enough_hifi_yield(sample: Sample) -> bool:
+def negative_control_sample_has_enough_hifi_yield(sample: Sample) -> bool:
     if sample.delivered_at is not None:
         LOG.debug(f"Sample {sample.internal_id} has already been delivered - passing check")
         return True
