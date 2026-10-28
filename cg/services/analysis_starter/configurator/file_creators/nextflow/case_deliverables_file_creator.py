@@ -3,6 +3,7 @@ from pathlib import Path
 from typing_extensions import Any
 
 from cg.io.yaml import read_yaml, write_yaml
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 
@@ -25,12 +26,32 @@ class CaseDeliverablesFileCreator:
         """
         template: list[dict[str, Any]] = read_yaml(pipeline_deliverables)
         output = []
+
+        case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
+        samples: list[Sample] = case.samples
+        """
+        {
+            "PATHTOCASE": case_directory,
+            "SAMPLE"
+        }
+        """
         for dictionary in template:
-            replaced_dictionary = dictionary.copy()
+            # TODO if dictionary contains SAMPLEID or SAMPLENAME
+            # for sample in samples
+            #     take every occurence of SAMPLEID and replace it with sample_internal_id
+            #     do the same for SAMPLENAME
+            #     expand dictionary with entries for every sample
+
+            replaced_dictionary = {}
             for key, value in dictionary.items():
                 if isinstance(value, list):
-                    replaced_dictionary[key] = [path.replace("CASEID", case_id) for path in value]
+                    replaced_dictionary[key] = [
+                        path.replace("CASEID", case_id).replace("PATHTOCASE", str(case_directory))
+                        for path in value
+                    ]
                 elif isinstance(value, str):
-                    replaced_dictionary[key] = value.replace("CASEID", case_id)
+                    replaced_dictionary[key] = value.replace("CASEID", case_id).replace(
+                        "PATHTOCASE", str(case_directory)
+                    )
             output.append(replaced_dictionary)
         write_yaml(content=output, file_path=file_path)
