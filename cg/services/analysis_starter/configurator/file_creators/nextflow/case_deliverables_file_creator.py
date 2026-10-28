@@ -10,6 +10,7 @@ class CaseDeliverablesFileCreator:
     def create(
         self,
         case_id: str,
+        case_directory: Path,
         file_path: Path,
         pipeline_deliverables: Path,
     ):
