@@ -59,7 +59,9 @@ def test_create(
 
     # GIVEN a case with samples in StatusDB
     sample_1 = create_autospec(Sample, internal_id="sample_1")
+    sample_1.name = "sample-1"
     sample_2 = create_autospec(Sample, internal_id="sample_2")
+    sample_2.name = "sample-2"
     case = create_autospec(Case, internal_id="case_id", samples=[sample_1, sample_2])
     status_db = create_autospec(Store)
     status_db.get_case_by_internal_id_strict = Mock(return_value=case)

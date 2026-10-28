@@ -25,7 +25,7 @@ class CaseDeliverablesFileCreator:
         - write the result to file_path (analysis dir)
         """
         template: list[dict[str, Any]] = read_yaml(pipeline_deliverables)
-        output = []
+        output: list[dict] = []
 
         case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
         samples: list[Sample] = case.samples
@@ -35,6 +35,7 @@ class CaseDeliverablesFileCreator:
             "SAMPLE"
         }
         """
+
         for dictionary in template:
             # TODO if dictionary contains SAMPLEID or SAMPLENAME
             # for sample in samples
@@ -43,6 +44,59 @@ class CaseDeliverablesFileCreator:
             #     expand dictionary with entries for every sample
 
             replaced_dictionary = {}
+            if any("SAMPLEID" in value for value in dictionary.values()) or any(
+                "SAMPLENAME" in value for value in dictionary.values()
+            ):
+                for sample in samples:
+                    sample_dict = {}
+                    for key, value in dictionary.items():
+                        if isinstance(value, str):
+                            sample_dict[key] = (
+                                dictionary[key]
+                                .replace("SAMPLENAME", sample.name)
+                                .replace("SAMPLEID", sample.internal_id)
+                                .replace("CASEID", case.internal_id)
+                                .replace("CASETOPATH", case_directory.as_posix())
+                            )
+                        elif isinstance(value, list):
+                            new_paths: list[str] = []
+                            for path in value:
+                                new_paths.append(
+                                    path.replace("SAMPLENAME", sample.name)
+                                    .replace("SAMPLEID", sample.internal_id)
+                                    .replace("CASEID", case.internal_id)
+                                    .replace("CASETOPATH", case_directory.as_posix())
+                                )
+                            sample_dict[key] = new_paths
+                        else:
+                            sample_dict[key] = value
+                    output.append(sample_dict)
+            else:
+                case_dict = {}
+                for key, value in dictionary.items():
+                    if isinstance(value, list):
+                        case_dict[key] = [
+                            path.replace("CASEID", case_id).replace(
+                                "PATHTOCASE", str(case_directory)
+                            )
+                            for path in value
+                        ]
+                    elif isinstance(value, str):
+                        case_dict[key] = value.replace("CASEID", case_id).replace(
+                            "PATHTOCASE", str(case_directory)
+                        )
+                    else:
+                        case_dict[key] = value
+                output.append(case_dict)
+        write_yaml(content=output, file_path=file_path)
+
+
+"""
+            for key, value in dictionary.items():
+                if isinstance(value, str):
+                    if "SAMPLEID" in value or "SAMPLENAME" in value:
+                        for sample in samples:
+                            sample_dict = {}
             for key, value in dictionary.items():
                 if isinstance(value, list):
                     replaced_dictionary[key] = [
@@ -54,4 +108,4 @@ class CaseDeliverablesFileCreator:
                         "PATHTOCASE", str(case_directory)
                     )
             output.append(replaced_dictionary)
-        write_yaml(content=output, file_path=file_path)
+"""
