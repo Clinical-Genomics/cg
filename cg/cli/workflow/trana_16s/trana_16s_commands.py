@@ -18,6 +18,7 @@ LOG = logging.getLogger(__name__)
 
 @click.group(context_settings=CLICK_CONTEXT_SETTINGS)
 def trana_16s():
+    """gms/Trana-16S analysis workflow"""
     pass
 
 
