@@ -1,0 +1,3 @@
+local_genomes: "/raredisease/references"
+genome: "GRCh38"
+fasta: "{{local_genomes}}/grch38_homo_sapiens_-gencode_pri-.fasta"
