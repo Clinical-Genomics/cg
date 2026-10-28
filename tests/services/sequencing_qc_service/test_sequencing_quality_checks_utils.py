@@ -3,7 +3,6 @@ from unittest.mock import create_autospec
 
 import pytest
 
-from cg.constants.constants import ControlOptions
 from cg.constants.devices import DeviceType
 from cg.constants.priority import Priority
 from cg.constants.sequencing import SeqLibraryPrepCategory
@@ -831,7 +830,7 @@ def test_raw_data_case_pass_qc_negative_control_read_based():
     # GIVEN a read based negative control
     sample: Sample = create_autospec(
         Sample,
-        control=ControlOptions.NEGATIVE,
+        control="negative",
         delivered_at=None,
         reads=1,
         expected_reads_for_sample=10,
@@ -852,7 +851,7 @@ def test_raw_data_case_pass_qc_negative_control_read_based_zero_reads():
     # GIVEN a read based negative control with zero reads
     sample: Sample = create_autospec(
         Sample,
-        control=ControlOptions.NEGATIVE,
+        control="negative",
         delivered_at=None,
         reads=0,
         expected_reads_for_sample=10,
@@ -873,7 +872,7 @@ def test_raw_data_case_pass_qc_negative_control_hifi_yield_based():
     # GIVEN a read based negative control
     sample: Sample = create_autospec(
         Sample,
-        control=ControlOptions.NEGATIVE,
+        control="negative",
         delivered_at=None,
         hifi_yield=1,
         expected_hifi_yield=10,
@@ -894,7 +893,7 @@ def test_raw_data_case_pass_qc_negative_control_hifi_yield_based_zero_hifi_yield
     # GIVEN a read based negative control
     sample: Sample = create_autospec(
         Sample,
-        control=ControlOptions.NEGATIVE,
+        control="negative",
         delivered_at=None,
         hifi_yield=0,
         expected_hifi_yield=10,

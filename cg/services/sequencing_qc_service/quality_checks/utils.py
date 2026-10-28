@@ -165,7 +165,7 @@ def raw_data_case_pass_qc(case: Case) -> bool:
         return all(
             (
                 negative_control_sample_has_enough_hifi_yield(sample)
-                if sample.control is ControlOptions.NEGATIVE
+                if sample.control == ControlOptions.NEGATIVE
                 else sample_has_enough_hifi_yield(sample)
             )
             for sample in case.samples
@@ -174,7 +174,7 @@ def raw_data_case_pass_qc(case: Case) -> bool:
         return all(
             (
                 negative_control_sample_has_enough_reads(sample)
-                if sample.control is ControlOptions.NEGATIVE
+                if sample.control == ControlOptions.NEGATIVE
                 else sample_has_enough_reads(sample)
             )
             for sample in case.samples
@@ -264,10 +264,12 @@ def negative_control_sample_has_enough_reads(sample: Sample) -> bool:
         LOG.debug(f"Sample {sample.internal_id} has already been delivered - passing check")
         return True
 
-    if sample.reads is not None:
-        return sample.reads > 0
-    else:
-        return False
+    enough_reads = sample.reads > 0
+    if not enough_reads:
+        LOG.warning(
+            f"Negative control {sample.internal_id} has {sample.reads} reads - failing QC check."
+        )
+    return enough_reads
 
 
 def sample_has_enough_hifi_yield(sample: Sample) -> bool:
@@ -304,10 +306,16 @@ def negative_control_sample_has_enough_hifi_yield(sample: Sample) -> bool:
         LOG.debug(f"Sample {sample.internal_id} has already been delivered - passing check")
         return True
 
-    if sample.hifi_yield is not None:
-        return sample.hifi_yield > 0
-    else:
+    if sample.hifi_yield is None:
+        LOG.debug(f"Sample {sample.internal_id} has no hifi yield.")
         return False
+
+    enough_hifi_yield = sample.hifi_yield > 0
+    if not enough_hifi_yield:
+        LOG.warning(
+            f"Negative control {sample.internal_id} has {sample.hifi_yield} hifi yield - failing QC check."
+        )
+    return enough_hifi_yield
 
 
 def is_sample_express_priority(sample: Sample) -> bool:
