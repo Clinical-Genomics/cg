@@ -164,7 +164,7 @@ def raw_data_case_pass_qc(case: Case) -> bool:
     if is_first_sample_yield_based_and_processed(case):
         return all(
             (
-                negative_sample_has_enough_hifi_yield(sample)
+                negative_control_sample_has_enough_hifi_yield(sample)
                 if sample.control is ControlOptions.NEGATIVE
                 else sample_has_enough_hifi_yield(sample)
             )
@@ -173,7 +173,7 @@ def raw_data_case_pass_qc(case: Case) -> bool:
     elif is_first_sample_reads_based_and_processed(case):
         return all(
             (
-                negative_sample_has_enough_reads(sample)
+                negative_control_sample_has_enough_reads(sample)
                 if sample.control is ControlOptions.NEGATIVE
                 else sample_has_enough_reads(sample)
             )
