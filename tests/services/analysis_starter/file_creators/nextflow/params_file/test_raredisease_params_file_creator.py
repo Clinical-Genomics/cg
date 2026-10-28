@@ -109,6 +109,7 @@ def test_create_on_lims_capture_kit_availability(
     # GIVEN a params file creator
     file_creator = RarediseaseParamsFileCreator(
         default_target_bed="default.bed",
+        express_manta_config=Path("/express/manta/config"),
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         store=store_mock,
@@ -194,6 +195,7 @@ def test_create_wgs(
 
     file_creator = RarediseaseParamsFileCreator(
         default_target_bed="default.bed",
+        express_manta_config=Path("/express/manta/config"),
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         store=store_mock,
@@ -280,6 +282,7 @@ def test_create_wes_gcnvcaller_included(
     # GIVEN a params file creator
     file_creator = RarediseaseParamsFileCreator(
         default_target_bed="default.bed",
+        express_manta_config=Path("/express/manta/config"),
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         references_directory=Path("some_path"),
@@ -367,6 +370,7 @@ def test_create_wes_gcnvcaller_bed_version_does_not_match(
     # GIVEN a params file creator
     file_creator = RarediseaseParamsFileCreator(
         default_target_bed="default.bed",
+        express_manta_config=Path("/express/manta/config"),
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         references_directory=Path("/any/path"),
@@ -420,8 +424,14 @@ def test_create_wes_gcnvcaller_bed_version_does_not_match(
 @pytest.mark.parametrize(
     "priority, expected_dict_contents",
     [
-        (Priority.express, DictContaining({"manta_config": "/manta/config/path.ini"})),
-        (Priority.standard, DictNotContaining({"manta_config": ANY})),
+        (
+            Priority.express,
+            DictContaining({"manta_config": Path("/manta/config/path.ini")}),
+        ),
+        (
+            Priority.standard,
+            DictNotContaining({"manta_config": ANY}),
+        ),
     ],
     ids=["Express case", "Standard case"],
 )
@@ -446,6 +456,7 @@ def test_create_manta_config_depends_on_priority(
     # GIVEN a params file creator
     file_creator = RarediseaseParamsFileCreator(
         default_target_bed="default.bed",
+        express_manta_config=Path("/manta/config/path.ini"),
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         references_directory=Path("/any/path"),

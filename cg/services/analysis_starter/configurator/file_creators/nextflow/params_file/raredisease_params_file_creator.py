@@ -30,6 +30,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
     def __init__(
         self,
         default_target_bed: str,
+        express_manta_config: Path | None,
         verifybamid_files_set: VerifybamidSvdFilesSet,
         gcnvcaller_files: dict[str, GCNVCallerFiles],
         references_directory: Path,
@@ -39,6 +40,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
     ):
         super().__init__(params)
         self.default_target_bed = default_target_bed
+        self.express_manta_config = express_manta_config
         self.verifybamid_files_set = verifybamid_files_set
         self.gcnvcaller_files = gcnvcaller_files
         self.references_directory = references_directory
@@ -71,12 +73,12 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         case = self.store.get_case_by_internal_id_strict(case_id)
         prep_category: SeqLibraryPrepCategory = self._get_arbitrary_prep_category_in_case(case_id)
         target_bed: str = self._get_target_bed(case)
+        manta_config: Path | None = self._get_manta_config(case)
         sample_mapping_file: Path = self._create_sample_mapping_file(case=case, case_path=case_path)
         verifybamid_files: VerifybamidSvdFiles = self._get_verifybamid_files(prep_category)
         skip_tools, gcnvcaller_model, ploidy_model, readcount_intervals = self._get_gcnvcaller_args(
             prep_category=prep_category, target_bed=target_bed
         )
-        manta_config = Path("?") if case.priority == Priority.express else None
         return RarediseaseParameters(
             analysis_type=prep_category,
             gcnvcaller_model=gcnvcaller_model,
@@ -94,6 +96,9 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             verifybamid_svd_mu=verifybamid_files.mu,
             verifybamid_svd_ud=verifybamid_files.ud,
         )
+
+    def _get_manta_config(self, case):
+        return self.express_manta_config if case.priority == Priority.express else None
 
     def _get_gcnvcaller_args(self, prep_category: SeqLibraryPrepCategory, target_bed: str) -> tuple:
         if prep_category == SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING:
