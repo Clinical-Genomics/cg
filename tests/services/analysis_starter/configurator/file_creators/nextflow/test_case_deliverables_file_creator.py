@@ -17,14 +17,14 @@ def pipeline_deliverables_content() -> str:
     return dedent("""
     - file_type: cram-picard-duplicates
       id: SAMPLEID
+      mandatory: false
       paths:
         - PATHTOCASE/alignment/SAMPLEID_sorted_md.cram
-      mandatory: false
     - file_type: copy-number-caller
       id: CASEID
+      mandatory: true
       paths:
         - PATHTOCASE/smncopynumbercaller/out/CASEID.json
-      mandatory: true
     """)
 
 
@@ -33,19 +33,19 @@ def expected_case_deliverables_content() -> str:
     return dedent("""    ---
     - file_type: cram-picard-duplicates
       id: sample_1
-      paths:
-        - path/to/case/alignment/sample_1_sorted_md.cram
       mandatory: false
+      paths:
+      - path/to/case/alignment/sample_1_sorted_md.cram
     - file_type: cram-picard-duplicates
       id: sample_2
-      paths:
-        - path/to/case/alignment/sample_2_sorted_md.cram
       mandatory: false
+      paths:
+      - path/to/case/alignment/sample_2_sorted_md.cram
     - file_type: copy-number-caller
       id: case_id
-      paths:
-        - path/to/case/smncopynumbercaller/out/case_id.json
       mandatory: true
+      paths:
+      - path/to/case/smncopynumbercaller/out/case_id.json
     """)
 
 

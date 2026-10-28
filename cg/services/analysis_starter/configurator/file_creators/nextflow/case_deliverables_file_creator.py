@@ -44,9 +44,7 @@ class CaseDeliverablesFileCreator:
             #     expand dictionary with entries for every sample
 
             replaced_dictionary = {}
-            if any("SAMPLEID" in value for value in dictionary.values()) or any(
-                "SAMPLENAME" in value for value in dictionary.values()
-            ):
+            if dictionary["id"] == "SAMPLEID":
                 for sample in samples:
                     sample_dict = {}
                     for key, value in dictionary.items():
@@ -56,7 +54,7 @@ class CaseDeliverablesFileCreator:
                                 .replace("SAMPLENAME", sample.name)
                                 .replace("SAMPLEID", sample.internal_id)
                                 .replace("CASEID", case.internal_id)
-                                .replace("CASETOPATH", case_directory.as_posix())
+                                .replace("PATHTOCASE", case_directory.as_posix())
                             )
                         elif isinstance(value, list):
                             new_paths: list[str] = []
@@ -65,7 +63,7 @@ class CaseDeliverablesFileCreator:
                                     path.replace("SAMPLENAME", sample.name)
                                     .replace("SAMPLEID", sample.internal_id)
                                     .replace("CASEID", case.internal_id)
-                                    .replace("CASETOPATH", case_directory.as_posix())
+                                    .replace("PATHTOCASE", case_directory.as_posix())
                                 )
                             sample_dict[key] = new_paths
                         else:
