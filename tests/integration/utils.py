@@ -97,7 +97,7 @@ def _create_fastq_files_and_add_to_housekeeper(
     )
     fastq_file_path2: Path = Path(fastq_base_path, f"{sample.internal_id}2.fastq.gz")
     copy_integration_test_file(
-        from_path=Path("tests/integration/config/file.fastq.gz"), to_path=fastq_file_path2
+        from_path=Path("tests/integration/config/file_R2.fastq.gz"), to_path=fastq_file_path2
     )
 
     _create_bundle_for_sample(
