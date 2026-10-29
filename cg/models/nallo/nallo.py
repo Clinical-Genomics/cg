@@ -6,7 +6,7 @@ from cg.constants import SexOptions
 from cg.models.qc_metrics import QCMetrics
 
 
-def convert_sex(plink_sex: float) -> SexOptions:
+def convert_sex(plink_sex: float) -> SexOptions:  # TODO RD will need the same conversion
     if plink_sex == 2:
         return SexOptions.FEMALE
     elif plink_sex == 1:
@@ -24,4 +24,6 @@ class NalloQCMetrics(QCMetrics):
     coverage_bases: float | None
     median_coverage: float | None
     percent_duplicates: float | None
-    predicted_sex: Annotated[SexOptions, BeforeValidator(convert_sex)] = Field(alias="somalier_sex")
+    predicted_sex: Annotated[SexOptions, BeforeValidator(convert_sex)] = Field(
+        alias="somalier_sex"
+    )  # TODO RD will need this setup

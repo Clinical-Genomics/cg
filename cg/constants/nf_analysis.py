@@ -14,7 +14,7 @@ NALLO_RAW_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "somalier_sex": {"norm": "eq", "threshold": None},
 }
 
-RAREDISEASE_PREDICTED_SEX_METRIC = "predicted_sex_sex_check"
+RAREDISEASE_PREDICTED_SEX_METRIC = "predicted_sex_sex_check"  # TODO change to somalier_sex
 
 RAREDISEASE_METRIC_CONDITIONS_WES: dict[str, dict[str, Any]] = {
     "PERCENT_DUPLICATION": {"norm": "lt", "threshold": 0.20},
