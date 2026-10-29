@@ -242,7 +242,7 @@ class ConfiguratorFactory:
                 pipeline_config = cast(TranaConfig, self.cg_config.get_pipeline_config(workflow))
                 return TranaExtension(
                     case_deliverables_file_creator=case_deliverables_file_creator,
-                    trana_config=pipeline_config,
+                    trana_pipeline_deliverables=pipeline_config.pipeline_deliverables,
                 )
             case _:
                 return PipelineExtension()

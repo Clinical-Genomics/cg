@@ -21,7 +21,7 @@ def test_configure():
     # GIVEN a Trana extension
     trana_extension = TranaExtension(
         case_deliverables_file_creator=case_deliverables_file_creator.as_type,
-        trana_config=trana_config,
+        trana_pipeline_deliverables=trana_config.pipeline_deliverables,
     )
 
     # WHEN configure is called
