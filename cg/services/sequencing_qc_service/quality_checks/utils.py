@@ -197,12 +197,12 @@ def get_express_reads_threshold_for_sample(sample: Sample) -> int:
 
 
 def get_express_yield_threshold_for_sample(sample: Sample) -> int:
-    if threshold := sample.application_version.application.expected_express_hifi_yield:
-        return threshold
-    else:
+    threshold: int | None = sample.application_version.application.expected_express_hifi_yield
+    if threshold is None:
         raise ApplicationDoesNotHaveHiFiYieldError(
             f"Application for sample {sample.internal_id} does not have target HiFi yield."
         )
+    return threshold
 
 
 def is_sample_ready_made_library(sample: Sample) -> bool:
