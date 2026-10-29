@@ -3,7 +3,7 @@ from pathlib import Path
 from typing_extensions import Any
 
 from cg.io.yaml import read_yaml, write_yaml
-from cg.store.models import Case
+from cg.store.models import Case, Sample
 from cg.store.store import Store
 
 
@@ -32,22 +32,33 @@ class CaseDeliverablesFileCreator:
 
         for file_type_dict in template:
             if file_type_dict["id"] == "SAMPLEID":
-                for sample in case.samples:
-                    sample_replacements = {
-                        **case_replacements,
-                        "SAMPLENAME": sample.name,
-                        "SAMPLEID": sample.internal_id,
-                    }
-                    result.append(
-                        self._transform_dict(
-                            old_dict=file_type_dict, replacements=sample_replacements
-                        )
+                result.extend(
+                    self._create_transformed_sample_dicts(
+                        samples=case.samples,
+                        file_type_dict=file_type_dict,
+                        case_replacements=case_replacements,
                     )
+                )
             else:
                 result.append(
                     self._transform_dict(old_dict=file_type_dict, replacements=case_replacements)
                 )
         write_yaml(content=result, file_path=file_path)
+
+    def _create_transformed_sample_dicts(
+        self, samples: list[Sample], file_type_dict: dict, case_replacements: dict
+    ) -> list[dict]:
+        sample_dicts: list[dict] = []
+        for sample in samples:
+            sample_replacements = {
+                **case_replacements,
+                "SAMPLENAME": sample.name,
+                "SAMPLEID": sample.internal_id,
+            }
+            sample_dicts.append(
+                self._transform_dict(old_dict=file_type_dict, replacements=sample_replacements)
+            )
+        return sample_dicts
 
     def _transform_dict(self, old_dict: dict, replacements: dict) -> dict:
         return {
