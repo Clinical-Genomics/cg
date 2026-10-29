@@ -14,7 +14,6 @@ class CaseDeliverablesFileCreator:
     def create(
         self,
         case_id: str,
-        case_directory: Path,
         file_path: Path,
         pipeline_deliverables: Path,
     ):
@@ -29,6 +28,7 @@ class CaseDeliverablesFileCreator:
         result: list[dict] = []
 
         case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
+        case_directory: Path = file_path.parent
         case_replacements = {"CASEID": case.internal_id, "PATHTOCASE": case_directory.as_posix()}
 
         for file_type_dict in template:

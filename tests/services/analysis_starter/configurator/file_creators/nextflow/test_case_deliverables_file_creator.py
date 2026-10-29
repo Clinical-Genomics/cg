@@ -74,7 +74,6 @@ def test_create(
     # WHEN creating the case_deliverables file
     file_creator.create(
         case_id="case_id",
-        case_directory=Path("path/to/case"),
         file_path=Path("case_id_deliverables.yaml"),
         pipeline_deliverables=Path("trana_deliverables.yaml"),
     )

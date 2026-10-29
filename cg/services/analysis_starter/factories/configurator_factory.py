@@ -238,7 +238,7 @@ class ConfiguratorFactory:
                 )
                 return TomteExtension(gene_panel_file_creator=gene_panel_creator)
             case Workflow.TRANA_16S | Workflow.TRANA_ITS:
-                case_deliverables_file_creator = CaseDeliverablesFileCreator()
+                case_deliverables_file_creator = CaseDeliverablesFileCreator(self.store)
                 pipeline_config = cast(TranaConfig, self.cg_config.get_pipeline_config(workflow))
                 return TranaExtension(
                     case_deliverables_file_creator=case_deliverables_file_creator,
