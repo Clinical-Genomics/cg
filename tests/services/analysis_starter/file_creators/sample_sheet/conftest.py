@@ -5,29 +5,14 @@ import pytest
 from cg.constants import Workflow
 from cg.constants.constants import Strandedness
 from cg.constants.sequencing import SequencingPlatform
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo_sample_sheet_creator import (
-    HEADERS as NALLO_HEADERS,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease_sample_sheet_creator import (
-    HEADERS as RAREDISEASE_HEADERS,
-)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease_sample_sheet_creator import (
     RarediseaseSampleSheetCreator,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion_sample_sheet_creator import (
-    HEADERS as RNAFUSION_HEADERS,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion_sample_sheet_creator import (
     RNAFusionSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler_sample_sheet_creator import (
-    HEADERS as TAXPROFILER_HEADERS,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.taxprofiler_sample_sheet_creator import (
     TaxprofilerSampleSheetCreator,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.tomte_sample_sheet_creator import (
-    HEADERS as TOMTE_HEADERS,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.tomte_sample_sheet_creator import (
     TomteSampleSheetCreator,
@@ -60,7 +45,20 @@ def expected_nallo_sample_sheet_content() -> list[list[str]]:
         "1",
         "2",
     ]
-    return [NALLO_HEADERS, row1, row2]
+    return [
+        [
+            "project",
+            "sample",
+            "file",
+            "family_id",
+            "paternal_id",
+            "maternal_id",
+            "sex",
+            "phenotype",
+        ],
+        row1,
+        row2,
+    ]
 
 
 @pytest.fixture
@@ -83,7 +81,20 @@ def raredisease_sample_sheet_expected_content(
         "",
         nextflow_case_id,
     ]
-    return [RAREDISEASE_HEADERS, entry_1]
+    return [
+        [
+            "sample",
+            "lane",
+            "fastq_1",
+            "fastq_2",
+            "sex",
+            "phenotype",
+            "paternal_id",
+            "maternal_id",
+            "case_id",
+        ],
+        entry_1,
+    ]
 
 
 @pytest.fixture
@@ -100,7 +111,7 @@ def rnafusion_sample_sheet_expected_content(
         fastq_path_2.as_posix(),
         strandedness.value,
     ]
-    return [RNAFUSION_HEADERS, row]
+    return [["sample", "fastq_1", "fastq_2", "strandedness"], row]
 
 
 @pytest.fixture
@@ -119,7 +130,17 @@ def taxprofiler_sample_sheet_expected_content(
         fastq_path_2.as_posix(),
         "",
     ]
-    return [TAXPROFILER_HEADERS, row]
+    return [
+        [
+            "sample",
+            "run_accession",
+            "instrument_platform",
+            "fastq_1",
+            "fastq_2",
+            "fasta",
+        ],
+        row,
+    ]
 
 
 @pytest.fixture
@@ -134,7 +155,7 @@ def tomte_sample_sheet_expected_content(
         fastq_path_2.as_posix(),
         Strandedness.REVERSE,
     ]
-    return [TOMTE_HEADERS, row]
+    return [["case", "sample", "fastq_1", "fastq_2", "strandedness"], row]
 
 
 @pytest.fixture
