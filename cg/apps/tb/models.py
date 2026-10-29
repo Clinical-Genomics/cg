@@ -27,6 +27,7 @@ class TrailblazerAnalysis(BaseModel):
     workflow: str | None = None
     ticket: str | None = None
     uploaded_at: str | None = None
+    tower_workflow_id: str | None = None
 
     model_config = ConfigDict(
         arbitrary_types_allowed=True,
