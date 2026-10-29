@@ -15,37 +15,39 @@ from cg.store.store import Store
 @pytest.fixture
 def pipeline_deliverables_content() -> str:
     return dedent("""
-    - file_type: cram-picard-duplicates
+    - file_type: non-mandatory-sample-type
       id: SAMPLEID
       mandatory: false
       paths:
-        - PATHTOCASE/alignment/SAMPLEID_sorted_md.cram
-    - file_type: copy-number-caller
+        - PATHTOCASE/outputs/SAMPLENAME_sorted_md.cram
+    - file_type: mandatory-case-multipath-type
       id: CASEID
       mandatory: true
       paths:
-        - PATHTOCASE/smncopynumbercaller/out/CASEID.json
+        - PATHTOCASE/output1/CASEID.json
+        - PATHTOCASE/output2/CASEID.json
     """)
 
 
 @pytest.fixture
 def expected_case_deliverables_content() -> str:
     return dedent("""    ---
-    - file_type: cram-picard-duplicates
-      id: sample_1
+    - file_type: non-mandatory-sample-type
+      id: sample_id_1
       mandatory: false
       paths:
-      - path/to/case/alignment/sample_1_sorted_md.cram
-    - file_type: cram-picard-duplicates
-      id: sample_2
+      - path/to/case/outputs/sample-name-1_sorted_md.cram
+    - file_type: non-mandatory-sample-type
+      id: sample_id_2
       mandatory: false
       paths:
-      - path/to/case/alignment/sample_2_sorted_md.cram
-    - file_type: copy-number-caller
+      - path/to/case/outputs/sample-name-2_sorted_md.cram
+    - file_type: mandatory-case-multipath-type
       id: case_id
       mandatory: true
       paths:
-      - path/to/case/smncopynumbercaller/out/case_id.json
+      - path/to/case/output1/case_id.json
+      - path/to/case/output2/case_id.json
     """)
 
 
@@ -58,10 +60,10 @@ def test_create(
     )
 
     # GIVEN a case with samples in StatusDB
-    sample_1 = create_autospec(Sample, internal_id="sample_1")
-    sample_1.name = "sample-1"
-    sample_2 = create_autospec(Sample, internal_id="sample_2")
-    sample_2.name = "sample-2"
+    sample_1 = create_autospec(Sample, internal_id="sample_id_1")
+    sample_1.name = "sample-name-1"
+    sample_2 = create_autospec(Sample, internal_id="sample_id_2")
+    sample_2.name = "sample-name-2"
     case = create_autospec(Case, internal_id="case_id", samples=[sample_1, sample_2])
     status_db = create_autospec(Store)
     status_db.get_case_by_internal_id_strict = Mock(return_value=case)

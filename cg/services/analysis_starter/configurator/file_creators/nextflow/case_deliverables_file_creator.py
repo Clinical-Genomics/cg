@@ -19,6 +19,7 @@ class CaseDeliverablesFileCreator:
         pipeline_deliverables: Path,
     ):
         """
+        TODO refine docstring
         - read the pipeline deliverables file
         - in that content, replace all placeholders (e.g. SAMPLEID, CASEID, PATHTOCASE, et al)
         - for SAMPLEID, expand to one row for each sample in the case
