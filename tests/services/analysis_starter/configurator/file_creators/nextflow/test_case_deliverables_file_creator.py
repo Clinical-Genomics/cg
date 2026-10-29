@@ -59,6 +59,9 @@ def test_create(
         file_path=Path("trana_deliverables.yaml"), contents=pipeline_deliverables_content
     )
 
+    # GIVEN a case dir
+    fs.create_dir("path/to/case")
+
     # GIVEN a case with samples in StatusDB
     sample_1 = create_autospec(Sample, internal_id="sample_id_1")
     sample_1.name = "sample-name-1"
@@ -74,9 +77,12 @@ def test_create(
     # WHEN creating the case_deliverables file
     file_creator.create(
         case_id="case_id",
-        file_path=Path("case_id_deliverables.yaml"),
+        file_path=Path("path/to/case/case_id_deliverables.yaml"),
         pipeline_deliverables=Path("trana_deliverables.yaml"),
     )
 
     # THEN a file will be written with the correct content
-    assert Path("case_id_deliverables.yaml").read_text() == expected_case_deliverables_content
+    assert (
+        Path("path/to/case/case_id_deliverables.yaml").read_text()
+        == expected_case_deliverables_content
+    )
