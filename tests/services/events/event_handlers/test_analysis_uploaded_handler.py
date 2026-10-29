@@ -20,7 +20,7 @@ def test_completed_success():
     # GIVEN a store with an analysis
     store: TypedMock[Store] = create_typed_mock(Store)
     case: Case = create_autospec(Case, internal_id="case_1")
-    analysis: Analysis = create_autospec(Analysis, id=1, case=case)
+    analysis: Analysis = create_autospec(Analysis, trailblazer_id=1, case=case)
 
     store.as_type.get_analysis_by_entry_id_strict = Mock(return_value=analysis)
 

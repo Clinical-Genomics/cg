@@ -298,6 +298,7 @@ class NfAnalysisAPI(AnalysisAPI):
         analysis: TrailblazerAnalysis = self.trailblazer_api.get_latest_analysis_strict(
             case_id=case_id
         )
+        # TODO
         try:
             metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
             qc_metrics_raw: dict = ReadFile.get_content_from_file(

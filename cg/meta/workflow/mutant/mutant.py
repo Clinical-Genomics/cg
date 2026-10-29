@@ -281,6 +281,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         analysis: TrailblazerAnalysis = self.trailblazer_api.get_latest_analysis_strict(
             case_id=case.internal_id
         )
+        # TODO
         try:
             qc_result: MutantQualityResult = self.get_qc_result(case=case)
         except Exception as exception:
