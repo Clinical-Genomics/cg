@@ -1,5 +1,6 @@
 import logging
 
+from cg.constants.constants import ControlOptions
 from cg.constants.devices import DeviceType
 from cg.constants.priority import Priority
 from cg.constants.sequencing import SeqLibraryPrepCategory
@@ -161,9 +162,23 @@ def raw_data_case_pass_qc(case: Case) -> bool:
     if is_case_ready_made_library(case):
         return ready_made_library_case_pass_sequencing_qc(case)
     if is_first_sample_yield_based_and_processed(case):
-        return all(sample_has_enough_hifi_yield(sample) for sample in case.samples)
+        return all(
+            (
+                negative_control_sample_has_enough_hifi_yield(sample)
+                if sample.control == ControlOptions.NEGATIVE
+                else sample_has_enough_hifi_yield(sample)
+            )
+            for sample in case.samples
+        )
     elif is_first_sample_reads_based_and_processed(case):
-        return all(sample_has_enough_reads(sample) for sample in case.samples)
+        return all(
+            (
+                negative_control_sample_has_enough_reads(sample)
+                if sample.control == ControlOptions.NEGATIVE
+                else sample_has_enough_reads(sample)
+            )
+            for sample in case.samples
+        )
     LOG.warning(f"Not all samples for case {case.internal_id} have been post-processed.")
     return False
 
@@ -244,6 +259,19 @@ def sample_has_enough_reads(sample: Sample) -> bool:
     return enough_reads
 
 
+def negative_control_sample_has_enough_reads(sample: Sample) -> bool:
+    if sample.delivered_at is not None:
+        LOG.debug(f"Sample {sample.internal_id} has already been delivered - passing check")
+        return True
+
+    enough_reads = sample.reads > 0
+    if not enough_reads:
+        LOG.warning(
+            f"Negative control {sample.internal_id} has {sample.reads} reads - failing QC check."
+        )
+    return enough_reads
+
+
 def sample_has_enough_hifi_yield(sample: Sample) -> bool:
     """
     Return true if:
@@ -270,6 +298,23 @@ def sample_has_enough_hifi_yield(sample: Sample) -> bool:
     enough_hifi_yield: bool = sample.hifi_yield >= sample.expected_hifi_yield
     if not enough_hifi_yield:
         LOG.warning(f"Sample {sample.internal_id} does not have enough HiFi yield.")
+    return enough_hifi_yield
+
+
+def negative_control_sample_has_enough_hifi_yield(sample: Sample) -> bool:
+    if sample.delivered_at is not None:
+        LOG.debug(f"Sample {sample.internal_id} has already been delivered - passing check")
+        return True
+
+    if sample.hifi_yield is None:
+        LOG.debug(f"Sample {sample.internal_id} has no hifi yield.")
+        return False
+
+    enough_hifi_yield = sample.hifi_yield > 0
+    if not enough_hifi_yield:
+        LOG.warning(
+            f"Negative control {sample.internal_id} has {sample.hifi_yield} hifi yield - failing QC check."
+        )
     return enough_hifi_yield
 
 

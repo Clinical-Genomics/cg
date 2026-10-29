@@ -362,7 +362,9 @@ def test_any_sample_in_case_has_reads(
 
 def test_case_pass_sequencing_qc_on_hifi_yield_passes():
     # GIVEN a sample with enough yield
-    sample: Sample = create_autospec(Sample, expected_hifi_yield=45, hifi_yield=45)
+    sample: Sample = create_autospec(
+        Sample, delivered_at=None, expected_hifi_yield=45, hifi_yield=45
+    )
 
     # GIVEN a case
     case: Case = create_autospec(Case, samples=[sample])
@@ -483,7 +485,9 @@ def test_case_pass_sequencing_qc_on_hifi_yield_zero_expected_yield_passes():
 
 def test_case_pass_sequencing_qc_on_hifi_yield_wrong_application():
     # GIVEN a case with an application without target HiFi yield
-    sample: Sample = create_autospec(Sample, hifi_yield=25, expected_hifi_yield=None)
+    sample: Sample = create_autospec(
+        Sample, delivered_at=None, hifi_yield=25, expected_hifi_yield=None
+    )
     case: Case = create_autospec(Case, samples=[sample])
 
     # WHEN calling the case_pass_sequencing_qc_on_hifi_yield on the case
@@ -496,6 +500,7 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_passes():
     # GIVEN a case with a PacBio application, express priority and half of the target yield
     sample: Sample = create_autospec(
         Sample,
+        delivered_at=None,
         hifi_yield=25,
         application_version=create_autospec(
             ApplicationVersion,
@@ -560,10 +565,11 @@ def test_case_pass_sequencing_qc_on_hifi_yield_express_priority_missing_hifi_yie
         application=create_autospec(Application, expected_express_hifi_yield=25),
     )
     sample_with_yield: Sample = create_autospec(
-        Sample, hifi_yield=24, application_version=application_version
+        Sample, delivered_at=None, hifi_yield=24, application_version=application_version
     )
     sample_without_yield: Sample = create_autospec(
         Sample,
+        delivered_at=None,
         hifi_yield=None,
         application_version=application_version,
     )
@@ -626,12 +632,14 @@ def test_raw_data_case_pass_qc_rml_passes():
     # GIVEN two RML samples for which their summed reads pass the application threshold
     sample_1: Sample = create_autospec(
         Sample,
+        delivered_at=None,
         reads=10,
         expected_reads_for_sample=20,
         prep_category=SeqLibraryPrepCategory.READY_MADE_LIBRARY,
     )
     sample_2: Sample = create_autospec(
         Sample,
+        delivered_at=None,
         reads=10,
         expected_reads_for_sample=20,
         prep_category=SeqLibraryPrepCategory.READY_MADE_LIBRARY,
@@ -651,12 +659,14 @@ def test_raw_data_case_pass_qc_rml_fails():
     # GIVEN two RML samples for which their summed reads does not reach the application threshold
     sample_1: Sample = create_autospec(
         Sample,
+        delivered_at=None,
         reads=1,
         expected_reads_for_sample=20,
         prep_category=SeqLibraryPrepCategory.READY_MADE_LIBRARY,
     )
     sample_2: Sample = create_autospec(
         Sample,
+        delivered_at=None,
         reads=1,
         expected_reads_for_sample=20,
         prep_category=SeqLibraryPrepCategory.READY_MADE_LIBRARY,
@@ -676,6 +686,7 @@ def test_raw_data_case_pass_qc_read_based_not_rml_passes():
     # GIVEN a raw-data non rml sample with enough reads
     sample: Sample = create_autospec(
         Sample,
+        delivered_at=None,
         reads=10,
         expected_reads_for_sample=10,
         sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
@@ -715,6 +726,7 @@ def test_raw_data_case_pass_qc_hifi_yield_based_passes():
     # GIVEN a raw-data yield based sample with enough HiFi yield
     sample: Sample = create_autospec(
         Sample,
+        delivered_at=None,
         hifi_yield=10,
         expected_hifi_yield=10,
         sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
@@ -752,7 +764,7 @@ def test_raw_data_case_pass_qc_hifi_yield_based_fails():
 
 def test_raw_data_case_pass_qc_sample_run_metrics_missing():
     # GIVEN a raw-data sample without sample run metrics
-    sample: Sample = create_autospec(Sample, sample_run_metrics=[])
+    sample: Sample = create_autospec(Sample, delivered_at=None, sample_run_metrics=[])
 
     # GIVEN a case with the sample above
     case: Case = create_autospec(Case, samples=[sample])
@@ -768,12 +780,17 @@ def test_raw_data_yield_based_case_pass_qc_second_sample_missing_sample_run_metr
     # GIVEN two raw-data samples, the second sample is missing sample_run_metrics
     sample_1: Sample = create_autospec(
         Sample,
+        delivered_at=None,
         hifi_yield=10,
         expected_hifi_yield=10,
         sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
     )
     sample_2: Sample = create_autospec(
-        Sample, hifi_yield=None, expected_hifi_yield=10, sample_run_metrics=[]
+        Sample,
+        delivered_at=None,
+        hifi_yield=None,
+        expected_hifi_yield=10,
+        sample_run_metrics=[],
     )
 
     # GIVEN a case with the samples above
@@ -806,4 +823,88 @@ def test_raw_data_read_based_case_pass_qc_second_sample_missing_sample_run_metri
     passes = raw_data_case_pass_qc(case)
 
     # THEN the case fails QC
+    assert not passes
+
+
+def test_raw_data_case_pass_qc_negative_control_read_based():
+    # GIVEN a read based negative control
+    sample: Sample = create_autospec(
+        Sample,
+        control="negative",
+        delivered_at=None,
+        reads=1,
+        expected_reads_for_sample=10,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
+    )
+
+    # GIVEN a case with the sample above
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN checking if the cases passes sequencing QC
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case should pass QC
+    assert passes
+
+
+def test_raw_data_case_pass_qc_negative_control_read_based_zero_reads():
+    # GIVEN a read based negative control with zero reads
+    sample: Sample = create_autospec(
+        Sample,
+        control="negative",
+        delivered_at=None,
+        reads=0,
+        expected_reads_for_sample=10,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
+    )
+
+    # GIVEN a case with the sample above
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN checking if the cases passes sequencing QC
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case should not pass QC
+    assert not passes
+
+
+def test_raw_data_case_pass_qc_negative_control_hifi_yield_based():
+    # GIVEN a read based negative control
+    sample: Sample = create_autospec(
+        Sample,
+        control="negative",
+        delivered_at=None,
+        hifi_yield=1,
+        expected_hifi_yield=10,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
+    )
+
+    # GIVEN a case with the sample above
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN checking if the cases passes sequencing QC
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case should pass QC
+    assert passes
+
+
+def test_raw_data_case_pass_qc_negative_control_hifi_yield_based_zero_hifi_yield():
+    # GIVEN a read based negative control
+    sample: Sample = create_autospec(
+        Sample,
+        control="negative",
+        delivered_at=None,
+        hifi_yield=0,
+        expected_hifi_yield=10,
+        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
+    )
+
+    # GIVEN a case with the sample above
+    case: Case = create_autospec(Case, samples=[sample])
+
+    # WHEN checking if the cases passes sequencing QC
+    passes = raw_data_case_pass_qc(case)
+
+    # THEN the case should not pass QC
     assert not passes
