@@ -25,32 +25,35 @@ class CaseDeliverablesFileCreator:
         - write the result to file_path (analysis dir)
         """
         template: list[dict[str, Any]] = read_yaml(pipeline_deliverables)
-        output: list[dict] = []
+        result: list[dict] = []
 
         case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
-        samples: list[Sample] = case.samples
-        """
-        {
-            "PATHTOCASE": case_directory,
-            "SAMPLE"
-        }
-        """
+        case_replacements = {"CASEID": case.internal_id, "PATHTOCASE": case_directory.as_posix()}
 
-        for dictionary in template:
-            # TODO if dictionary contains SAMPLEID or SAMPLENAME
-            # for sample in samples
-            #     take every occurence of SAMPLEID and replace it with sample_internal_id
-            #     do the same for SAMPLENAME
-            #     expand dictionary with entries for every sample
-
+        for file_type_dict in template:
             replaced_dictionary = {}
-            if dictionary["id"] == "SAMPLEID":
+            if file_type_dict["id"] == "SAMPLEID":
+                for sample in case.samples:
+                    sample_replacements = {
+                        **case_replacements,
+                        "SAMPLENAME": sample.name,
+                        "SAMPLEID": sample.internal_id,
+                    }
+                    result.append(
+                        self._transform_dict(old_dict=file_type_dict, replacements=sample_replacements))
+            else:
+                result.append(self._transform_dict(old_dict=file_type_dict, replacements=case_replacements))
+
+
+
+
+                """-----"""
                 for sample in samples:
                     sample_dict = {}
-                    for key, value in dictionary.items():
+                    for key, value in file_type_dict.items():
                         if isinstance(value, str):
                             sample_dict[key] = (
-                                dictionary[key]
+                                file_type_dict[key]
                                 .replace("SAMPLENAME", sample.name)
                                 .replace("SAMPLEID", sample.internal_id)
                                 .replace("CASEID", case.internal_id)
@@ -71,7 +74,7 @@ class CaseDeliverablesFileCreator:
                     output.append(sample_dict)
             else:
                 case_dict = {}
-                for key, value in dictionary.items():
+                for key, value in file_type_dict.items():
                     if isinstance(value, list):
                         case_dict[key] = [
                             path.replace("CASEID", case_id).replace(
