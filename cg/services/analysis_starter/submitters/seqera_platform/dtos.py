@@ -2,6 +2,7 @@ from pydantic import BaseModel
 
 
 class LaunchRequest(BaseModel):
+    id: str | None = None
     computeEnvId: str
     configProfiles: list[str]
     configText: str

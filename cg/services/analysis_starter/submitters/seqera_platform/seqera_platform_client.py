@@ -24,11 +24,11 @@ class SeqeraPlatformClient:
         url = f"{self.base_url}/workflow/launch"
         params: dict = {"workspaceId": self.workspace_id}
         LOG.debug(
-            f"Sending request body {request.model_dump()} \n Headers: {self.auth_headers} \n Params: {params}"
+            f"Sending request body {request.model_dump(exclude_none=True)} \n Headers: {self.auth_headers} \n Params: {params}"
         )
         response: requests.Response = requests.post(
             headers=self.auth_headers,
-            json=request.model_dump(),
+            json=request.model_dump(exclude_none=True),
             params=params,
             url=url,
         )

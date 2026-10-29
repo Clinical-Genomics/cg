@@ -1,6 +1,8 @@
 from pathlib import Path
 
-from cg.exc import AnalysisAlreadyCompletedError, MissingConfigFilesError
+from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
+from cg.exc import AnalysisAlreadyCompletedError, MissingConfigFilesError, SeqeraError
 from cg.models.cg_config import CommonAppConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
@@ -28,6 +30,7 @@ class NextflowConfigurator(Configurator):
         pipeline_config: CommonAppConfig,
         sample_sheet_creator: SampleSheetCreator,
         store: Store,
+        trailblazer_api: TrailblazerAPI,
         pipeline_extension: PipelineExtension = PipelineExtension(),
     ):
         self.root_dir: str = pipeline_config.root
@@ -38,6 +41,7 @@ class NextflowConfigurator(Configurator):
         self.config_profiles = [pipeline_config.profile]
         self.pre_run_script = pipeline_config.pre_run_script
         self.store: Store = store
+        self.trailblazer_api: TrailblazerAPI = trailblazer_api
         self.config_file_creator = config_file_creator
         self.pipeline_extension = pipeline_extension
         self.sample_sheet_creator = sample_sheet_creator
@@ -87,11 +91,11 @@ class NextflowConfigurator(Configurator):
             workflow=self.store.get_case_workflow(case_id),
         )
         config: NextflowCaseConfig = self._set_flags(config=config, **flags)
-        config = self._set_session_id(config)
+        config = self._set_resume_ids(config)
         self._ensure_required_config_files_exist(config)
         return config
 
-    def _set_session_id(self, config: NextflowCaseConfig) -> NextflowCaseConfig:
+    def _set_resume_ids(self, config: NextflowCaseConfig) -> NextflowCaseConfig:
         new_config: NextflowCaseConfig = config.model_copy()
         if config.resume:
             analysis: Analysis = self.store.get_latest_started_analysis_for_case(
@@ -101,7 +105,19 @@ class NextflowConfigurator(Configurator):
                 raise AnalysisAlreadyCompletedError(
                     "Resume not possible for an already completed analysis"
                 )
+            tb_analysis: TrailblazerAnalysis | None = self.trailblazer_api.get_latest_analysis(
+                case_id=new_config.case_id
+            )
+            if (
+                not tb_analysis
+                or tb_analysis.id != analysis.trailblazer_id
+                or not tb_analysis.tower_workflow_id
+            ):
+                raise SeqeraError(
+                    f"No matching Tower workflow found for the latest analysis of {new_config.case_id}"
+                )
             new_config.session_id = analysis.session_id
+            new_config.workflow_id = tb_analysis.tower_workflow_id
         return new_config
 
     def _get_config_file_path(self, case_id: str) -> Path:

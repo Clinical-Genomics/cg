@@ -8,9 +8,10 @@ import pytest
 from pytest_mock import MockerFixture
 
 from cg.apps.demultiplex.sample_sheet.sample_sheet_creator import SampleSheetCreator
+from cg.apps.tb import TrailblazerAPI
 from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
-from cg.exc import AnalysisAlreadyCompletedError, MissingConfigFilesError
+from cg.exc import AnalysisAlreadyCompletedError, MissingConfigFilesError, SeqeraError
 from cg.models.cg_config import (
     CommonAppConfig,
     NalloConfig,
@@ -124,6 +125,7 @@ def test_get_config_uses_configured_case_and_work_directories(
     store_mock.get_case_priority = Mock(return_value=SlurmQos.NORMAL)
     pipeline_extension = create_autospec(PipelineExtension)
     configurator = NextflowConfigurator(
+        trailblazer_api=create_autospec(TrailblazerAPI),
         config_file_creator=create_autospec(NextflowConfigFileCreator),
         params_file_creator=create_autospec(RarediseaseParamsFileCreator),
         pipeline_config=pipeline_config,
@@ -182,6 +184,7 @@ def test_get_config_missing_required_files(mocker: MockerFixture):
 
     # GIVEN a nextflow configurator
     configurator = NextflowConfigurator(
+        trailblazer_api=create_autospec(TrailblazerAPI),
         config_file_creator=config_file_creator,
         params_file_creator=params_file_creator,
         pipeline_config=pipeline_config,
@@ -261,7 +264,12 @@ def test_get_config_resume(
     nextflow_case_id: str, raredisease_configurator: NextflowConfigurator, mocker: MockerFixture
 ):
     # GIVEN a Nextflow Configurator with a case and a
-    analysis: Analysis = create_autospec(Analysis, session_id="session_id", completed_at=None)
+    analysis: Analysis = create_autospec(
+        Analysis, session_id="session_id", completed_at=None, trailblazer_id=123
+    )
+    raredisease_configurator.trailblazer_api.get_latest_analysis.return_value = SimpleNamespace(
+        id=123, tower_workflow_id="previous_workflow_id"
+    )
     raredisease_configurator.store.get_latest_started_analysis_for_case = Mock(
         return_value=analysis
     )
@@ -280,6 +288,7 @@ def test_get_config_resume(
     # THEN the resume attribute is True and the session id is as expected
     assert case_config.resume is True
     assert case_config.session_id == "session_id"
+    assert case_config.workflow_id == "previous_workflow_id"
 
 
 def test_get_config_resume_already_completed_analysis(
@@ -410,6 +419,7 @@ def test_configure(
 
     # GIVEN a nextflow configurator
     configurator = NextflowConfigurator(
+        trailblazer_api=create_autospec(TrailblazerAPI),
         config_file_creator=config_file_creator,
         params_file_creator=params_file_creator,
         pipeline_config=pipeline_config,
@@ -467,3 +477,29 @@ def test_configure(
     pipeline_extension.configure.assert_called_once_with(
         case_id=case_id, case_run_directory=case_run_directory
     )
+
+
+@pytest.mark.parametrize(
+    "tb_analysis",
+    [
+        None,
+        SimpleNamespace(id=456, tower_workflow_id="other_workflow"),
+        SimpleNamespace(id=123, tower_workflow_id=None),
+    ],
+)
+def test_get_config_resume_without_matching_analysis(
+    tb_analysis,
+    nextflow_case_id: str,
+    raredisease_configurator: NextflowConfigurator,
+):
+    # GIVEN a StatusDB analysis without a matching Tower workflow in Trailblazer
+    raredisease_configurator.store.get_latest_started_analysis_for_case = Mock(
+        return_value=create_autospec(
+            Analysis, session_id="session_id", completed_at=None, trailblazer_id=123
+        )
+    )
+    raredisease_configurator.trailblazer_api.get_latest_analysis.return_value = tb_analysis
+
+    # WHEN getting the resume configuration, THEN it fails before submission
+    with pytest.raises(SeqeraError, match="No matching Tower workflow"):
+        raredisease_configurator.get_config(case_id=nextflow_case_id, resume=True)

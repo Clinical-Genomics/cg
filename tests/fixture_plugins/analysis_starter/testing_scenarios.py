@@ -4,6 +4,7 @@ from typing import NamedTuple
 import pytest
 from mock import create_autospec
 
+from cg.apps.tb import TrailblazerAPI
 from cg.constants import Workflow
 from cg.models.cg_config import (
     CommonAppConfig,
@@ -120,6 +121,7 @@ def configurator_scenario(
         nextflow_config_dict: dict = get_nextflow_config_dict(workflow)
 
         configurator = NextflowConfigurator(
+            trailblazer_api=create_autospec(TrailblazerAPI),
             config_file_creator=create_autospec(NextflowConfigFileCreator),
             params_file_creator=create_autospec(scenario.params_file_creator),
             pipeline_extension=create_autospec(scenario.pipeline_extension),
