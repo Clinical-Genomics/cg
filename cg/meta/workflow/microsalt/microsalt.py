@@ -5,7 +5,6 @@ from pathlib import Path
 
 import rich_click as click
 
-from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import EXIT_FAIL, EXIT_SUCCESS, Workflow
 from cg.constants.constants import FileExtensions
 from cg.constants.tb import AnalysisStatus
@@ -15,7 +14,7 @@ from cg.meta.workflow.microsalt.quality_controller import MicroSALTQualityContro
 from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
 from cg.meta.workflow.microsalt.utils import get_most_recent_project_directory
 from cg.models.cg_config import CGConfig
-from cg.store.models import Analysis, Case, Sample
+from cg.store.models import Case, Sample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
