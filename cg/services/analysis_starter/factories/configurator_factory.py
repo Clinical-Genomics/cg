@@ -6,7 +6,7 @@ from cg.apps.lims import LimsAPI
 from cg.apps.scout.scoutapi import ScoutAPI
 from cg.constants import Workflow
 from cg.meta.workflow.fastq import BalsamicFastqHandler, MicrosaltFastqHandler, MipFastqHandler
-from cg.models.cg_config import CGConfig, CommonAppConfig, RarediseaseConfig
+from cg.models.cg_config import CGConfig, CommonAppConfig, RarediseaseConfig, TranaConfig
 from cg.services.analysis_starter.configurator.configurator import Configurator
 from cg.services.analysis_starter.configurator.extensions.nallo import NalloExtension
 from cg.services.analysis_starter.configurator.extensions.pipeline_extension import (
@@ -14,6 +14,7 @@ from cg.services.analysis_starter.configurator.extensions.pipeline_extension imp
 )
 from cg.services.analysis_starter.configurator.extensions.raredisease import RarediseaseExtension
 from cg.services.analysis_starter.configurator.extensions.tomte_extension import TomteExtension
+from cg.services.analysis_starter.configurator.extensions.trana_extension import TranaExtension
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
     BalsamicConfigFileCreator,
 )
@@ -26,6 +27,9 @@ from cg.services.analysis_starter.configurator.file_creators.microsalt_config im
 )
 from cg.services.analysis_starter.configurator.file_creators.mip_dna_config import (
     MIPDNAConfigFileCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.case_deliverables_file_creator import (
+    CaseDeliverablesFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.config_file import (
     NextflowConfigFileCreator,
@@ -233,6 +237,13 @@ class ConfiguratorFactory:
                     workflow
                 )
                 return TomteExtension(gene_panel_file_creator=gene_panel_creator)
+            case Workflow.TRANA_16S | Workflow.TRANA_ITS:
+                case_deliverables_file_creator = CaseDeliverablesFileCreator(self.store)
+                pipeline_config = cast(TranaConfig, self.cg_config.get_pipeline_config(workflow))
+                return TranaExtension(
+                    case_deliverables_file_creator=case_deliverables_file_creator,
+                    trana_pipeline_deliverables=pipeline_config.pipeline_deliverables,
+                )
             case _:
                 return PipelineExtension()
 
