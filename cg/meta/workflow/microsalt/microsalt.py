@@ -15,7 +15,7 @@ from cg.meta.workflow.microsalt.quality_controller import MicroSALTQualityContro
 from cg.meta.workflow.microsalt.quality_controller.models import QualityResult
 from cg.meta.workflow.microsalt.utils import get_most_recent_project_directory
 from cg.models.cg_config import CGConfig
-from cg.store.models import Case, Sample
+from cg.store.models import Analysis, Case, Sample
 from cg.utils import Process
 
 LOG = logging.getLogger(__name__)
@@ -146,15 +146,17 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                     continue
 
                 result: QualityResult = self.quality_checker.quality_control(metrics_file_path)
-                analysis: TrailblazerAnalysis = self.trailblazer_api.get_latest_analysis_strict(
-                    case.internal_id
+                tb_id = (
+                    case.latest_completed_analysis.trailblazer_id
+                    or self.trailblazer_api.get_latest_analysis_strict(case_id=case.internal_id).id
                 )
-                self.trailblazer_api.add_comment(analysis_id=analysis.id, comment=result.summary)
+
+                self.trailblazer_api.add_comment(analysis_id=tb_id, comment=result.summary)
                 if result.passes_qc:
                     cases_to_store.append(case)
                 else:
                     self.trailblazer_api.set_analysis_status(
-                        analysis_id=analysis.id, status=AnalysisStatus.FAILED
+                        analysis_id=tb_id, status=AnalysisStatus.FAILED
                     )
             else:
                 cases_to_store.append(case)
