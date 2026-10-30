@@ -177,32 +177,32 @@ class TrailblazerAPI:
         response = self.query_trailblazer(command="add-pending-analysis", request_body=request_body)
         return TrailblazerAnalysis.model_validate(response)
 
-    def set_analysis_uploaded(self, case_id: str, uploaded_at: datetime) -> None:
+    def set_analysis_uploaded(self, analysis_id: int, uploaded_at: datetime) -> None:
         """Set a uploaded at date for a trailblazer analysis."""
-        request_body = {"case_id": case_id, "uploaded_at": str(uploaded_at)}
+        request_body = {"analysis_id": analysis_id, "uploaded_at": str(uploaded_at)}
 
         LOG.debug(f"Setting analysis uploaded at for {request_body}")
-        LOG.info(f"{case_id} - uploaded at set to {uploaded_at}")
+        LOG.info(f"{analysis_id} - uploaded at set to {uploaded_at}")
         self.query_trailblazer(
             command="set-analysis-uploaded", request_body=request_body, method=APIMethods.PUT
         )
 
-    def set_analysis_status(self, case_id: str, status: str) -> None:
+    def set_analysis_status(self, analysis_id: int, status: str) -> None:
         """Set an analysis to a given status."""
-        request_body = {"case_id": case_id, "status": status}
+        request_body = {"analysis_id": analysis_id, "status": status}
 
         LOG.debug(f"Request body: {request_body}")
-        LOG.info(f"Setting analysis status to {status} for case {case_id}")
+        LOG.info(f"Setting analysis status to {status} for analysis {analysis_id}.")
         self.query_trailblazer(
             command="set-analysis-status", request_body=request_body, method=APIMethods.PUT
         )
 
-    def add_comment(self, case_id: str, comment: str):
+    def add_comment(self, analysis_id: int, comment: str):
         """Adding a comment to a trailblazer analysis."""
-        request_body = {"case_id": case_id, "comment": comment}
+        request_body = {"analysis_id": analysis_id, "comment": comment}
 
         LOG.debug(f"Request body: {request_body}")
-        LOG.info(f"Adding comment: {comment} to case {case_id}")
+        LOG.info(f"Adding comment: {comment} to analysis {analysis_id}")
         self.query_trailblazer(
             command="add-comment", request_body=request_body, method=APIMethods.PUT
         )
