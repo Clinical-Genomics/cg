@@ -153,13 +153,9 @@ def test_store_housekeeper_valid_case(
     context: CGConfig = request.getfixturevalue(f"{workflow}_context")
     hermes_deliverables = request.getfixturevalue(f"{workflow}_hermes_deliverables")
     request.getfixturevalue(f"{workflow}_mock_deliverable_dir")
-    store: Store = context.status_db
 
     # GIVEN a case id
     case_id: str = request.getfixturevalue(f"{workflow}_case_id")
-
-    # GIVEN that case is not already stored in StatusDB
-    assert not store.get_case_by_internal_id(internal_id=case_id).analyses
 
     # mock update_analysis_as_completed_statusdb so we can assert is was called
     mocker.patch.object(AnalysisAPI, "update_analysis_as_completed_statusdb")
@@ -206,9 +202,6 @@ def test_valid_case_already_added(
     # GIVEN a Housekeeper API
     context.housekeeper_api_ = real_housekeeper_api
     context.meta_apis["analysis_api"].housekeeper_api = real_housekeeper_api
-
-    # GIVEN that case is not already stored in StatusDB
-    assert not context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
 
     # mock update_analysis_as_completed_statusdb so we can assert is was called
     mocker.patch.object(AnalysisAPI, "update_analysis_as_completed_statusdb")
@@ -274,9 +267,6 @@ def test_dry_run(
 
     # GIVEN that case is not already stored in Housekeeper
     assert not context.housekeeper_api.bundle(case_id)
-
-    # GIVEN that case is not already stored in StatusDB
-    assert not context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
 
     # WHEN running the store-housekeeper command with dry-run specified
     result = cli_runner.invoke(

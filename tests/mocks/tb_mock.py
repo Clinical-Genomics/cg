@@ -23,9 +23,6 @@ class MockTB:
     def get_latest_analysis(self, case_id: str) -> TrailblazerAnalysis | None:
         return self.get_latest_analysis_response.get(case_id)
 
-    def get_latest_analysis_strict(self, case_id: str) -> TrailblazerAnalysis:
-        return create_autospec(TrailblazerAnalysis, id=1, case_id="case_id")
-
     def get_latest_analysis_status(self, *args, **kwargs) -> None:
         return None
 

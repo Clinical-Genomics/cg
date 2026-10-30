@@ -241,6 +241,12 @@ def qc_microsalt_context(
         data_analysis=Workflow.MICROSALT,
         action=CaseActions.RUNNING,
     )
+    helpers.add_analysis(
+        store=store,
+        trailblazer_id=1,
+        case=microsalt_case_qc_pass,
+        completed_at=datetime.datetime.now(),
+    )
 
     for sample in qc_pass_microsalt_samples[1:]:
         sample_to_add: Sample = helpers.add_sample(

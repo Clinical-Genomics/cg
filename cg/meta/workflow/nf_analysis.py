@@ -295,10 +295,8 @@ class NfAnalysisAPI(AnalysisAPI):
             return
 
         LOG.info("Validating QC metrics")
-        analysis: TrailblazerAnalysis = self.trailblazer_api.get_latest_analysis_strict(
-            case_id=case_id
-        )
-        # TODO
+        case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
+        analysis: Analysis = case.latest_analysis_strict
         try:
             metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
             qc_metrics_raw: dict = ReadFile.get_content_from_file(
@@ -308,23 +306,25 @@ class NfAnalysisAPI(AnalysisAPI):
         except MetricsQCError as error:
             LOG.error(f"QC metrics failed for {case_id}, with: {error}")
             self.trailblazer_api.set_analysis_status(
-                analysis_id=analysis.id, status=AnalysisStatus.FAILED
+                analysis_id=analysis.trailblazer_id, status=AnalysisStatus.FAILED
             )
             samples = self.status_db.get_samples_by_case_id(case_id=case_id)
             for sample in samples:
                 trailblazer_comment = str(error).replace(
                     f"{sample.internal_id} - ", f"{sample.name} ({sample.internal_id}) - "
                 )
-            self.trailblazer_api.add_comment(analysis_id=analysis.id, comment=trailblazer_comment)
+            self.trailblazer_api.add_comment(
+                analysis_id=analysis.trailblazer_id, comment=trailblazer_comment
+            )
             raise MetricsQCError from error
         except CgError as error:
             LOG.error(f"Could not create metrics deliverables file: {error}")
             self.trailblazer_api.set_analysis_status(
-                analysis_id=analysis.id, status=AnalysisStatus.ERROR
+                analysis_id=analysis.trailblazer_id, status=AnalysisStatus.ERROR
             )
             raise CgError from error
         self.trailblazer_api.set_analysis_status(
-            analysis_id=analysis.id, status=AnalysisStatus.COMPLETED
+            analysis_id=analysis.trailblazer_id, status=AnalysisStatus.COMPLETED
         )
 
     def metrics_deliver(self, case_id: str, dry_run: bool):

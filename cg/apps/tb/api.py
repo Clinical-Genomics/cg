@@ -130,13 +130,6 @@ class TrailblazerAPI:
         if response:
             return TrailblazerAnalysis.model_validate(response)
 
-    def get_latest_analysis_strict(self, case_id: str) -> TrailblazerAnalysis:
-        request_body = {
-            "case_id": case_id,
-        }
-        response = self.query_trailblazer(command="get-latest-analysis", request_body=request_body)
-        return TrailblazerAnalysis.model_validate(response)
-
     def get_latest_analysis_status(self, case_id: str) -> str | None:
         latest_analysis = self.get_latest_analysis(case_id=case_id)
         if latest_analysis:
