@@ -17,7 +17,6 @@ from cg.constants.nf_analysis import (
 from cg.constants.scout import RAREDISEASE_CASE_TAGS
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.constants.subject import PlinkSex
-from cg.exc import MultiqcMissingSectionError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.utils.chanjo1 import CoverageMetricsChanjo1, chanjo1_get_sample_coverage
 from cg.models.analysis import NextflowAnalysis
@@ -138,12 +137,12 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
 
     @staticmethod
     def _get_somalier_dict(multiqc_json: MultiqcDataJson) -> dict[str, Any]:
-        if multiqc_json.report_saved_raw_data is None:
-            raise MultiqcMissingSectionError(
-                "Multiqc report is missing section: report_general_stats_data"
-            )
+        raw_data: dict[str, dict] = multiqc_json.report_saved_raw_data or {}
+        if "multiqc_somalier" not in raw_data:
+            LOG.warning("MultiQC report is missing section multiqc_somalier")
+            return {}
 
-        somalier_raw = copy.deepcopy(multiqc_json.report_saved_raw_data["multiqc_somalier"])
+        somalier_raw = copy.deepcopy(raw_data["multiqc_somalier"])
         for sample_id, metrics in somalier_raw.items():
             somalier_raw[sample_id] = {f"somalier_{k}": v for k, v in metrics.items()}
 

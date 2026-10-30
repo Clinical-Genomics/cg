@@ -423,7 +423,3 @@ class MissingNegativeControlError(CgError):
 
 class MultipleNegativeControlsError(CgError):
     """Exception raised when a case has multiple a negative control"""
-
-
-class MultiqcMissingSectionError(CgError):
-    """Exception raised when Multiqc json is missing a section"""
