@@ -7,4 +7,4 @@ class RarediseaseQCMetrics(QCMetrics):
 
     percent_duplication: float
     picard_pct_pf_reads_aligned: float
-    predicted_sex_sex_check: SexOptions  # TODO switch for somalier_sex
+    predicted_sex_sex_check: SexOptions  # TODO switch for somalier_sex, delivery report

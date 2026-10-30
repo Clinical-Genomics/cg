@@ -37,7 +37,7 @@ def expected_wgs_qc_metrics() -> dict[str, dict[str, Any]]:
         "AT_DROPOUT": {"norm": "lt", "threshold": 5},
         "GC_DROPOUT": {"norm": "lt", "threshold": 5},
         "MEDIAN_TARGET_COVERAGE": {"norm": "gt", "threshold": 25},
-        "predicted_sex_sex_check": {"norm": "eq", "threshold": SexOptions.FEMALE},
+        "somalier_sex": {"norm": "eq", "threshold": 2.0},
         "gender": {"norm": "eq", "threshold": SexOptions.FEMALE},
     }
 
@@ -50,7 +50,7 @@ def expected_wes_qc_metrics() -> dict[str, dict[str, Any]]:
         "PCT_TARGET_BASES_10X": {"norm": "gt", "threshold": 0.95},
         "AT_DROPOUT": {"norm": "lt", "threshold": 10},
         "GC_DROPOUT": {"norm": "lt", "threshold": 10},
-        "predicted_sex_sex_check": {"norm": "eq", "threshold": SexOptions.FEMALE},
+        "somalier_sex": {"norm": "eq", "threshold": 2.0},
     }
 
 
@@ -187,6 +187,7 @@ def test_get_qc_conditions_for_workflow(
     )
     status_db = create_autospec(Store)
     status_db.get_sample_by_internal_id = Mock(return_value=sample)
+    status_db.get_sample_by_internal_id_strict = Mock(return_value=sample)
     # GIVEN Raredisease analysis API
     analysis_api: RarediseaseAnalysisAPI = RarediseaseAnalysisAPI(
         config=create_autospec(
