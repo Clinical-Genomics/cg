@@ -505,6 +505,32 @@
                 "X_hom_alt": 68.0,
                 "Y_depth_mean": 13.0,
                 "Y_n": 6.0
+            },
+            "ADM2": {
+                "family_id": "case_id",
+                "paternal_id": 0.0,
+                "maternal_id": 0.0,
+                "sex": 2.0,
+                "phenotype": 1.0,
+                "original_pedigree_sex": "female",
+                "gt_depth_mean": 33.8,
+                "gt_depth_sd": 6.4,
+                "depth_mean": 19.8,
+                "depth_sd": 17.1,
+                "ab_mean": 0.47,
+                "ab_std": 0.3,
+                "n_hom_ref": 2301.0,
+                "n_het": 6240.0,
+                "n_hom_alt": 1452.0,
+                "n_unknown": 7391.0,
+                "p_middling_ab": 0.005,
+                "X_depth_mean": 17.1,
+                "X_n": 142.0,
+                "X_hom_ref": 70.0,
+                "X_het": 4.0,
+                "X_hom_alt": 68.0,
+                "Y_depth_mean": 0.0,
+                "Y_n": 0.0
             }
         }
     }

@@ -76,7 +76,7 @@ def test_parse_analysis(
     assert analysis_model.sample_metrics[sample_id].model_dump() == {
         "percent_duplication": 0.0438,
         "picard_pct_pf_reads_aligned": 0.999729,
-        "predicted_sex_sex_check": SexOptions.FEMALE,
+        "predicted_sex": SexOptions.FEMALE,
     }
 
 
