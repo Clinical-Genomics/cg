@@ -487,7 +487,7 @@ class CustomerView(BaseView):
         "lab_contact": view_user_link,
         "primary_contact": view_user_link,
     }
-    column_searchable_list = ["internal_id", "label", "name"]
+    column_searchable_list = ["internal_id", "label", "name", "primary_contact.name"]
     form_excluded_columns = ["families", "samples", "pools", "orders", "invoices"]
 
 
@@ -962,7 +962,16 @@ class CaseSampleView(BaseView):
         "case": CaseView.view_case_link,
         "sample": SampleView.view_sample_link,
     }
-    column_searchable_list = ["case.internal_id", "case.name", "sample.internal_id"]
+    column_searchable_list = [
+        "case.internal_id",
+        "case.name",
+        "sample.internal_id",
+        "sample.name",
+        "father.internal_id",
+        "father.name",
+        "mother.internal_id",
+        "mother.name",
+    ]
     create_modal = True
     edit_modal = True
     form_ajax_refs = {
@@ -993,7 +1002,7 @@ class UserView(BaseView):
     column_filters = ["is_admin", "order_portal_login", "customers"]
     column_hide_backrefs = False
     column_list = ("name", "email", "is_admin", "order_portal_login", "customers")
-    column_searchable_list = ["name", "email"]
+    column_searchable_list = ["name", "email", "customers.name", "customers.internal_id"]
     create_modal = True
     edit_modal = True
 

@@ -19,6 +19,12 @@ def nextflow_sample_id() -> str:
 
 
 @pytest.fixture
+def trana_control_sample_id() -> str:
+    """Fixture for a Trana control sample id."""
+    return "trana_control_sample_id"
+
+
+@pytest.fixture
 def nextflow_repository() -> str:
     return "https://some_url"
 

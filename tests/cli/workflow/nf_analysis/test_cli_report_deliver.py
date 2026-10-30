@@ -11,10 +11,10 @@ from click.testing import CliRunner
 from cg.cli.workflow.base import workflow as workflow_cli
 from cg.constants import EXIT_SUCCESS, Workflow
 from cg.constants.constants import FileFormat
-from cg.constants.nextflow import NEXTFLOW_WORKFLOWS
 from cg.io.controller import ReadFile
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.models.cg_config import CGConfig
+from tests.conftest import NEXTFLOW_WORKFLOWS
 
 LOG = logging.getLogger(__name__)
 

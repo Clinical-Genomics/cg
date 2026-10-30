@@ -9,7 +9,9 @@ from cg.exc import AnalysisNotReadyError
 from cg.meta.archive.archive import SpringArchiveAPI
 from cg.meta.compress.compress import CompressAPI
 from cg.models.compression_data import CaseCompressionData
-from cg.services.analysis_starter.input_fetcher.implementations.fastq_fetcher import FastqFetcher
+from cg.services.analysis_starter.analysis_input_validator.implementations.fastq_fetcher import (
+    FastqFetcher,
+)
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
