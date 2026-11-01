@@ -18,22 +18,22 @@ class CaseDeliverablesFileCreator:
         pipeline_deliverables: Path,
     ):
         """
-        TODO refine docstring
-        - read the pipeline deliverables file
-        - in that content, replace all placeholders (e.g. SAMPLEID, CASEID, PATHTOCASE, et al)
-        - for SAMPLEID, expand to one row for each sample in the case
-        - write the result to file_path (analysis dir)
+        Create a deliverables file for the given case, based on the provided pipeline deliverables template.
+        The process involves:
+        - read the pipeline deliverables template file
+        - replace all placeholders (e.g. SAMPLEID, SAMPLENAME, CASEID, and PATHTOCASE) with correct values
+        - for sections containing sample information, expand to one entry per sample in the case
+        - write the result to file_path located in the case analysis directory
         """
         template: list[dict[str, Any]] = read_yaml(pipeline_deliverables)
-        result: list[dict] = []
+        content: list[dict] = []
 
         case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
-        case_directory: Path = file_path.parent
-        case_replacements = {"CASEID": case.internal_id, "PATHTOCASE": case_directory.as_posix()}
+        case_replacements = {"CASEID": case.internal_id, "PATHTOCASE": file_path.parent.as_posix()}
 
         for file_type_dict in template:
-            if file_type_dict["id"] == "SAMPLEID":
-                result.extend(
+            if file_type_dict["id"] == "SAMPLEID":  # TODO: We have to revise if this applies
+                content.extend(
                     self._create_transformed_sample_dicts(
                         samples=case.samples,
                         file_type_dict=file_type_dict,
@@ -41,10 +41,10 @@ class CaseDeliverablesFileCreator:
                     )
                 )
             else:
-                result.append(
+                content.append(
                     self._transform_dict(old_dict=file_type_dict, replacements=case_replacements)
                 )
-        write_yaml(content=result, file_path=file_path)
+        write_yaml(content=content, file_path=file_path)
 
     def _create_transformed_sample_dicts(
         self, samples: list[Sample], file_type_dict: dict, case_replacements: dict
