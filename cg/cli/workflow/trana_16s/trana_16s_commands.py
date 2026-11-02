@@ -97,14 +97,13 @@ def start_available(cg_config: CGConfig) -> None:
     if not succeeded:
         raise click.Abort
 
+
 @trana_16s.command("store")
 @ARGUMENT_CASE_ID
 @COMMENT
 @FORCE
 @click.pass_context
-def store(
-    context: click.Context, case_id: str, comment: str | None, force: bool
-) -> None:
+def store(context: click.Context, case_id: str, comment: str | None, force: bool) -> None:
     """
     Store deliverable files in Housekeeper after meeting QC metrics criteria.
 
@@ -114,7 +113,6 @@ def store(
     """
     # TODO: What checks need to be performed before storing, if any?
     #
-
     validate_force_store_option(force=force, comment=comment)
     analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
     try:
