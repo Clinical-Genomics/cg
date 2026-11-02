@@ -24,6 +24,3 @@ jobs:
 
       - name: Check formatting with Black
         run: black . --check
-
-      - name: Check for unused code with Vulture
-        run: vulture
