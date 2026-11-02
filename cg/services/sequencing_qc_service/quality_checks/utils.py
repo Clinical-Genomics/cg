@@ -165,7 +165,7 @@ def raw_data_case_pass_qc(case: Case) -> bool:
         return all(
             (
                 negative_control_sample_has_enough_hifi_yield(sample)
-                if sample.control == ControlOptions.NEGATIVE
+                if sample.is_negative_control
                 else sample_has_enough_hifi_yield(sample)
             )
             for sample in case.samples
@@ -174,7 +174,7 @@ def raw_data_case_pass_qc(case: Case) -> bool:
         return all(
             (
                 negative_control_sample_has_enough_reads(sample)
-                if sample.control == ControlOptions.NEGATIVE
+                if sample.is_negative_control
                 else sample_has_enough_reads(sample)
             )
             for sample in case.samples
@@ -267,7 +267,7 @@ def negative_control_sample_has_enough_reads(sample: Sample) -> bool:
     enough_reads = sample.reads > 0
     if not enough_reads:
         LOG.warning(
-            f"Negative control {sample.internal_id} has {sample.reads} reads - failing QC check."
+            f"Negative control {sample.internal_id} has no reads - failing QC check."
         )
     return enough_reads
 
@@ -313,7 +313,7 @@ def negative_control_sample_has_enough_hifi_yield(sample: Sample) -> bool:
     enough_hifi_yield = sample.hifi_yield > 0
     if not enough_hifi_yield:
         LOG.warning(
-            f"Negative control {sample.internal_id} has {sample.hifi_yield} hifi yield - failing QC check."
+            f"Negative control {sample.internal_id} has 0 hifi yield - failing QC check."
         )
     return enough_hifi_yield
 
