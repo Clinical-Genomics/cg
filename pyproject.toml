@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [project]
 name = "cg"
-version = "88.24.2"
+version = "88.24.3"
 description = "Clinical Genomics command center"
 readme = {file = "README.md", content-type = "text/markdown"}
 homepage = "https://github.com/Clinical-Genomics/cg"
@@ -55,6 +55,7 @@ dependencies = [
 "tabulate",
 "typing_extensions",
 "urllib3",
+"brotli>=1.2.1",
 "genologics",
 "housekeeper == 4.13.15",
 "pydantic-settings>=2.3.3",
