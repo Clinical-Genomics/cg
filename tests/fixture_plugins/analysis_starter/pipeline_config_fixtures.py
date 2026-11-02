@@ -14,6 +14,7 @@ from cg.models.cg_config import (
     SlurmConfig,
     TaxprofilerConfig,
     TomteConfig,
+    TranaConfig,
 )
 
 
@@ -49,6 +50,7 @@ def get_nextflow_config_dict(
             "resources": str(nf_analysis_pipeline_resource_optimisation_path),
             "launch_directory": "path/to/launchdir",
             "workflow_bin_path": "workflow/path",
+            "pre_run_script": "do something",
             "profile": "myprofile",
             "references": "path/to/references",
             "repository": nextflow_repository,
