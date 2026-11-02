@@ -1,6 +1,5 @@
 import logging
 
-from cg.constants.constants import ControlOptions
 from cg.constants.devices import DeviceType
 from cg.constants.priority import Priority
 from cg.constants.sequencing import SeqLibraryPrepCategory
@@ -266,9 +265,7 @@ def negative_control_sample_has_enough_reads(sample: Sample) -> bool:
 
     enough_reads = sample.reads > 0
     if not enough_reads:
-        LOG.warning(
-            f"Negative control {sample.internal_id} has no reads - failing QC check."
-        )
+        LOG.warning(f"Negative control {sample.internal_id} has no reads - failing QC check.")
     return enough_reads
 
 
@@ -312,9 +309,7 @@ def negative_control_sample_has_enough_hifi_yield(sample: Sample) -> bool:
 
     enough_hifi_yield = sample.hifi_yield > 0
     if not enough_hifi_yield:
-        LOG.warning(
-            f"Negative control {sample.internal_id} has 0 hifi yield - failing QC check."
-        )
+        LOG.warning(f"Negative control {sample.internal_id} has 0 hifi yield - failing QC check.")
     return enough_hifi_yield
 
 

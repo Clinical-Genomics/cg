@@ -687,6 +687,7 @@ def test_raw_data_case_pass_qc_read_based_not_rml_passes():
     sample: Sample = create_autospec(
         Sample,
         delivered_at=None,
+        is_negative_control=False,
         reads=10,
         expected_reads_for_sample=10,
         sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
@@ -707,6 +708,7 @@ def test_raw_data_case_pass_qc_read_based_not_rml_fails():
     sample: Sample = create_autospec(
         Sample,
         delivered_at=None,
+        is_negative_control=False,
         reads=10,
         expected_reads_for_sample=20,
         sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
@@ -727,6 +729,7 @@ def test_raw_data_case_pass_qc_hifi_yield_based_passes():
     sample: Sample = create_autospec(
         Sample,
         delivered_at=None,
+        is_negative_control=False,
         hifi_yield=10,
         expected_hifi_yield=10,
         sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
@@ -747,6 +750,7 @@ def test_raw_data_case_pass_qc_hifi_yield_based_fails():
     sample: Sample = create_autospec(
         Sample,
         delivered_at=None,
+        is_negative_control=False,
         hifi_yield=10,
         expected_hifi_yield=20,
         sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
@@ -781,6 +785,7 @@ def test_raw_data_yield_based_case_pass_qc_second_sample_missing_sample_run_metr
     sample_1: Sample = create_autospec(
         Sample,
         delivered_at=None,
+        is_negative_control=False,
         hifi_yield=10,
         expected_hifi_yield=10,
         sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.PACBIO)],
@@ -788,6 +793,7 @@ def test_raw_data_yield_based_case_pass_qc_second_sample_missing_sample_run_metr
     sample_2: Sample = create_autospec(
         Sample,
         delivered_at=None,
+        is_negative_control=False,
         hifi_yield=None,
         expected_hifi_yield=10,
         sample_run_metrics=[],
@@ -808,12 +814,18 @@ def test_raw_data_read_based_case_pass_qc_second_sample_missing_sample_run_metri
     sample_1: Sample = create_autospec(
         Sample,
         delivered_at=None,
+        is_negative_control=False,
         reads=10,
         expected_reads_for_sample=10,
         sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
     )
     sample_2: Sample = create_autospec(
-        Sample, delivered_at=None, reads=0, expected_reads_for_sample=10, sample_run_metrics=[]
+        Sample,
+        delivered_at=None,
+        is_negative_control=False,
+        reads=0,
+        expected_reads_for_sample=10,
+        sample_run_metrics=[],
     )
 
     # GIVEN a case with the samples above
@@ -830,7 +842,7 @@ def test_raw_data_case_pass_qc_negative_control_read_based():
     # GIVEN a read based negative control
     sample: Sample = create_autospec(
         Sample,
-        control="negative",
+        is_negative_control=True,
         delivered_at=None,
         reads=1,
         expected_reads_for_sample=10,
@@ -851,7 +863,7 @@ def test_raw_data_case_pass_qc_negative_control_read_based_zero_reads():
     # GIVEN a read based negative control with zero reads
     sample: Sample = create_autospec(
         Sample,
-        control="negative",
+        is_negative_control=True,
         delivered_at=None,
         reads=0,
         expected_reads_for_sample=10,
@@ -872,7 +884,7 @@ def test_raw_data_case_pass_qc_negative_control_hifi_yield_based():
     # GIVEN a read based negative control
     sample: Sample = create_autospec(
         Sample,
-        control="negative",
+        is_negative_control=True,
         delivered_at=None,
         hifi_yield=1,
         expected_hifi_yield=10,
@@ -893,7 +905,7 @@ def test_raw_data_case_pass_qc_negative_control_zero_hifi_yield():
     # GIVEN a hifi yield based negative control
     sample: Sample = create_autospec(
         Sample,
-        control="negative",
+        is_negative_control=True,
         delivered_at=None,
         hifi_yield=0,
         expected_hifi_yield=10,
@@ -914,7 +926,7 @@ def test_raw_data_case_pass_qc_negative_zero_reads():
     # GIVEN a read based negative control
     sample: Sample = create_autospec(
         Sample,
-        control="negative",
+        is_negative_control=True,
         delivered_at=None,
         reads=0,
         expected_reads_for_sample=10,
