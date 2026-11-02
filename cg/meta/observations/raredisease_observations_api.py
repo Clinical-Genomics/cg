@@ -119,14 +119,9 @@ class RarediseaseObservationsAPI(ObservationsAPI):
             "snv_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[RarediseaseObservationsAnalysisTag.SNV_VCF_LOQUSDB]
             ).first(),
-            "sv_vcf_path": (
-                self.housekeeper_api.files(
-                    version=hk_version.id, tags=[RarediseaseObservationsAnalysisTag.SV_VCF]
-                ).first()
-                if self.analysis_api.get_data_analysis_type(case_id)
-                == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
-                else None
-            ),
+            "sv_vcf_path": self.housekeeper_api.files(
+                version=hk_version.id, tags=[RarediseaseObservationsAnalysisTag.SV_VCF]
+            ).first(),
             "profile_vcf_path": self.housekeeper_api.files(
                 version=hk_version.id, tags=[RarediseaseObservationsAnalysisTag.SNV_VCF]
             ).first(),
@@ -134,7 +129,9 @@ class RarediseaseObservationsAPI(ObservationsAPI):
                 version=hk_version.id, tags=[RarediseaseObservationsAnalysisTag.FAMILY_PED]
             ).first(),
         }
-        return RarediseaseObservationsInputFiles(**get_full_path_dictionary(input_files))
+        file_paths: dict[str, str] = get_full_path_dictionary(input_files)
+        LOG.debug(f"Observations input files for case {case_id}: {file_paths}")
+        return RarediseaseObservationsInputFiles(**file_paths)
 
     def delete_case(self, case_id: str) -> None:
         """Delete RAREDISEASE case observations from Loqusdb."""
