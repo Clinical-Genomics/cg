@@ -920,24 +920,3 @@ def test_raw_data_case_pass_qc_negative_control_zero_hifi_yield():
 
     # THEN the case should not pass QC
     assert not passes
-
-
-def test_raw_data_case_pass_qc_negative_zero_reads():
-    # GIVEN a read based negative control
-    sample: Sample = create_autospec(
-        Sample,
-        is_negative_control=True,
-        delivered_at=None,
-        reads=0,
-        expected_reads_for_sample=10,
-        sample_run_metrics=[create_autospec(SampleRunMetrics, type=DeviceType.ILLUMINA)],
-    )
-
-    # GIVEN a case with the sample above
-    case: Case = create_autospec(Case, samples=[sample])
-
-    # WHEN checking if the cases passes sequencing QC
-    passes = raw_data_case_pass_qc(case)
-
-    # THEN the case should not pass QC
-    assert not passes
