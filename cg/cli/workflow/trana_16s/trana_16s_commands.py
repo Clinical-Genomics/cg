@@ -13,6 +13,7 @@ from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
+from cg.services.storing_service.storing_service import StoringService
 
 LOG = logging.getLogger(__name__)
 
@@ -102,8 +103,8 @@ def start_available(cg_config: CGConfig) -> None:
 @ARGUMENT_CASE_ID
 @COMMENT
 @FORCE
-@click.pass_context
-def store(context: click.Context, case_id: str, comment: str | None, force: bool) -> None:
+@click.pass_obj
+def store(cg_config: CGConfig, case_id: str, comment: str | None, force: bool) -> None:
     """
     Store deliverable files in Housekeeper after meeting QC metrics criteria.
 
@@ -114,10 +115,5 @@ def store(context: click.Context, case_id: str, comment: str | None, force: bool
     # TODO: What checks need to be performed before storing, if any?
     # TODO: Create metics QC and validate in a good way
     #
-    validate_force_store_option(force=force, comment=comment)
-    analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
-    try:
-        analysis_api.store(case_id=case_id, comment=comment, dry_run=dry_run, force=force)
-    except Exception as error:
-        LOG.error(repr(error))
-        raise click.Abort()
+    storing_service = StoringService()
+    storing_service.store_pipeline_output(root_directory=cg_config.trana_16s.root, case_id=case_id)

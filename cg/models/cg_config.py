@@ -400,7 +400,7 @@ class TranaConfig(CommonAppConfig):
     repository: str
     resources: str
     revision: str
-    root: str
+    root: Path
     slurm: SlurmConfig
     tower_workflow: str
 
