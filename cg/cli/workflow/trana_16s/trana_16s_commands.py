@@ -7,6 +7,7 @@ from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.cli.workflow.nf_analysis import OPTION_RESUME, OPTION_REVISION
 from cg.constants import Workflow
+from cg.constants.cli_options import COMMENT, FORCE
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
@@ -95,3 +96,29 @@ def start_available(cg_config: CGConfig) -> None:
     succeeded: bool = analysis_starter.start_available()
     if not succeeded:
         raise click.Abort
+
+@trana_16s.command("store")
+@ARGUMENT_CASE_ID
+@COMMENT
+@FORCE
+@click.pass_context
+def store(
+    context: click.Context, case_id: str, comment: str | None, force: bool
+) -> None:
+    """
+    Store deliverable files in Housekeeper after meeting QC metrics criteria.
+
+    Raises:
+        click.Abort: If an error occurs during the deliverables file generation, metrics
+        validation, or storage processes.
+    """
+    # TODO: What checks need to be performed before storing, if any?
+    #
+
+    validate_force_store_option(force=force, comment=comment)
+    analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
+    try:
+        analysis_api.store(case_id=case_id, comment=comment, dry_run=dry_run, force=force)
+    except Exception as error:
+        LOG.error(repr(error))
+        raise click.Abort()
