@@ -112,6 +112,7 @@ def store(context: click.Context, case_id: str, comment: str | None, force: bool
         validation, or storage processes.
     """
     # TODO: What checks need to be performed before storing, if any?
+    # TODO: Create metics QC and validate in a good way
     #
     validate_force_store_option(force=force, comment=comment)
     analysis_api: NfAnalysisAPI = context.obj.meta_apis[MetaApis.ANALYSIS_API]
