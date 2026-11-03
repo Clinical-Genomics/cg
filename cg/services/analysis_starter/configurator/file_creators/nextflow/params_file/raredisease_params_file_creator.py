@@ -97,7 +97,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             verifybamid_svd_ud=verifybamid_files.ud,
         )
 
-    def _get_manta_config(self, case):
+    def _get_manta_config(self, case) -> Path | None:
         return self.express_manta_config if case.priority == Priority.express else None
 
     def _get_gcnvcaller_args(self, prep_category: SeqLibraryPrepCategory, target_bed: str) -> tuple:
