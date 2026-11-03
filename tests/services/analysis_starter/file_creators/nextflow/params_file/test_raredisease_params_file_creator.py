@@ -436,7 +436,6 @@ def test_create_manta_config_depends_on_priority(
     write_yaml_mock = mocker.patch.object(
         raredisease_params_file_creator, "write_yaml_nextflow_style"
     )
-    mocker.patch.object(raredisease_params_file_creator, "write_csv")
     mocker.patch.object(
         raredisease_params_file_creator, "read_yaml", return_value={"workflow": "parameter"}
     )
