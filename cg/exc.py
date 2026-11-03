@@ -415,3 +415,11 @@ class ExternalSampleNotFoundError(CgError):
 
 class SubjectIdMissingError(OrderFormError):
     """Exception raised when the subject_id is missing in the order form"""
+
+
+class MissingNegativeControlError(CgError):
+    """Exception raised when a case is missing a negative control"""
+
+
+class MultipleNegativeControlsError(CgError):
+    """Exception raised when a case has multiple a negative control"""
