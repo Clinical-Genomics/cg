@@ -30,7 +30,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
     def __init__(
         self,
         default_target_bed: str,
-        express_manta_config: Path | None,
+        express_manta_config: Path,
         verifybamid_files_set: VerifybamidSvdFilesSet,
         gcnvcaller_files: dict[str, GCNVCallerFiles],
         references_directory: Path,

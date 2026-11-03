@@ -14,7 +14,6 @@ from cg.models.cg_config import (
     SlurmConfig,
     TaxprofilerConfig,
     TomteConfig,
-    TranaConfig,
 )
 
 
@@ -75,6 +74,7 @@ def get_nextflow_config_dict(
         if workflow == Workflow.RAREDISEASE:
             raredisease_config: dict = {
                 "default_target_bed": "default_target.bed",
+                "express_manta_config": "express_manta_config.ini",
                 "gcnvcaller": {
                     "default_target.bed": {
                         "gcnvcaller_model": "gcnvcaller_model",
@@ -168,6 +168,7 @@ def nallo_config_object(get_nextflow_config_dict: Callable) -> NalloConfig:
 def raredisease_config_object(get_nextflow_config_dict: Callable) -> RarediseaseConfig:
     config: dict = get_nextflow_config_dict(workflow=Workflow.RAREDISEASE)
     config["default_target_bed"] = "twistexomecomprehensive_10.2_hg38_design.bed"
+    config["express_manta_config"] = Path("express_manta_config.ini")
     config["gcnvcaller"] = {
         "twistexomecomprehensive_10.2_hg38_design.bed": {
             "gcnvcaller_model": "tyra/bananks",
