@@ -1,0 +1,24 @@
+{% extends 'admin/model/list.html' %}
+
+{% block tail %}
+    {{ super() }}
+    <script>
+        // If rows are selected, the export button exports only those rows.
+        // If no rows are selected, it exports all rows as usual.
+        const exportButton = document.querySelector('a[title="Export"]');
+
+        exportButton.addEventListener("click", function (event) {
+            const selectedCheckboxes = document.querySelectorAll("input.action-checkbox:checked");
+            if (selectedCheckboxes.length === 0) {
+                return;
+            }
+
+            event.preventDefault();
+            const exportUrl = new URL(exportButton.href);
+            for (const checkbox of selectedCheckboxes) {
+                exportUrl.searchParams.append("selected_id", checkbox.value);
+            }
+            window.location = exportUrl;
+        });
+    </script>
+{% endblock %}

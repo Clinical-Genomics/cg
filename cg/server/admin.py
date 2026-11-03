@@ -1,10 +1,12 @@
 """Module for Flask-Admin views"""
 
+from collections.abc import Callable
 from gettext import gettext
 
 from flask import flash, redirect, request, session, url_for
 from flask_admin.actions import action
 from flask_admin.contrib.sqla import ModelView
+from flask_admin.contrib.sqla.tools import get_query_for_ids
 from flask_dance.contrib.google import google
 from markupsafe import Markup, escape
 from sqlalchemy import inspect
@@ -21,7 +23,30 @@ from cg.utils.number_formatter import Si
 
 
 class BaseView(ModelView):
-    """Base for the specific views."""
+    """Base for the specific views. The export button exports the selected rows, if any are selected."""
+
+    can_export = True
+    # Flask-Admin's descriptor for this attribute is untyped, declare the type it actually has
+    column_formatters: dict[str, Callable]
+    # Adds the ids of the selected rows to the export button's URL
+    list_template = "admin/model/export_selected_list.html"
+    # Export raw values instead of the HTML links produced by column_formatters
+    column_formatters_export = {}
+
+    def get_query(self):
+        query = super().get_query()
+        if request.endpoint == f"{self.endpoint}.export":
+            if selected_ids := request.args.getlist("selected_id"):
+                query = get_query_for_ids(query, self.model, selected_ids)
+        return query
+
+    def get_export_value(self, model, name):
+        """Export raw values, but use the formatter for columns that only exist through one."""
+        formatter = self.column_formatters.get(name)
+        if formatter and not hasattr(model, name):
+            value = formatter(self, None, model, name)
+            return Markup(value or "").striptags()
+        return super().get_export_value(model, name)
 
     def is_accessible(self):
         user = db.get_user_by_email(email=session.get("user_email"))
@@ -672,7 +697,6 @@ class AnalysisView(BaseView):
 class IlluminaFlowCellView(BaseView):
     """Admin view for Model.IlluminaSequencingRun"""
 
-    can_export = True
     column_list = (
         "internal_id",
         "model",
@@ -954,7 +978,6 @@ class SampleView(BaseView):
 class CaseSampleView(BaseView):
     """Admin view for Model.caseSample"""
 
-    can_export = True
     column_default_sort = ("created_at", True)
     column_editable_list = ["should_deliver_sample", "status"]
     column_filters = ["should_deliver_sample", "status"]
@@ -1009,7 +1032,6 @@ class UserView(BaseView):
 
 class IlluminaSampleSequencingMetricsView(BaseView):
 
-    can_export = True
     column_list = [
         "flow_cell",
         "sample",
@@ -1031,7 +1053,6 @@ class IlluminaSampleSequencingMetricsView(BaseView):
 class PacbioSmrtCellMetricsView(BaseView):
     """Admin view for Model.PacbioSMRTCell"""
 
-    can_export = True
     column_list = (
         "internal_id",
         "sequencing_run.run_name",
@@ -1107,7 +1128,6 @@ class PacbioSmrtCellMetricsView(BaseView):
 
 class PacbioSampleRunMetricsView(BaseView):
 
-    can_export = True
     column_filters = [
         "instrument_run.plate",
         "instrument_run.sequencing_run.run_id",
