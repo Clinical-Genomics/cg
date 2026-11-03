@@ -70,7 +70,7 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         self, case_id: str, case_path: Path, sample_sheet_path: Path
     ) -> RarediseaseParameters:
         """Return case-specific parameters for the analysis."""
-        case = self.store.get_case_by_internal_id_strict(case_id)
+        case: Case = self.store.get_case_by_internal_id_strict(case_id)
         prep_category: SeqLibraryPrepCategory = self._get_arbitrary_prep_category_in_case(case_id)
         target_bed: str = self._get_target_bed(case)
         manta_config: Path | None = self._get_manta_config(case)
