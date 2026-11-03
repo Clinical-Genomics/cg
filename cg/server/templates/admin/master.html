@@ -33,6 +33,8 @@
         }
     </style>
     <script>
+
+    // --- Type directly in searchbar ---
     document.addEventListener('keydown', function (e) {
       /* Gets search field if there is one. */
       const search = document.querySelector('input[name="search"]');
@@ -49,6 +51,42 @@
 
       /* Glues the typing to search field. */
       search.focus();
+    });
+
+    // --- Shift-Select Checkboxes ---
+    document.addEventListener('DOMContentLoaded', function () {
+      let lastChecked = null;
+
+      // Listen for clicks on the table body inside your scrolled box container
+      const tableBody = document.querySelector('#no-more-tables tbody');
+      if (!tableBody) return;
+
+      tableBody.addEventListener('click', function (e) {
+        const target = e.target;
+
+        // Target Flask-Admin row checkboxes specifically
+        if (!target.classList.contains('action-checkbox')) return;
+
+        // If shift key is held and user has already clicked a row checkbox during this session
+        if (e.shiftKey && lastChecked) {
+          const checkboxes = Array.from(tableBody.querySelectorAll('.action-checkbox'));
+          const start = checkboxes.indexOf(target);
+          const end = checkboxes.indexOf(lastChecked);
+
+          // Get all checkboxes sitting between the boundaries of the selection range
+          const range = checkboxes.slice(Math.min(start, end), Math.max(start, end) + 1);
+
+          range.forEach(checkbox => {
+            checkbox.checked = target.checked;
+
+            // Dispatches change event to alert Flask-Admin's master action menu counters
+            checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+          });
+        }
+
+        // Track this checkbox as the starting anchor for the next potential shift-click
+        lastChecked = target;
+      });
     });
     </script>
 {% endblock %}
