@@ -304,7 +304,7 @@ class RarediseaseConfig(CommonAppConfig):
     conda_env: str
     config: str
     default_target_bed: str
-    express_manta_config: Path | None = None
+    express_manta_config: Path
     gcnvcaller: dict[str, GCNVCallerFiles]
     launch_directory: str
     params: str

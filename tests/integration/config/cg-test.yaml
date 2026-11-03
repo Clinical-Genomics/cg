@@ -192,6 +192,7 @@ raredisease:
   conda_env: raredisease_conda_env
   config: {test_root_dir}/raredisease_config.config
   default_target_bed: twistexomecomprehensive_10.2_hg38_design.bed
+  express_manta_config: {test_root_dir}/express_manta_config.ini
   gcnvcaller:
     twistexomecomprehensive_10.2_hg38_design.bed:
       gcnvcaller_model: {test_root_dir}/tyra/bananks
