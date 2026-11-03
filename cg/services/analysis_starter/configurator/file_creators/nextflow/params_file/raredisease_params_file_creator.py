@@ -2,13 +2,11 @@ import logging
 from pathlib import Path
 
 from cg.apps.lims import LimsAPI
-from cg.constants import FileExtensions
 from cg.constants.constants import BedVersionGenomeVersion
 from cg.constants.priority import Priority
 from cg.constants.scout import ScoutExportFileName
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.exc import CgDataError
-from cg.io.csv import write_csv
 from cg.io.yaml import read_yaml, write_yaml_nextflow_style
 from cg.models.cg_config import GCNVCallerFiles, VerifybamidSvdFiles, VerifybamidSvdFilesSet
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
@@ -74,7 +72,6 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
         prep_category: SeqLibraryPrepCategory = self._get_arbitrary_prep_category_in_case(case_id)
         target_bed: str = self._get_target_bed(case)
         manta_config: Path | None = self._get_manta_config(case)
-        sample_mapping_file: Path = self._create_sample_mapping_file(case=case, case_path=case_path)
         verifybamid_files: VerifybamidSvdFiles = self._get_verifybamid_files(prep_category)
         skip_tools, gcnvcaller_model, ploidy_model, readcount_intervals = self._get_gcnvcaller_args(
             prep_category=prep_category, target_bed=target_bed
@@ -87,7 +84,6 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             ploidy_model=ploidy_model,
             readcount_intervals=readcount_intervals,
             manta_config=manta_config,
-            sample_id_map=sample_mapping_file,
             skip_tools=skip_tools,
             target_bed=Path(self.references_directory, target_bed),
             vcfanno_extra_resources=f"{case_path}/{ScoutExportFileName.MANAGED_VARIANTS}",
@@ -144,13 +140,3 @@ class RarediseaseParamsFileCreator(ParamsFileCreator):
             return bed_version.filename
         else:
             return self.default_target_bed
-
-    def _create_sample_mapping_file(self, case: Case, case_path: Path) -> Path:
-        """Create a sample mapping file for the case and returns its path."""
-        file_path = Path(case_path, f"{case.internal_id}_customer_internal_mapping").with_suffix(
-            FileExtensions.CSV
-        )
-        content: list[list[str]] = [["customer_id", "internal_id"]]
-        content.extend([sample.name, sample.internal_id] for sample in case.samples)
-        write_csv(file_path=file_path, content=content)
-        return file_path

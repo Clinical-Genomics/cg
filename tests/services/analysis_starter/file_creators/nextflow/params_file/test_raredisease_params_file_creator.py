@@ -76,22 +76,21 @@ def test_create_on_lims_capture_kit_availability(
     mocker: MockerFixture,
 ):
     # GIVEN a file path
-    file_path = Path("some_path", "file_name.yaml")
+    file_path = Path("some_path", "params_file.yaml")
 
     # GIVEN case id
     case_id = "case_id"
 
     # GIVEN a store containing a case with a linked sample. Also contains a bed version.
-    super_sample = create_autospec(
+    sample: Sample = create_autospec(
         Sample,
         from_sample=None,
         internal_id="ACC",
         prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
     )
-    super_sample.name = "sample_name"
-    case = create_autospec(Case, internal_id=case_id, samples=[super_sample])
+    case: Case = create_autospec(Case, internal_id=case_id, samples=[sample])
     store_mock: Store = create_autospec(Store)
-    store_mock.get_samples_by_case_id = Mock(return_value=[super_sample])
+    store_mock.get_samples_by_case_id = Mock(return_value=[sample])
     store_mock.get_case_by_internal_id_strict = Mock(return_value=case)
     store_mock.get_bed_version_by_short_name_and_genome_version_strict = (
         lambda short_name, genome_version: (
@@ -115,7 +114,7 @@ def test_create_on_lims_capture_kit_availability(
         store=store_mock,
         references_directory=Path("/some/full/path/"),
         lims=lims,
-        params="Path_to_file.yaml",
+        params="params_in_servers.yaml",
     )
 
     # GIVEN sample sheet path
@@ -125,7 +124,6 @@ def test_create_on_lims_capture_kit_availability(
     write_yaml_mock = mocker.patch.object(
         raredisease_params_file_creator, "write_yaml_nextflow_style"
     )
-    write_csv_mock = mocker.patch.object(raredisease_params_file_creator, "write_csv")
     mocker.patch.object(raredisease_params_file_creator, "read_yaml", return_value={"Key": "Value"})
 
     # WHEN creating the params file
@@ -143,7 +141,6 @@ def test_create_on_lims_capture_kit_availability(
             "analysis_type": "wgs",
             "input": Path("root/samplesheet.csv"),
             "outdir": Path("some_path"),
-            "sample_id_map": Path("some_path/case_id_customer_internal_mapping.csv"),
             "skip_tools": "germlinecnvcaller",
             "target_bed": expected_bed_short_name,
             "vcfanno_extra_resources": "some_path/managed_variants.vcf",
@@ -153,11 +150,6 @@ def test_create_on_lims_capture_kit_availability(
             "verifybamid_svd_ud": ANY,
         },
     )
-    # THEN auxiliary file is written and with the correct content
-    write_csv_mock.assert_called_once_with(
-        content=[["customer_id", "internal_id"], ["sample_name", "ACC"]],
-        file_path=Path("some_path", f"{case_id}_customer_internal_mapping.csv"),
-    )
 
 
 def test_create_wgs(
@@ -166,22 +158,21 @@ def test_create_wgs(
     mocker: MockerFixture,
 ):
     # GIVEN a file path
-    file_path = Path("some_path", "file_name.yaml")
+    file_path = Path("some_path", "params_file.yaml")
 
     # GIVEN case id
     case_id = "case_id"
 
     # GIVEN a store containing a case with a linked sample. Also contains a bed version.
-    super_sample = create_autospec(
+    sample: Sample = create_autospec(
         Sample,
         from_sample=None,
         internal_id="ACC",
         prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
     )
-    super_sample.name = "sample_name"
-    case = create_autospec(Case, internal_id=case_id, samples=[super_sample])
+    case: Case = create_autospec(Case, internal_id=case_id, samples=[sample])
     store_mock: Store = create_autospec(Store)
-    store_mock.get_samples_by_case_id = Mock(return_value=[super_sample])
+    store_mock.get_samples_by_case_id = Mock(return_value=[sample])
     store_mock.get_case_by_internal_id_strict = Mock(return_value=case)
     store_mock.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(BedVersion, filename="bed_version.bed")
@@ -201,7 +192,7 @@ def test_create_wgs(
         store=store_mock,
         references_directory=Path("/some/full/path/"),
         lims=lims,
-        params="Path_to_file.yaml",
+        params="params_in_servers.yaml",
     )
 
     # GIVEN sample sheet path
@@ -211,7 +202,6 @@ def test_create_wgs(
     write_yaml_mock = mocker.patch.object(
         raredisease_params_file_creator, "write_yaml_nextflow_style"
     )
-    write_csv_mock = mocker.patch.object(raredisease_params_file_creator, "write_csv")
     mocker.patch.object(raredisease_params_file_creator, "read_yaml", return_value={"Key": "Value"})
 
     # WHEN creating the params file
@@ -230,7 +220,6 @@ def test_create_wgs(
             "input": Path("root/samplesheet.csv"),
             "outdir": Path("some_path"),
             "skip_tools": "germlinecnvcaller",
-            "sample_id_map": Path("some_path/case_id_customer_internal_mapping.csv"),
             "target_bed": ANY,
             "vcfanno_extra_resources": "some_path/managed_variants.vcf",
             "vep_filters_scout_fmt": "some_path/gene_panels.bed",
@@ -238,11 +227,6 @@ def test_create_wgs(
             "verifybamid_svd_mu": Path("some/cow.mu"),
             "verifybamid_svd_ud": Path("some/department_of_external_affairs.UD"),
         },
-    )
-    # THEN auxiliary file is written and with the correct content
-    write_csv_mock.assert_called_once_with(
-        content=[["customer_id", "internal_id"], ["sample_name", "ACC"]],
-        file_path=Path("some_path", f"{case_id}_customer_internal_mapping.csv"),
     )
 
 
@@ -252,22 +236,21 @@ def test_create_wes_gcnvcaller_included(
     mocker: MockerFixture,
 ):
     # GIVEN a file path
-    file_path = Path("some_path", "file_name.yaml")
+    file_path = Path("some_path", "params_file.yaml")
 
     # GIVEN case id
     case_id = "case_id"
 
     # GIVEN a store containing a case with a linked sample. Also contains a bed version.
-    super_sample = create_autospec(
+    sample: Sample = create_autospec(
         Sample,
         from_sample=None,
         internal_id="ACC",
         prep_category=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
     )
-    super_sample.name = "sample_name"
-    case = create_autospec(Case, internal_id=case_id, samples=[super_sample])
+    case: Case = create_autospec(Case, internal_id=case_id, samples=[sample])
     store_mock: Store = create_autospec(Store)
-    store_mock.get_samples_by_case_id = Mock(return_value=[super_sample])
+    store_mock.get_samples_by_case_id = Mock(return_value=[sample])
     store_mock.get_case_by_internal_id_strict = Mock(return_value=case)
     store_mock.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(
@@ -288,7 +271,7 @@ def test_create_wes_gcnvcaller_included(
         references_directory=Path("some_path"),
         store=store_mock,
         lims=lims,
-        params="Path_to_file.yaml",
+        params="params_in_servers.yaml",
     )
 
     # GIVEN sample sheet path
@@ -298,7 +281,6 @@ def test_create_wes_gcnvcaller_included(
     write_yaml_mock = mocker.patch.object(
         raredisease_params_file_creator, "write_yaml_nextflow_style"
     )
-    write_csv_mock = mocker.patch.object(raredisease_params_file_creator, "write_csv")
     mocker.patch.object(raredisease_params_file_creator, "read_yaml", return_value={"Key": "Value"})
 
     # WHEN creating the params file
@@ -319,7 +301,6 @@ def test_create_wes_gcnvcaller_included(
             "outdir": Path("some_path"),
             "ploidy_model": Path("tom/bananks"),
             "readcount_intervals": Path("richard/banankins"),
-            "sample_id_map": Path("some_path/case_id_customer_internal_mapping.csv"),
             "target_bed": ANY,
             "vcfanno_extra_resources": "some_path/managed_variants.vcf",
             "vep_filters_scout_fmt": "some_path/gene_panels.bed",
@@ -329,12 +310,6 @@ def test_create_wes_gcnvcaller_included(
         },
     )
 
-    # THEN auxiliary file is written and with the correct content
-    write_csv_mock.assert_called_once_with(
-        content=[["customer_id", "internal_id"], ["sample_name", "ACC"]],
-        file_path=Path("some_path", f"{case_id}_customer_internal_mapping.csv"),
-    )
-
 
 def test_create_wes_gcnvcaller_bed_version_does_not_match(
     gcnvcaller_files: dict[str, GCNVCallerFiles],
@@ -342,22 +317,21 @@ def test_create_wes_gcnvcaller_bed_version_does_not_match(
     mocker: MockerFixture,
 ):
     # GIVEN a file path
-    file_path = Path("some_path", "file_name.yaml")
+    file_path = Path("some_path", "params_file.yaml")
 
     # GIVEN case id
     case_id = "case_id"
 
     # GIVEN a store containing a case with a linked sample. Also contains a bed version.
-    super_sample = create_autospec(
+    sample = create_autospec(
         Sample,
         from_sample=None,
         internal_id="ACC",
         prep_category=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
     )
-    super_sample.name = "sample_name"
-    case = create_autospec(Case, internal_id=case_id, samples=[super_sample])
+    case: Case = create_autospec(Case, internal_id=case_id, samples=[sample])
     store_mock: Store = create_autospec(Store)
-    store_mock.get_samples_by_case_id = Mock(return_value=[super_sample])
+    store_mock.get_samples_by_case_id = Mock(return_value=[sample])
     store_mock.get_case_by_internal_id_strict = Mock(return_value=case)
     store_mock.get_bed_version_by_short_name_and_genome_version_strict = Mock(
         return_value=create_autospec(BedVersion, filename="non-matching_bed_version.bed")
@@ -376,7 +350,7 @@ def test_create_wes_gcnvcaller_bed_version_does_not_match(
         references_directory=Path("/any/path"),
         store=store_mock,
         lims=lims,
-        params="Path_to_file.yaml",
+        params="params_in_servers.yaml",
     )
 
     # GIVEN sample sheet path
@@ -386,7 +360,6 @@ def test_create_wes_gcnvcaller_bed_version_does_not_match(
     write_yaml_mock = mocker.patch.object(
         raredisease_params_file_creator, "write_yaml_nextflow_style"
     )
-    write_csv_mock = mocker.patch.object(raredisease_params_file_creator, "write_csv")
     mocker.patch.object(raredisease_params_file_creator, "read_yaml", return_value={"Key": "Value"})
 
     # WHEN creating the params file
@@ -404,7 +377,6 @@ def test_create_wes_gcnvcaller_bed_version_does_not_match(
             "analysis_type": SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
             "input": Path("root/samplesheet.csv"),
             "outdir": Path("some_path"),
-            "sample_id_map": Path("some_path/case_id_customer_internal_mapping.csv"),
             "skip_tools": "germlinecnvcaller",
             "target_bed": ANY,
             "vcfanno_extra_resources": "some_path/managed_variants.vcf",
@@ -413,11 +385,6 @@ def test_create_wes_gcnvcaller_bed_version_does_not_match(
             "verifybamid_svd_mu": ANY,
             "verifybamid_svd_ud": ANY,
         },
-    )
-    # THEN auxiliary file is written and with the correct content
-    write_csv_mock.assert_called_once_with(
-        content=[["customer_id", "internal_id"], ["sample_name", "ACC"]],
-        file_path=Path("some_path", f"{case_id}_customer_internal_mapping.csv"),
     )
 
 
@@ -444,7 +411,7 @@ def test_create_manta_config_depends_on_priority(
     mocker: MockerFixture,
 ) -> None:
     # GIVEN a case with the given priority
-    case = create_autospec(Case, samples=[wgs_sample], priority=priority)
+    case: Case = create_autospec(Case, samples=[wgs_sample], priority=priority)
     store: TypedMock[Store] = create_typed_mock(Store)
     store.as_mock.get_samples_by_case_id = Mock(return_value=[wgs_sample])
     store.as_mock.get_case_by_internal_id_strict = Mock(return_value=case)

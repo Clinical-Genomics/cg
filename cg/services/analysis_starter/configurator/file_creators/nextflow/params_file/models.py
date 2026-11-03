@@ -27,7 +27,6 @@ class RarediseaseParameters(WorkflowParameters):
     ploidy_model: Path | None
     readcount_intervals: Path | None
     manta_config: Path | None
-    sample_id_map: Path
     skip_tools: str | None
     target_bed: Path
     vcfanno_extra_resources: str
