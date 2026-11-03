@@ -10,6 +10,8 @@ from cg.cli.workflow.raredisease.base import start as raredisease_start
 from cg.cli.workflow.rnafusion.base import start as rnafusion_start
 from cg.cli.workflow.taxprofiler.base import start as taxprofiler_start
 from cg.cli.workflow.tomte.base import start as tomte_start
+from cg.cli.workflow.trana_16s.trana_16s_commands import start as trana_16s_start
+from cg.cli.workflow.trana_its.trana_its_commands import start as trana_its_start
 from cg.constants import EXIT_SUCCESS
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
@@ -17,8 +19,16 @@ from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 
 @pytest.mark.parametrize(
     "start_command",
-    [nallo_start, raredisease_start, rnafusion_start, taxprofiler_start, tomte_start],
-    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler", "Tomte"],
+    [
+        nallo_start,
+        raredisease_start,
+        rnafusion_start,
+        taxprofiler_start,
+        tomte_start,
+        trana_16s_start,
+        trana_its_start,
+    ],
+    ids=["Nallo", "raredisease", "RNAFUSION", "Taxprofiler", "Tomte", "Trana 16S", "Trana ITS"],
 )
 def test_start_nextflow_calls_service(
     start_command: BaseCommand,

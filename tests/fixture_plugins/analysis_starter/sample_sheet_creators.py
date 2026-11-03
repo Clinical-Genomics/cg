@@ -15,6 +15,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.tomte_sample_sheet_creator import (
     TomteSampleSheetCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.trana_sample_sheet_creator import (
+    TranaSampleSheetCreator,
+)
 from cg.store.models import Case, Sample
 from cg.store.store import Store
 
@@ -65,4 +68,30 @@ def tomte_sample_sheet_creator(
     return TomteSampleSheetCreator(
         store=store,
         housekeeper_api=mock_housekeeper_for_nf_sample_sheet,
+    )
+
+
+@pytest.fixture
+def trana_sample_sheet_creator(
+    mock_housekeeper_for_trana_sample_sheet: HousekeeperAPI,
+    nextflow_case_id: str,
+    nextflow_sample_id: str,
+    trana_control_sample_id: str,
+) -> TranaSampleSheetCreator:
+    store: Store = create_autospec(Store)
+    sample: Sample = create_autospec(
+        Sample, internal_id=nextflow_sample_id, is_negative_control=False
+    )
+    control_sample: Sample = create_autospec(
+        Sample, internal_id=trana_control_sample_id, is_negative_control=True
+    )
+    sample.name = nextflow_sample_id
+    control_sample.name = "control_sample"
+    case: Case = create_autospec(
+        Case, internal_id=nextflow_case_id, samples=[sample, control_sample]
+    )
+    store.get_case_by_internal_id_strict = Mock(return_value=case)
+    return TranaSampleSheetCreator(
+        store=store,
+        housekeeper_api=mock_housekeeper_for_trana_sample_sheet,
     )

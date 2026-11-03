@@ -48,6 +48,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.params_fil
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.tomte_params_file_creator import (
     TomteParamsFileCreator,
 )
+from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.trana_params_file_creator import (
+    TranaParamsFileCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.nallo_sample_sheet_creator import (
     NalloSampleSheetCreator,
 )
@@ -65,6 +68,9 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.tomte_sample_sheet_creator import (
     TomteSampleSheetCreator,
+)
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.trana_sample_sheet_creator import (
+    TranaSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.implementations.balsamic_configurator import (
     BalsamicConfigurator,
@@ -98,29 +104,35 @@ class ConfiguratorFactory:
                 | Workflow.RNAFUSION
                 | Workflow.TAXPROFILER
                 | Workflow.TOMTE
+                | Workflow.TRANA_16S
+                | Workflow.TRANA_ITS
             ):
                 return self._get_nextflow_configurator(workflow)
             case _:
                 raise NotImplementedError
 
     def _get_nextflow_configurator(self, workflow: Workflow) -> NextflowConfigurator:
+        pipeline_config = cast(CommonAppConfig, self.cg_config.get_pipeline_config(workflow))
         config_file_creator: NextflowConfigFileCreator = self._get_nextflow_config_file_creator(
-            workflow
+            pipeline_config
         )
-        params_file_creator: ParamsFileCreator = self._get_params_file_creator(workflow)
+        params_file_creator: ParamsFileCreator = self._get_params_file_creator(
+            workflow=workflow, pipeline_config=pipeline_config
+        )
         sample_sheet_creator: SampleSheetCreator = self._get_sample_sheet_creator(workflow)
         extension: PipelineExtension = self._get_pipeline_extension(workflow)
         return NextflowConfigurator(
             config_file_creator=config_file_creator,
             params_file_creator=params_file_creator,
-            pipeline_config=self._get_pipeline_config(workflow),
+            pipeline_config=pipeline_config,
             sample_sheet_creator=sample_sheet_creator,
             store=self.store,
             pipeline_extension=extension,
         )
 
-    def _get_nextflow_config_file_creator(self, workflow: Workflow) -> NextflowConfigFileCreator:
-        pipeline_config: CommonAppConfig = self._get_pipeline_config(workflow)
+    def _get_nextflow_config_file_creator(
+        self, pipeline_config: CommonAppConfig
+    ) -> NextflowConfigFileCreator:
         return NextflowConfigFileCreator(
             account=pipeline_config.slurm.account,
             platform=pipeline_config.platform,
@@ -129,8 +141,14 @@ class ConfiguratorFactory:
             workflow_config_path=pipeline_config.config,
         )
 
-    def _get_params_file_creator(self, workflow: Workflow) -> ParamsFileCreator:
-        params: str = self._get_pipeline_config(workflow).params
+    def _get_params_file_creator(
+        self, workflow: Workflow, pipeline_config: CommonAppConfig
+    ) -> ParamsFileCreator:
+        params = getattr(pipeline_config, "params", None)
+        if not params:
+            raise NotImplementedError(
+                f"No params in pipeline config {pipeline_config.model_dump()}"
+            )
         match workflow:
             case Workflow.NALLO:
                 return NalloParamsFileCreator(params)
@@ -153,11 +171,10 @@ class ConfiguratorFactory:
                 return TomteParamsFileCreator(
                     lims_api=self.lims_api, params=params, status_db=self.store
                 )
+            case Workflow.TRANA_16S | Workflow.TRANA_ITS:
+                return TranaParamsFileCreator(params)
             case _:
                 raise NotImplementedError(f"There is no params file creator for {workflow}")
-
-    def _get_pipeline_config(self, workflow: Workflow) -> CommonAppConfig:
-        return getattr(self.cg_config, workflow)
 
     def _get_sample_sheet_creator(self, workflow: Workflow) -> SampleSheetCreator:
         match workflow:
@@ -180,6 +197,10 @@ class ConfiguratorFactory:
                 )
             case Workflow.TOMTE:
                 return TomteSampleSheetCreator(
+                    housekeeper_api=self.housekeeper_api, store=self.store
+                )
+            case Workflow.TRANA_16S | Workflow.TRANA_ITS:
+                return TranaSampleSheetCreator(
                     housekeeper_api=self.housekeeper_api, store=self.store
                 )
             case _:
