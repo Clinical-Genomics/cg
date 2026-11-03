@@ -2088,6 +2088,7 @@ def context_config(
             "compute_env": "nf_tower_compute_env",
             "conda_binary": conda_binary,
             "conda_env": "S_raredisease",
+            "express_manta_config": Path("path/to/express_manta_config.ini"),
             "platform": str(nf_analysis_platform_config_path),
             "params": str(nf_analysis_pipeline_params_path),
             "config": str(nf_analysis_pipeline_config_path),

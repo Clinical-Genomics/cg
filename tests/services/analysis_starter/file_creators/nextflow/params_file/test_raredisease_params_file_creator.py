@@ -6,24 +6,20 @@ from mock import ANY
 from pytest_mock import MockerFixture
 
 from cg.apps.lims.api import LimsAPI
-from cg.constants.constants import BedVersionGenomeVersion, Workflow
+from cg.constants.constants import BedVersionGenomeVersion
+from cg.constants.priority import Priority
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.models.cg_config import GCNVCallerFiles, VerifybamidSvdFiles, VerifybamidSvdFilesSet
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file import (
     raredisease_params_file_creator,
-    tomte_params_file_creator,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.abstract import (
-    ParamsFileCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.raredisease_params_file_creator import (
     RarediseaseParamsFileCreator,
 )
-from cg.services.analysis_starter.configurator.file_creators.nextflow.params_file.tomte_params_file_creator import (
-    TomteParamsFileCreator,
-)
 from cg.store.models import BedVersion, Case, Sample
 from cg.store.store import Store
+from tests.matchers import DictContaining, DictNotContaining
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 @pytest.fixture
@@ -52,6 +48,18 @@ def gcnvcaller_files() -> dict[str, GCNVCallerFiles]:
     }
 
 
+@pytest.fixture
+def wgs_sample() -> Sample:
+    sample = create_autospec(
+        Sample,
+        from_sample=None,
+        internal_id="ACC",
+        prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
+    )
+    sample.name = "sample_name"
+    return sample
+
+
 @pytest.mark.parametrize(
     "expected_bed_short_name, lims_capture_kit",
     [
@@ -60,7 +68,7 @@ def gcnvcaller_files() -> dict[str, GCNVCallerFiles]:
     ],
     ids=["Capture kit is in LIMS", "Capture kit not in LIMS"],
 )
-def test_raredisease_params_file_creator_on_lims_capture_kit_availability(
+def test_create_on_lims_capture_kit_availability(
     lims_capture_kit: str | None,
     expected_bed_short_name: str,
     gcnvcaller_files: dict[str, GCNVCallerFiles],
@@ -70,6 +78,9 @@ def test_raredisease_params_file_creator_on_lims_capture_kit_availability(
     # GIVEN a file path
     file_path = Path("some_path", "file_name.yaml")
 
+    # GIVEN case id
+    case_id = "case_id"
+
     # GIVEN a store containing a case with a linked sample. Also contains a bed version.
     super_sample = create_autospec(
         Sample,
@@ -78,7 +89,7 @@ def test_raredisease_params_file_creator_on_lims_capture_kit_availability(
         prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
     )
     super_sample.name = "sample_name"
-    case = create_autospec(Case, samples=[super_sample])
+    case = create_autospec(Case, internal_id=case_id, samples=[super_sample])
     store_mock: Store = create_autospec(Store)
     store_mock.get_samples_by_case_id = Mock(return_value=[super_sample])
     store_mock.get_case_by_internal_id_strict = Mock(return_value=case)
@@ -98,6 +109,7 @@ def test_raredisease_params_file_creator_on_lims_capture_kit_availability(
     # GIVEN a params file creator
     file_creator = RarediseaseParamsFileCreator(
         default_target_bed="default.bed",
+        express_manta_config=Path("/express/manta/config"),
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         store=store_mock,
@@ -105,9 +117,6 @@ def test_raredisease_params_file_creator_on_lims_capture_kit_availability(
         lims=lims,
         params="Path_to_file.yaml",
     )
-
-    # GIVEN case id
-    case_id = "case_id"
 
     # GIVEN sample sheet path
     sample_sheet_path = Path("root", "samplesheet.csv")
@@ -151,13 +160,16 @@ def test_raredisease_params_file_creator_on_lims_capture_kit_availability(
     )
 
 
-def test_raredisease_params_file_creator_wgs(
+def test_create_wgs(
     gcnvcaller_files: dict[str, GCNVCallerFiles],
     verifybamid_files_set: VerifybamidSvdFilesSet,
     mocker: MockerFixture,
 ):
     # GIVEN a file path
     file_path = Path("some_path", "file_name.yaml")
+
+    # GIVEN case id
+    case_id = "case_id"
 
     # GIVEN a store containing a case with a linked sample. Also contains a bed version.
     super_sample = create_autospec(
@@ -167,7 +179,7 @@ def test_raredisease_params_file_creator_wgs(
         prep_category=SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING,
     )
     super_sample.name = "sample_name"
-    case = create_autospec(Case, samples=[super_sample])
+    case = create_autospec(Case, internal_id=case_id, samples=[super_sample])
     store_mock: Store = create_autospec(Store)
     store_mock.get_samples_by_case_id = Mock(return_value=[super_sample])
     store_mock.get_case_by_internal_id_strict = Mock(return_value=case)
@@ -183,6 +195,7 @@ def test_raredisease_params_file_creator_wgs(
 
     file_creator = RarediseaseParamsFileCreator(
         default_target_bed="default.bed",
+        express_manta_config=Path("/express/manta/config"),
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         store=store_mock,
@@ -190,9 +203,6 @@ def test_raredisease_params_file_creator_wgs(
         lims=lims,
         params="Path_to_file.yaml",
     )
-
-    # GIVEN case id
-    case_id = "case_id"
 
     # GIVEN sample sheet path
     sample_sheet_path = Path("root", "samplesheet.csv")
@@ -236,13 +246,16 @@ def test_raredisease_params_file_creator_wgs(
     )
 
 
-def test_raredisease_params_file_creator_wes_gcnvcaller_included(
+def test_create_wes_gcnvcaller_included(
     gcnvcaller_files: dict[str, GCNVCallerFiles],
     verifybamid_files_set: VerifybamidSvdFilesSet,
     mocker: MockerFixture,
 ):
     # GIVEN a file path
     file_path = Path("some_path", "file_name.yaml")
+
+    # GIVEN case id
+    case_id = "case_id"
 
     # GIVEN a store containing a case with a linked sample. Also contains a bed version.
     super_sample = create_autospec(
@@ -252,7 +265,7 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_included(
         prep_category=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
     )
     super_sample.name = "sample_name"
-    case = create_autospec(Case, samples=[super_sample])
+    case = create_autospec(Case, internal_id=case_id, samples=[super_sample])
     store_mock: Store = create_autospec(Store)
     store_mock.get_samples_by_case_id = Mock(return_value=[super_sample])
     store_mock.get_case_by_internal_id_strict = Mock(return_value=case)
@@ -269,6 +282,7 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_included(
     # GIVEN a params file creator
     file_creator = RarediseaseParamsFileCreator(
         default_target_bed="default.bed",
+        express_manta_config=Path("/express/manta/config"),
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         references_directory=Path("some_path"),
@@ -276,9 +290,6 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_included(
         lims=lims,
         params="Path_to_file.yaml",
     )
-
-    # GIVEN case id
-    case_id = "case_id"
 
     # GIVEN sample sheet path
     sample_sheet_path = Path("root", "samplesheet.csv")
@@ -325,13 +336,16 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_included(
     )
 
 
-def test_raredisease_params_file_creator_wes_gcnvcaller_bed_version_does_not_match(
+def test_create_wes_gcnvcaller_bed_version_does_not_match(
     gcnvcaller_files: dict[str, GCNVCallerFiles],
     verifybamid_files_set: VerifybamidSvdFilesSet,
     mocker: MockerFixture,
 ):
     # GIVEN a file path
     file_path = Path("some_path", "file_name.yaml")
+
+    # GIVEN case id
+    case_id = "case_id"
 
     # GIVEN a store containing a case with a linked sample. Also contains a bed version.
     super_sample = create_autospec(
@@ -341,7 +355,7 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_bed_version_does_not_mat
         prep_category=SeqLibraryPrepCategory.WHOLE_EXOME_SEQUENCING,
     )
     super_sample.name = "sample_name"
-    case = create_autospec(Case, samples=[super_sample])
+    case = create_autospec(Case, internal_id=case_id, samples=[super_sample])
     store_mock: Store = create_autospec(Store)
     store_mock.get_samples_by_case_id = Mock(return_value=[super_sample])
     store_mock.get_case_by_internal_id_strict = Mock(return_value=case)
@@ -356,6 +370,7 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_bed_version_does_not_mat
     # GIVEN a params file creator
     file_creator = RarediseaseParamsFileCreator(
         default_target_bed="default.bed",
+        express_manta_config=Path("/express/manta/config"),
         gcnvcaller_files=gcnvcaller_files,
         verifybamid_files_set=verifybamid_files_set,
         references_directory=Path("/any/path"),
@@ -363,9 +378,6 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_bed_version_does_not_mat
         lims=lims,
         params="Path_to_file.yaml",
     )
-
-    # GIVEN case id
-    case_id = "case_id"
 
     # GIVEN sample sheet path
     sample_sheet_path = Path("root", "samplesheet.csv")
@@ -409,89 +421,65 @@ def test_raredisease_params_file_creator_wes_gcnvcaller_bed_version_does_not_mat
     )
 
 
-def test_tomte_params_file_creator(mocker: MockerFixture):
-    # GIVEN statusDB and connection to the LIMS API
-    status_db: Store = create_autospec(Store)
-    status_db.get_sample_ids_by_case_id = Mock(return_value=["sample_1", "sample_2"])
-    lims_api: LimsAPI = create_autospec(LimsAPI)
-
-    # GIVEN all sample have the same source, the best kind.
-    lims_api.get_source = Mock(return_value="the_best_kind_of_source")
-
-    # GIVEN a Tomte params file creator.
-    file_creator = TomteParamsFileCreator(
-        "/path/to/params_file", lims_api=lims_api, status_db=status_db
-    )
-
-    # GIVEN a workflow parameters file
-    mocker.patch.object(tomte_params_file_creator, "read_yaml", return_value={"cat": "grep"})
-
-    # GIVEN yaml can be written
-    write_yaml_mock: Mock = mocker.patch.object(
-        tomte_params_file_creator, "write_yaml_nextflow_style"
-    )
-
-    # WHEN calling create
-    file_creator.create(
-        case_id="santa_case",
-        file_path=Path("down", "the", "chimney"),
-        sample_sheet_path=Path("wish", "list"),
-    )
-
-    # THEN the params file was created with expected content
-    write_yaml_mock.assert_called_once_with(
-        content={
-            "cat": "grep",
-            "gene_panel_clinical_filter": Path("down", "the", "gene_panels.bed"),
-            "genome": "GRCh38",
-            "input": Path("wish", "list"),
-            "outdir": Path("down", "the"),
-            "tissue": "the_best_kind_of_source",
-        },
-        file_path=Path("down", "the", "chimney"),
-    )
-
-
 @pytest.mark.parametrize(
-    "workflow",
+    "priority, expected_dict_contents",
     [
-        Workflow.NALLO,
-        Workflow.RNAFUSION,
-        Workflow.TAXPROFILER,
-        Workflow.TRANA_16S,
-        Workflow.TRANA_ITS,
+        (
+            Priority.express,
+            DictContaining({"manta_config": Path("/manta/config/path.ini")}),
+        ),
+        (
+            Priority.standard,
+            DictNotContaining({"manta_config": ANY}),
+        ),
     ],
+    ids=["Express case", "Standard case"],
 )
-def test_nextflow_params_file_creator(
-    workflow: Workflow,
-    params_file_scenario: dict,
-    nextflow_sample_sheet_path: Path,
-    case_id: str,
+def test_create_manta_config_depends_on_priority(
+    priority: Priority,
+    expected_dict_contents: DictContaining | DictNotContaining,
+    gcnvcaller_files: dict[str, GCNVCallerFiles],
+    verifybamid_files_set: VerifybamidSvdFilesSet,
+    wgs_sample: Sample,
     mocker: MockerFixture,
-):
-    """Test that the Nextflow params file is written correctly."""
-    # GIVEN a file path where the params file should be written
-    file_path = Path("/root", "case_id", "file_name.yaml")
+) -> None:
+    # GIVEN a case with the given priority
+    case = create_autospec(Case, samples=[wgs_sample], priority=priority)
+    store: TypedMock[Store] = create_typed_mock(Store)
+    store.as_mock.get_samples_by_case_id = Mock(return_value=[wgs_sample])
+    store.as_mock.get_case_by_internal_id_strict = Mock(return_value=case)
 
-    # GIVEN a params file creator class, an expected output and the module with the file creator
-    file_creator_class, expected_content, module = params_file_scenario[workflow]
-    file_creator: ParamsFileCreator = file_creator_class(params="workflow_parameters.yaml")
+    # GIVEN that no capture kit is found in LIMS
+    lims: TypedMock[LimsAPI] = create_typed_mock(LimsAPI)
+    lims.as_mock.capture_kit = Mock(return_value=None)
 
-    # GIVEN a YAML reader that returns the content of a pipeline params file and a file writer
-    read_yaml_mock: Mock = mocker.patch.object(
-        module, "read_yaml", return_value={"workflow_param1": "some_value"}
+    # GIVEN a params file creator
+    file_creator = RarediseaseParamsFileCreator(
+        default_target_bed="default.bed",
+        express_manta_config=Path("/manta/config/path.ini"),
+        gcnvcaller_files=gcnvcaller_files,
+        verifybamid_files_set=verifybamid_files_set,
+        references_directory=Path("/any/path"),
+        store=store.as_type,
+        lims=lims.as_type,
+        params="Path_to_file.yaml",
     )
-    write_yaml_mock: Mock = mocker.patch.object(module, "write_yaml_nextflow_style")
+
+    # GIVEN IO is mocked
+    write_yaml_mock = mocker.patch.object(
+        raredisease_params_file_creator, "write_yaml_nextflow_style"
+    )
+    mocker.patch.object(raredisease_params_file_creator, "write_csv")
+    mocker.patch.object(
+        raredisease_params_file_creator, "read_yaml", return_value={"workflow": "parameter"}
+    )
 
     # WHEN creating the params file
     file_creator.create(
-        case_id=case_id,
-        file_path=file_path,
-        sample_sheet_path=nextflow_sample_sheet_path,
+        case_id="case_id",
+        file_path=Path("some_path", "file_name.yaml"),
+        sample_sheet_path=Path("root", "samplesheet.csv"),
     )
 
-    # THEN the workflow parameters was read from the correct file
-    read_yaml_mock.assert_called_once_with(Path("workflow_parameters.yaml"))
-
-    # THEN the file should have been written with the expected content
-    write_yaml_mock.assert_called_once_with(file_path=file_path, content=expected_content)
+    # THEN the manta config is only included for express cases
+    write_yaml_mock.assert_called_once_with(file_path=ANY, content=expected_dict_contents)
