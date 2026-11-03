@@ -9,9 +9,6 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
     HEADERS as NALLO_HEADERS,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease_sample_sheet_creator import (
-    HEADERS as RAREDISEASE_HEADERS,
-)
-from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease_sample_sheet_creator import (
     RarediseaseSampleSheetCreator,
 )
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.rnafusion_sample_sheet_creator import (
@@ -82,8 +79,23 @@ def raredisease_sample_sheet_expected_content(
         "",
         "",
         nextflow_case_id,
+        "sample-name",
     ]
-    return [RAREDISEASE_HEADERS, entry_1]
+    return [
+        [
+            "sample",
+            "lane",
+            "fastq_1",
+            "fastq_2",
+            "sex",
+            "phenotype",
+            "paternal_id",
+            "maternal_id",
+            "case_id",
+            "customer_id",
+        ],
+        entry_1,
+    ]
 
 
 @pytest.fixture

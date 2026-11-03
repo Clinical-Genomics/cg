@@ -120,6 +120,7 @@ def mock_store_for_raredisease_file_creators(
     sample.internal_id = nextflow_sample_id
     sample.application_version.application.analysis_type = "wgs"
     sample.sex = SexEnum.male
+    sample.name = "sample-name"
     case: Case = create_autospec(Case)
     case.internal_id = nextflow_case_id
     link: CaseSample = create_autospec(
