@@ -3,6 +3,7 @@ from unittest.mock import Mock, create_autospec
 
 import pytest
 from housekeeper.store.models import File
+from sqlalchemy.orm import Query
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import DataDelivery, Workflow
@@ -79,6 +80,26 @@ def mock_housekeeper_for_nf_sample_sheet(fastq_path_1: Path, fastq_path_2: Path)
     fastq_file2: File = create_autospec(File, full_path=fastq_path_2.as_posix())
     housekeeper_mock: HousekeeperAPI = create_autospec(HousekeeperAPI)
     housekeeper_mock.files.return_value = [fastq_file1, fastq_file2]
+    return housekeeper_mock
+
+
+@pytest.fixture
+def mock_housekeeper_for_trana_sample_sheet(
+    fastq_path_1: Path,
+    fastq_path_2: Path,
+    nextflow_sample_id: str,
+    trana_control_sample_id: str,
+) -> HousekeeperAPI:
+    files_by_bundle: dict[str, Query] = {}
+    for bundle in [nextflow_sample_id, trana_control_sample_id]:
+        query = create_autospec(Query)
+        query.all.return_value = [
+            create_autospec(File, full_path=fastq_path_1.as_posix()),
+            create_autospec(File, full_path=fastq_path_2.as_posix()),
+        ]
+        files_by_bundle[bundle] = query
+    housekeeper_mock: HousekeeperAPI = create_autospec(HousekeeperAPI)
+    housekeeper_mock.files.side_effect = lambda bundle, tags: files_by_bundle[bundle]
     return housekeeper_mock
 
 
@@ -166,3 +187,25 @@ def mock_store_for_tomte_file_creators(nextflow_sample_id: str) -> Store:
     mock_store.get_case_workflow = Mock(return_value=Workflow.TOMTE)
     mock_store.get_case_priority = Mock(return_value=SlurmQos.NORMAL)
     return mock_store
+
+
+@pytest.fixture
+def mock_store_for_trana_16s_file_creators(nextflow_sample_id: str) -> Store:
+    """Fixture to provide a mock store for the Trana sample sheet creator."""
+    mock_sample: Sample = create_autospec(Sample)
+    mock_sample.internal_id = nextflow_sample_id
+    mock_sample.name = nextflow_sample_id
+
+    mock_case: Case = create_autospec(Case, samples=[mock_sample])
+
+    mock_store: Store = create_autospec(Store)
+    mock_store.get_case_by_internal_id = Mock(return_value=mock_case)
+    mock_store.get_case_workflow = Mock(return_value=Workflow.TRANA_16S)
+    mock_store.get_case_priority = Mock(return_value=SlurmQos.NORMAL)
+    return mock_store
+
+
+@pytest.fixture
+def mock_store_for_trana_its_creators(mock_store_for_trana_16s_file_creators: Store) -> Store:
+    mock_store_for_trana_16s_file_creators.get_case_workflow = Mock(return_value=Workflow.TRANA_ITS)
+    return mock_store_for_trana_16s_file_creators

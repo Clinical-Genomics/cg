@@ -24,3 +24,5 @@ def test_no_options(cli_runner: CliRunner, base_context: CGConfig):
     assert "raredisease" in result.output
     assert "rnafusion" in result.output
     assert "taxprofiler" in result.output
+    assert "trana-16s" in result.output
+    assert "trana-its" in result.output
