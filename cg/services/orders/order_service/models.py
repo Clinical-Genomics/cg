@@ -15,7 +15,7 @@ class OrderQueryParams(BaseModel):
 
     @field_validator("workflows", mode="before")
     def expand_balsamic_workflow(cls, value):
-        """Expand the BALSAMIC workflow to include the UMI and QC workflows when Trailblazer request Balsamic."""
-        if value and Workflow.BALSAMIC in value:
-            value = [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]
+        """Include Balsamic UMI while preserving all selected workflows."""
+        if value and Workflow.BALSAMIC in value and Workflow.BALSAMIC_UMI not in value:
+            value = [*value, Workflow.BALSAMIC_UMI]
         return value
