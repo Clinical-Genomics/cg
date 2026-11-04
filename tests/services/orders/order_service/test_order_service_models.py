@@ -7,17 +7,33 @@ from cg.services.orders.order_service.models import OrderQueryParams
 @pytest.mark.parametrize(
     "workflow, expected_workflows",
     [
+        # Balsamic adds UMI
         ([Workflow.BALSAMIC], [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]),
+        # Other workflows remain unchanged
         ([Workflow.MIP_DNA], [Workflow.MIP_DNA]),
+        # Balsamic expansion preserves RNAfusion
+        (
+            [Workflow.BALSAMIC, Workflow.RNAFUSION],
+            [Workflow.BALSAMIC, Workflow.RNAFUSION, Workflow.BALSAMIC_UMI],
+        ),
+        # Already-selected UMI is not duplicated
+        (
+            [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI],
+            [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI],
+        ),
+        # An empty workflow list stays empty
+        ([], []),
     ],
 )
-def test_order_query_params_field_validator(workflow: Workflow, expected_workflows: list[Workflow]):
-    """Test that the field validator expands the BALSAMIC workflow to include the UMI and QC workflows"""
+def test_order_query_params_field_validator(
+    workflow: list[Workflow], expected_workflows: list[Workflow]
+):
+    """Test Balsamic expansion preserves other workflows without duplicating UMI."""
 
-    # GIVEN a order query params with BALSAMIC as workflow
+    # GIVEN workflow selections and their expected expansion
+
+    # WHEN creating query parameters, which runs the validator
     order_query_params = OrderQueryParams(workflows=workflow)
 
-    # WHEN the field validator is called
-
-    # THEN the BALSAMIC workflow should be expanded to include UMI and QC workflows
+    # THEN the workflows match the expected result
     assert order_query_params.workflows == expected_workflows
