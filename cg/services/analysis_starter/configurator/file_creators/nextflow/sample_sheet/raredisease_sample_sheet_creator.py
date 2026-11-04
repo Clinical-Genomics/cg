@@ -17,6 +17,7 @@ HEADERS: list[str] = [
     "paternal_id",
     "maternal_id",
     "case_id",
+    "customer_id",
 ]
 
 
@@ -53,6 +54,7 @@ class RarediseaseSampleSheetCreator(NextflowFastqSampleSheetCreator):
                     case_sample.get_paternal_sample_id,
                     case_sample.get_maternal_sample_id,
                     case_sample.case.internal_id,
+                    case_sample.sample.name,
                 ]
             )
         return content
