@@ -21,8 +21,8 @@ MINUTES_CEIL: int = 1440
 # Read-based memory/time scaling for decompression - independent, separately tunable from compression
 DECOMPRESSION_MEMORY_PER_READ: float = 0
 DECOMPRESSION_MEMORY_INTERCEPT: float = 8
-DECOMPRESSION_MINUTES_PER_READ: float = 3.0918e-07
-DECOMPRESSION_TIME_INTERCEPT: float = 120
+DECOMPRESSION_MINUTES_PER_READ: float = 6.0918e-07
+DECOMPRESSION_TIME_INTERCEPT: float = 60
 
 
 # Number of days until FASTQs counts as old
