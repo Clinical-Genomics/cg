@@ -11,14 +11,18 @@ from cg.store.models import Order
 
 
 @pytest.mark.parametrize(
-    "limit, workflow, expected_orders",
+    "limit, workflow, workflows, expected_orders",
     [
-        (None, Workflow.MIP_DNA, 2),
-        (1, Workflow.MIP_DNA, 1),
-        (2, Workflow.MIP_DNA, 2),
-        (None, Workflow.BALSAMIC, 1),
-        (None, Workflow.FLUFFY, 0),
-        (None, None, 3),
+        (None, Workflow.MIP_DNA, [], 2),
+        (1, Workflow.MIP_DNA, [], 1),
+        (2, Workflow.MIP_DNA, [], 2),
+        (None, Workflow.BALSAMIC, [], 1),
+        (None, Workflow.FLUFFY, [], 0),
+        (None, None, [], 3),
+        (None, None, [Workflow.MIP_DNA], 2),
+        (None, None, [Workflow.MIP_DNA, Workflow.BALSAMIC], 3),
+        (None, None, [Workflow.BALSAMIC, Workflow.FLUFFY], 1),
+        (1, None, [Workflow.MIP_DNA, Workflow.BALSAMIC], 1),
     ],
 )
 def test_orders_endpoint(
@@ -27,12 +31,20 @@ def test_orders_endpoint(
     order_another: Order,
     order_balsamic: Order,
     limit: int | None,
-    workflow: str,
+    workflow: str | None,
+    workflows: list[str],
     expected_orders: int,
     analysis_summaries: list[AnalysisSummary],
 ):
     """Tests that orders are returned from the orders endpoint"""
     # GIVEN a store with three orders, two of which are MIP-DNA and the last is BALSAMIC
+
+    selected_workflows = workflows or ([workflow] if workflow else [])
+    expected_ids = {
+        item.id
+        for item in (order, order_another, order_balsamic)
+        if not selected_workflows or item.workflow in selected_workflows
+    }
 
     # WHEN a request is made to get all orders
     endpoint: str = "/api/v1/orders"
@@ -41,13 +53,22 @@ def test_orders_endpoint(
         "get_summaries",
         return_value=analysis_summaries,
     ):
-        response = client.get(endpoint, query_string={"pageSize": limit, "workflow": workflow})
+        response = client.get(
+            endpoint,
+            query_string={"pageSize": limit, "workflow": workflow, "workflows[]": workflows},
+        )
 
     # THEN the response should be successful
     assert response.status_code == HTTPStatus.OK
 
     # THEN the response contains the correct number of orders
     assert len(response.json["orders"]) == expected_orders
+    assert response.json["total_count"] == len(expected_ids)
+    returned_ids = {item["id"] for item in response.json["orders"]}
+    if limit and limit < len(expected_ids):
+        assert returned_ids <= expected_ids
+    else:
+        assert returned_ids == expected_ids
 
 
 def test_order_endpoint(
@@ -81,3 +102,24 @@ def test_order_endpoint_not_found(
 
     # THEN the response should be unsuccessful
     assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+@pytest.mark.parametrize(
+    "query_string, expected_error",
+    [
+        (
+            {"workflow": Workflow.MIP_DNA, "workflows[]": [Workflow.BALSAMIC]},
+            "Use either workflow or workflows[], not both",
+        ),
+        ({"workflows[]": ["invalid-workflow"]}, "Input should be"),
+        ({"workflows[]": [Workflow.MIP_DNA, "invalid-workflow"]}, "Input should be"),
+    ],
+)
+def test_orders_endpoint_invalid_workflow_filters(
+    client: FlaskClient, query_string: dict, expected_error: str
+):
+    """Reject conflicting filters and invalid values in repeated workflow parameters."""
+    response = client.get("/api/v1/orders", query_string=query_string)
+
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert expected_error in response.json["error"]
