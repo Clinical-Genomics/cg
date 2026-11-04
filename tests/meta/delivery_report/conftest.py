@@ -2,7 +2,6 @@ from unittest.mock import create_autospec
 
 import pytest
 
-from cg.constants import SexOptions
 from cg.models.analysis import NextflowAnalysis
 from cg.models.balsamic.analysis import BalsamicAnalysis
 from cg.models.balsamic.config import (
@@ -169,7 +168,7 @@ def raredisease_analysis() -> NextflowAnalysis:
             "sample_id": RarediseaseQCMetrics(
                 percent_duplication=0.1,
                 picard_pct_pf_reads_aligned=1,
-                predicted_sex_sex_check=SexOptions.MALE,
+                somalier_sex=1.0,  # type: ignore (will be translated to SexOptions by validator)
             )
         }
     )

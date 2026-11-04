@@ -44,6 +44,7 @@ RAREDISEASE_CASE_TAGS = dict(
     peddy_check={"ped-check", "peddy"},
     peddy_ped={"ped", "peddy"},
     peddy_sex={"sex-check", "peddy"},
+    somalier_samples={"somalier", "relate-samples"},
     smn_tsv={"smn-calling"},
     vcf_mei={"mobile-elements", "clinical", "vcf"},
     vcf_mei_research={"mobile-elements", "research", "vcf"},

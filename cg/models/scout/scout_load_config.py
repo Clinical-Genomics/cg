@@ -190,6 +190,8 @@ class RarediseaseLoadConfig(ScoutLoadConfig):
     peddy_sex: str | None = None
     saltshaker_report: str | None = None
     samples: list[ScoutRarediseaseIndividual] = []
+    somalier_samples: str | None = None
+    somalier_pairs: str | None = None
     smn_tsv: str | None = None
     vcf_mei: str | None = None
     vcf_mei_research: str | None = None

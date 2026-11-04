@@ -16,6 +16,7 @@ from cg.constants.nf_analysis import (
 )
 from cg.constants.scout import RAREDISEASE_CASE_TAGS
 from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.constants.subject import PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.utils.chanjo1 import CoverageMetricsChanjo1, chanjo1_get_sample_coverage
 from cg.models.analysis import NextflowAnalysis
@@ -64,13 +65,14 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             metric_conditions: dict[str, dict[str, Any]] = (
                 self.get_metric_conditions_by_prep_category(sample_id=sample.internal_id)
             )
+            self.set_somalier_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
             self.set_order_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
         else:
             metric_conditions = RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION.copy()
         return metric_conditions
 
     def get_metric_conditions_by_prep_category(self, sample_id: str) -> dict:
-        sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
+        sample: Sample = self.status_db.get_sample_by_internal_id_strict(internal_id=sample_id)
         if (
             sample.application_version.application.analysis_type
             == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
@@ -129,8 +131,22 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         metric_dicts: list[dict[str, Any]] = multiqc_json.report_general_stats_data
         list_copy: list[dict[str, Any]] = copy.deepcopy(metric_dicts)
         list_copy.append(self._get_multiqc_picard_dict(multiqc_json))
+        list_copy.append(self._get_somalier_dict(multiqc_json))
 
         return list_copy
+
+    @staticmethod
+    def _get_somalier_dict(multiqc_json: MultiqcDataJson) -> dict[str, Any]:
+        raw_data: dict[str, dict] = multiqc_json.report_saved_raw_data or {}
+        if "multiqc_somalier" not in raw_data:
+            LOG.warning("MultiQC report is missing section multiqc_somalier")
+            return {}
+
+        somalier_raw = copy.deepcopy(raw_data["multiqc_somalier"])
+        for sample_id, metrics in somalier_raw.items():
+            somalier_raw[sample_id] = {f"somalier_{k}": v for k, v in metrics.items()}
+
+        return somalier_raw
 
     @staticmethod
     def _get_multiqc_picard_dict(multiqc_json: MultiqcDataJson) -> dict:
@@ -150,7 +166,17 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
         ):
             metric_conditions["gender"]["threshold"] = sample.sex
-        metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
+
+    @staticmethod
+    def set_somalier_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
+        if "somalier_sex" in metric_conditions:
+            metric_conditions["somalier_sex"]["threshold"] = float(
+                {
+                    "male": PlinkSex.MALE,
+                    "female": PlinkSex.FEMALE,
+                    "unknown": PlinkSex.UNKNOWN,
+                }[sample.sex]
+            )
 
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]
