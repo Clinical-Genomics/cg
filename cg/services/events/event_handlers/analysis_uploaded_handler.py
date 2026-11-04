@@ -22,7 +22,9 @@ def handle(config: CGConfig, event_payload: dict, event_metadata: EventMetadata)
         analysis.uploaded_at = event.uploaded_at
 
         config.trailblazer_api.set_analysis_uploaded(
-            analysis.case.internal_id, uploaded_at=event.uploaded_at
+            analysis.trailblazer_id, uploaded_at=event.uploaded_at
         )
 
-        LOG.info(f"Case {analysis.case.internal_id} set as uploaded in Trailblazer.")
+        LOG.info(
+            f"Analysis of case {analysis.case.internal_id} (Trailblazer ID {analysis.trailblazer_id}) set as uploaded in Trailblazer."
+        )

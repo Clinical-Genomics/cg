@@ -36,6 +36,7 @@ from cg.constants.lims import LimsStatus
 from cg.constants.priority import PriorityTerms, SlurmQos, TrailblazerPriority
 from cg.constants.sequencing import ReadType, SeqLibraryPrepCategory
 from cg.constants.symbols import EMPTY_STRING
+from cg.exc import AnalysisDoesNotExistError
 from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.models.orders.constants import OrderType
 
@@ -576,6 +577,17 @@ class Case(Base, PriorityMixin):
         valid_analyses: list[Analysis] = [a for a in self.analyses if a.completed_at is not None]
         if not valid_analyses:
             return None
+        sorted_analyses: list[Analysis] = sorted(
+            valid_analyses, key=lambda analysis: analysis.completed_at, reverse=True
+        )
+        return sorted_analyses[0]
+
+    @property
+    def latest_analysis_strict(self) -> Analysis:
+        """Returns the latest analysis for this case."""
+        valid_analyses: list[Analysis] = [a for a in self.analyses]
+        if not valid_analyses:
+            raise AnalysisDoesNotExistError(f"No analyses for case {self.internal_id}")
         sorted_analyses: list[Analysis] = sorted(
             valid_analyses, key=lambda analysis: analysis.completed_at, reverse=True
         )
