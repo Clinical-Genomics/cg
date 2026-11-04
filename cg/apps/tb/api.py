@@ -182,7 +182,7 @@ class TrailblazerAPI:
         request_body = {"analysis_id": analysis_id, "uploaded_at": str(uploaded_at)}
 
         LOG.debug(f"Setting analysis uploaded at for {request_body}")
-        LOG.info(f"{analysis_id} - uploaded at set to {uploaded_at}")
+        LOG.info(f"Trailblazer analysis {analysis_id} - uploaded at set to {uploaded_at}")
         self.query_trailblazer(
             command="set-analysis-uploaded", request_body=request_body, method=APIMethods.PUT
         )
