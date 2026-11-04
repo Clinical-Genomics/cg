@@ -7,7 +7,6 @@ from dateutil.parser import parse
 from pydantic import TypeAdapter
 from pydantic.v1 import ValidationError
 
-from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Workflow
 from cg.constants.constants import FileExtensions, FileFormat, GenomeVersion, MultiQC
 from cg.constants.tb import AnalysisStatus
