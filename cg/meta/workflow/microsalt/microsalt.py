@@ -145,7 +145,7 @@ class MicrosaltAnalysisAPI(AnalysisAPI):
                     continue
 
                 result: QualityResult = self.quality_checker.quality_control(metrics_file_path)
-                analysis: Analysis = case.latest_completed_analysis
+                analysis: Analysis = case.latest_analysis_strict
 
                 self.trailblazer_api.add_comment(
                     analysis_id=analysis.trailblazer_id, comment=result.summary
