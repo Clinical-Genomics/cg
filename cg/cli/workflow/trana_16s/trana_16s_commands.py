@@ -7,11 +7,13 @@ from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.cli.workflow.nf_analysis import OPTION_RESUME, OPTION_REVISION
 from cg.constants import Workflow
+from cg.constants.cli_options import COMMENT, FORCE
 from cg.models.cg_config import CGConfig
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
+from cg.services.storing_service.storing_service import StoringService
 
 LOG = logging.getLogger(__name__)
 
@@ -95,3 +97,23 @@ def start_available(cg_config: CGConfig) -> None:
     succeeded: bool = analysis_starter.start_available()
     if not succeeded:
         raise click.Abort
+
+
+@trana_16s.command("store")
+@ARGUMENT_CASE_ID
+@COMMENT
+@FORCE
+@click.pass_obj
+def store(cg_config: CGConfig, case_id: str, comment: str | None, force: bool) -> None:
+    """
+    Store deliverable files in Housekeeper after meeting QC metrics criteria.
+
+    Raises:
+        click.Abort: If an error occurs during the deliverables file generation, metrics
+        validation, or storage processes.
+    """
+    # TODO: What checks need to be performed before storing, if any?
+    # TODO: Create metics QC and validate in a good way
+    #
+    storing_service = StoringService()
+    storing_service.store_pipeline_output(root_directory=cg_config.trana_16s.root, case_id=case_id)
