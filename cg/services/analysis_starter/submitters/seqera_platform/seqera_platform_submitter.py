@@ -63,7 +63,20 @@ class SeqeraPlatformSubmitter(Submitter):
             sessionId=case_config.session_id,
             workDir=case_config.work_dir,
         )
+        if case_config.resume:
+            launch_request.id = self._get_resume_launch_id(case_config)
         return WorkflowLaunchRequest(launch=launch_request)
+
+    def _get_resume_launch_id(self, case_config: NextflowCaseConfig) -> str:
+        if not case_config.workflow_id or not case_config.session_id:
+            raise SeqeraError("A workflow ID and session ID are required to resume an analysis")
+        response: dict = self.client.get_workflow(case_config.workflow_id)
+        workflow: dict = response.get("workflow") or {}
+        if workflow.get("sessionId") != case_config.session_id:
+            raise SeqeraError("The Tower workflow session does not match the analysis to resume")
+        if not (launch_id := workflow.get("launchId")):
+            raise SeqeraError(f"No launchId found for workflow {case_config.workflow_id}")
+        return launch_id
 
     @staticmethod
     def _create_run_name(case_id: str, resume: bool) -> str:

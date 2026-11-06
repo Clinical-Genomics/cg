@@ -653,3 +653,24 @@ def test_get_delivered_analyses_for_order_raises_error(
     # THEN a TrailblazerAPIHTTPError should be raised
     with pytest.raises(TrailblazerAPIHTTPError):
         trailblazer_api.get_delivered_analyses_for_order(order_id=1)
+
+
+@pytest.mark.parametrize("workflow_id", [None, "previous_workflow_id"])
+def test_get_latest_analysis_preserves_tower_workflow_id(
+    workflow_id: str | None,
+    valid_trailblazer_config: dict,
+    analysis_raw_response: str,
+    mocker: MockerFixture,
+):
+    # GIVEN a Trailblazer analysis response with an optional Tower workflow ID
+    response: dict = json.loads(analysis_raw_response)["analyses"][0]
+    if workflow_id:
+        response["tower_workflow_id"] = workflow_id
+    api = TrailblazerAPI(valid_trailblazer_config)
+    mocker.patch.object(api, "query_trailblazer", return_value=response)
+
+    # WHEN retrieving the analysis
+    analysis: TrailblazerAnalysis = api.get_latest_analysis(case_id="case_1")
+
+    # THEN the workflow ID is available for resume, with older responses still supported
+    assert analysis.tower_workflow_id == workflow_id

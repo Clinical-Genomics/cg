@@ -3,6 +3,7 @@ from unittest.mock import Mock, create_autospec
 import pytest
 
 from cg.apps.lims import LimsAPI
+from cg.apps.tb import TrailblazerAPI
 from cg.meta.workflow.fastq import BalsamicFastqHandler, MicrosaltFastqHandler
 from cg.models.cg_config import BalsamicConfig, CGConfig, RarediseaseConfig
 from cg.services.analysis_starter.configurator.file_creators.balsamic_config import (
@@ -67,6 +68,7 @@ def raredisease_configurator(
     raredisease_config_object: RarediseaseConfig,
 ) -> NextflowConfigurator:
     return NextflowConfigurator(
+        trailblazer_api=create_autospec(TrailblazerAPI),
         store=mock_store_for_raredisease_file_creators,
         config_file_creator=create_autospec(NextflowConfigFileCreator),
         params_file_creator=create_autospec(RarediseaseParamsFileCreator),

@@ -128,6 +128,7 @@ class ConfiguratorFactory:
             sample_sheet_creator=sample_sheet_creator,
             store=self.store,
             pipeline_extension=extension,
+            trailblazer_api=self.cg_config.trailblazer_api,
         )
 
     def _get_nextflow_config_file_creator(
