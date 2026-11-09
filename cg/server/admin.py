@@ -881,6 +881,7 @@ class SampleView(BaseView):
         "priority",
         "sex",
         "skip_compression",
+        "control",
     ]
     column_formatters = {
         "application_version": view_application_link_via_application_version,
