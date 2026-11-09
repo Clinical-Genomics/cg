@@ -3,7 +3,7 @@ from pathlib import Path
 
 from cg.io.json import read_json
 from cg.meta.workflow.nf_analysis import MultiQCSearchPattern
-from cg.models.deliverables.metric_deliverables import MultiqcDataJson
+from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.store.store import Store
 
 
@@ -11,8 +11,18 @@ class MultiQCParser:
     def __init__(self, status_db: Store) -> None:
         self.status_db = status_db
 
-    def parse_and_validate(self, file: Path) -> None:
-        multiqc_model = MultiqcDataJson(**read_json(file_path=file))
+    def parse_and_validate(self, case_id: str, file: Path) -> None:
+        multiqc_json = MultiqcDataJson(**read_json(file_path=file))
+        metrics = []
+        for pattern in self._get_multiqc_search_patterns(case_id=case_id):
+            metrics_for_pattern: list[MetricsBase] = self.get_multiqc_metrics_for_sample(
+                search_pattern=pattern.pattern,
+                multiqc_json=multiqc_json,
+                sample_id=pattern.sample_id,
+                exact_match=self.is_multiqc_pattern_search_exact(),
+            )
+            metrics.extend(metrics_for_pattern)
+        metrics = self.get_deduplicated_metrics(metrics=metrics)
 
     def _get_multiqc_search_patterns(self, case_id: str) -> list[MultiQCSearchPattern]:
         # TODO simplify this method to avoid the MultiQCSearchPattern
@@ -23,3 +33,43 @@ class MultiQCParser:
         return [
             MultiQCSearchPattern(pattern=sample_id, sample_id=sample_id) for sample_id in sample_ids
         ]
+
+    def get_multiqc_metrics_for_sample(
+        self,
+        search_pattern: str,
+        multiqc_json: MultiqcDataJson,
+        sample_id: str,
+        exact_match: bool = False,
+    ) -> list[MetricsBase]:
+        """Parse a MultiqcDataJson and returns a list of metrics."""
+        metrics: list[MetricsBase] = []
+        list_of_metric_dicts: list[dict[str, Any]] = multiqc_json.report_general_stats_data
+        # TODO: Continue here 2026-11-10
+        for section in list_of_metric_dicts:
+            for subsection, metrics_dict in section.items():
+                if self._is_pattern_found(
+                    pattern=search_pattern, text=subsection, exact_match=exact_match
+                ):
+                    for metric_name, metric_value in metrics_dict.items():
+                        metric: MetricsBase = self.get_multiqc_metric(
+                            metric_name=metric_name, metric_value=metric_value, sample_id=sample_id
+                        )
+                        metrics.append(metric)
+        return metrics
+
+    def is_multiqc_pattern_search_exact(self) -> bool:
+        """Return True if only exact pattern search is allowed to collect metrics information from MultiQC file.
+        If false, pattern must be present but does not need to be exact."""
+        return False
+
+    @staticmethod
+    def get_deduplicated_metrics(metrics: list[MetricsBase]) -> list[MetricsBase]:
+        """Return deduplicated metrics based on metric ID and name. If duplicated entries are found
+        only the first one will be kept."""
+        deduplicated_metric_id_name = set([])
+        deduplicated_metrics: list = []
+        for metric in metrics:
+            if (metric.id, metric.name) not in deduplicated_metric_id_name:
+                deduplicated_metric_id_name.add((metric.id, metric.name))
+                deduplicated_metrics.append(metric)
+        return deduplicated_metrics
