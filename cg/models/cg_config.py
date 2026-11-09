@@ -197,6 +197,7 @@ class MutaccAutoConfig(BaseModel):
     binary_path: str
     config_path: str
     padding: int = 300
+    reference: Path
 
 
 class LoqusDBDumpFiles(BaseModel):

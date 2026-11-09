@@ -5,6 +5,7 @@ Module for mutacc-auto API
 import copy
 import logging
 import subprocess
+from pathlib import Path
 
 from cg.constants.constants import FileFormat
 from cg.io.controller import WriteStream
@@ -19,10 +20,16 @@ class MutaccAutoAPI:
     """
 
     def __init__(self, config: MutaccAutoConfig):
+        self.config = config
         self.mutacc_auto_config = config.config_path
         self.mutacc_auto_binary = config.binary_path
         self.mutacc_padding = config.padding
         self.base_call = [self.mutacc_auto_binary, "--config-file", self.mutacc_auto_config]
+
+    @property
+    def reference_path(self) -> Path:
+        """Return the path to the reference FASTA."""
+        return self.config.reference
 
     def extract_reads(self, case: dict, variants: dict):
         """

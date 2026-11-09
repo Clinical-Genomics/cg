@@ -1,4 +1,5 @@
 from datetime import datetime
+from pathlib import Path
 from unittest.mock import ANY, Mock, create_autospec
 
 import pytest
@@ -32,11 +33,13 @@ def cg_config() -> CGConfig:
             binary_path="crazy_path",
             config_path="a_path",
             padding=1337,
+            reference=Path("hg19-genome.fa"),
         ),
         mutacc_auto_hg38=MutaccAutoConfig(
             binary_path="what_in_the_world",
             config_path="no_path",
             padding=666,
+            reference=Path("hg38-genome.fa"),
         ),
         status_db=create_autospec(Store),
     )

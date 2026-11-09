@@ -153,14 +153,16 @@ mip-rd-dna:
   script: "{test_root_dir}/mip-dna/bin"
 
 mutacc_auto_hg19:
-  config_path: "{test_root_dir}/mutacc-auto_config_path-hg19"
   binary_path: "{test_root_dir}/mutacc-auto_binary_path-hg19"
+  config_path: "{test_root_dir}/mutacc-auto_config_path-hg19"
   padding: 300
+  reference: "{test_root_dir}/mutacc-auto_config-hg19-reference"
 
 mutacc_auto_hg38:
-  config_path: "{test_root_dir}/mutacc-auto_config_path-hg38"
   binary_path: "{test_root_dir}/mutacc-auto_binary_path-hg38"
+  config_path: "{test_root_dir}/mutacc-auto_config_path-hg38"
   padding: 300
+  reference: "{test_root_dir}/mutacc-auto_config-hg38-reference"
 
 nallo:
   compute_env: nallo_compute_env

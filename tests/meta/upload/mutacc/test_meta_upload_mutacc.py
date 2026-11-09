@@ -1,8 +1,12 @@
 """Tests for cg.meta.upload.mutacc module"""
 
 import os
+from pathlib import Path
+from unittest.mock import create_autospec
 
+from cg.apps.mutacc_auto import MutaccAutoAPI
 from cg.apps.scout.scout_export import ScoutExportCase
+from cg.apps.scout.scoutapi import ScoutAPI
 from cg.meta.upload.mutacc import UploadToMutaccAPI, resolve_parent, resolve_phenotype, resolve_sex
 
 
@@ -23,20 +27,61 @@ def test_instantiate():
     assert mutacc_upload_api.mutacc_auto == mutacc_auto_api
 
 
-def test_data(mutacc_upload_api, scout_export_case: ScoutExportCase, mocker):
+def test_data(scout_export_case: ScoutExportCase, mocker):
     """
     Test the data method
     """
-    # GIVEN a case object
+    # GIVEN UploadToMutaccAPI
+    mutacc_auto_api = create_autospec(MutaccAutoAPI, reference_path=Path("/path/to/genome.fa"))
+    mutacc_upload_api = UploadToMutaccAPI(
+        scout_api=create_autospec(ScoutAPI), mutacc_auto_api=mutacc_auto_api
+    )
 
-    mocker.patch.object(os.path, "isfile")
-    os.path.isfile.return_value = True
+    # GIVEN a file exists
+    mocker.patch.object(os.path, "isfile", return_value=True)
 
     # WHEN generating data
     result = mutacc_upload_api.data(scout_export_case)
 
-    # THEN data dict should have keys 'case', and 'causatives'
-    assert set(result.keys()) == {"case", "causatives"}
+    # THEN data dict should be as expected
+    assert result == {
+        "case": {
+            "case_id": "internal_id",
+            "genome_build": "37",
+            "rank_score_threshold": 5,
+            "reference": "/path/to/genome.fa",
+            "samples": [
+                {
+                    "analysis_type": "wgs",
+                    "bam_file": "",
+                    "father": "individual_2",
+                    "mother": "individual_3",
+                    "phenotype": "affected",
+                    "sample_id": "individual_1",
+                    "sex": "male",
+                },
+                {
+                    "analysis_type": "wgs",
+                    "bam_file": "",
+                    "father": "0",
+                    "mother": "0",
+                    "phenotype": "unaffected",
+                    "sample_id": "individual_2",
+                    "sex": "male",
+                },
+                {
+                    "analysis_type": "wgs",
+                    "bam_file": "",
+                    "father": "0",
+                    "mother": "0",
+                    "phenotype": "unaffected",
+                    "sample_id": "individual_3",
+                    "sex": "female",
+                },
+            ],
+        },
+        "causatives": [],
+    }
 
 
 def test_data_no_bam(mutacc_upload_api, scout_export_case_missing_bam: ScoutExportCase, mocker):
