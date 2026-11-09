@@ -9,11 +9,12 @@ from cg.cli.workflow.nf_analysis import OPTION_RESUME, OPTION_REVISION
 from cg.constants import Workflow
 from cg.constants.cli_options import COMMENT, FORCE
 from cg.models.cg_config import CGConfig
+from cg.services.analysis_qc_service import analysis_qc_service
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
-from cg.services.storing_service.storing_service import StoringService
+from cg.services.storing_service.storing_service import StoreAnalysisService
 
 LOG = logging.getLogger(__name__)
 
@@ -115,5 +116,15 @@ def store(cg_config: CGConfig, case_id: str, comment: str | None, force: bool) -
     # TODO: What checks need to be performed before storing, if any?
     # TODO: Create metics QC and validate in a good way
     #
-    storing_service = StoringService()
-    storing_service.store_pipeline_output(root_directory=cg_config.trana_16s.root, case_id=case_id)
+    storing_service = StoreAnalysisService()
+    storing_service.store_output(root_directory=cg_config.trana_16s.root, case_id=case_id)
+
+
+@trana_16s.command("qc-check")
+@ARGUMENT_CASE_ID
+def perform_qc_check(case_id: str) -> None:
+    """
+    Perform QC check for a Trana 16S case.
+
+    """
+    analysis_qc_service.perform_qc(case_id)
