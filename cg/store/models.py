@@ -16,7 +16,12 @@ from sqlalchemy import (
     Table,
 )
 from sqlalchemy import Text as SLQText
-from sqlalchemy import UniqueConstraint, orm, select, types
+from sqlalchemy import (
+    UniqueConstraint,
+    orm,
+    select,
+    types,
+)
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
@@ -1439,3 +1444,12 @@ class OrderTypeApplication(Base):
     application: Mapped[Application] = orm.relationship(
         "Application", back_populates="order_type_applications"
     )
+
+
+class UploadKeys(Base):
+    __tablename__ = "upload_keys"
+    file_type: str
+    scout_key: str | None
+    loqusdb_key: str | None
+    upload_to_customer_inbox: bool
+    chanjo_key: str
