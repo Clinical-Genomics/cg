@@ -100,4 +100,4 @@ class MultiQCParser:
     def get_qc_conditions_for_workflow(self, sample_id) -> dict:
         # TODO: Fill this out for Trana
         # TODO: Make this vary on workflow
-        pass
+        raise NotImplementedError()

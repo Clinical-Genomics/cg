@@ -122,9 +122,15 @@ def store(cg_config: CGConfig, case_id: str, comment: str | None, force: bool) -
 
 @trana_16s.command("qc-check")
 @ARGUMENT_CASE_ID
-def perform_qc_check(case_id: str) -> None:
+@click.pass_obj
+def perform_qc_check(cg_config: CGConfig, case_id: str) -> None:
     """
     Perform QC check for a Trana 16S case.
 
     """
-    analysis_qc_service.perform_qc(case_id)
+    analysis_qc_service.perform_qc(
+        case_id=case_id,
+        status_db=cg_config.status_db,
+        root_directory=cg_config.trana_16s.root,
+        trailblazer_api=cg_config.trailblazer_api,
+    )
