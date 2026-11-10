@@ -166,6 +166,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
         ):
             metric_conditions["gender"]["threshold"] = sample.sex
+        metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
 
     @staticmethod
     def set_somalier_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:

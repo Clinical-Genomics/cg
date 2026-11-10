@@ -1055,7 +1055,9 @@ metrics:
   name: het_ratio_sex_check
   step: multiqc
   value: 0.03753
-- condition: null
+- condition:
+    norm: eq
+    threshold: female
   header: null
   id: ADM1
   input: multiqc_data.json
@@ -2487,7 +2489,9 @@ metrics:
   name: het_ratio_sex_check
   step: multiqc
   value: 0.03753
-- condition: null
+- condition:
+    norm: eq
+    threshold: female
   header: null
   id: ADM2
   input: multiqc_data.json

@@ -37,6 +37,7 @@ def expected_wgs_qc_metrics() -> dict[str, dict[str, Any]]:
         "AT_DROPOUT": {"norm": "lt", "threshold": 5},
         "GC_DROPOUT": {"norm": "lt", "threshold": 5},
         "MEDIAN_TARGET_COVERAGE": {"norm": "gt", "threshold": 25},
+        "predicted_sex_sex_check": {"norm": "eq", "threshold": SexOptions.FEMALE},
         "somalier_sex": {"norm": "eq", "threshold": 2.0},
         "gender": {"norm": "eq", "threshold": SexOptions.FEMALE},
     }
@@ -50,6 +51,7 @@ def expected_wes_qc_metrics() -> dict[str, dict[str, Any]]:
         "PCT_TARGET_BASES_10X": {"norm": "gt", "threshold": 0.95},
         "AT_DROPOUT": {"norm": "lt", "threshold": 10},
         "GC_DROPOUT": {"norm": "lt", "threshold": 10},
+        "predicted_sex_sex_check": {"norm": "eq", "threshold": SexOptions.FEMALE},
         "somalier_sex": {"norm": "eq", "threshold": 2.0},
     }
 
@@ -76,7 +78,7 @@ def test_parse_analysis(
     assert analysis_model.sample_metrics[sample_id].model_dump() == {
         "percent_duplication": 0.0438,
         "picard_pct_pf_reads_aligned": 0.999729,
-        "predicted_sex": SexOptions.FEMALE,
+        "predicted_sex_sex_check": SexOptions.FEMALE,
     }
 
 

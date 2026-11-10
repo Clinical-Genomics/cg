@@ -53,7 +53,7 @@ class RarediseaseDeliveryReportAPI(DeliveryReportAPI):
             mean_target_coverage=coverage_metrics.mean_coverage if coverage_metrics else None,
             million_read_pairs=get_million_read_pairs(sample.reads),
             pct_10x=coverage_metrics.coverage_completeness_percent if coverage_metrics else None,
-            sex=sample_metrics.predicted_sex,
+            sex=sample_metrics.predicted_sex_sex_check,
         )
 
     def is_report_accredited(
