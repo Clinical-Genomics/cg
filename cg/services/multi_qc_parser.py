@@ -1,6 +1,8 @@
 from collections.abc import Iterator
 from pathlib import Path
+from typing import Any
 
+from cg.constants.constants import FileExtensions, MultiQC
 from cg.io.json import read_json
 from cg.meta.workflow.nf_analysis import MultiQCSearchPattern
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
@@ -44,7 +46,6 @@ class MultiQCParser:
         """Parse a MultiqcDataJson and returns a list of metrics."""
         metrics: list[MetricsBase] = []
         list_of_metric_dicts: list[dict[str, Any]] = multiqc_json.report_general_stats_data
-        # TODO: Continue here 2026-11-10
         for section in list_of_metric_dicts:
             for subsection, metrics_dict in section.items():
                 if self._is_pattern_found(
@@ -73,3 +74,30 @@ class MultiQCParser:
                 deduplicated_metric_id_name.add((metric.id, metric.name))
                 deduplicated_metrics.append(metric)
         return deduplicated_metrics
+
+    def get_multiqc_metric(
+        self, metric_name: str, metric_value: str | int | float, sample_id: str
+    ) -> MetricsBase:
+        """Return a MetricsBase object for a given metric."""
+        return MetricsBase(
+            header=None,
+            id=sample_id,
+            input=MultiQC.MULTIQC_DATA + FileExtensions.JSON,
+            name=metric_name,
+            step=MultiQC.MULTIQC,
+            value=metric_value,
+            condition=self.get_qc_conditions_for_workflow(sample_id).get(metric_name, None),
+        )
+
+    @staticmethod
+    def _is_pattern_found(pattern: str, text: str, exact_match: bool) -> bool:
+        if exact_match:
+            is_pattern_found: bool = pattern == text
+        else:
+            is_pattern_found: bool = pattern in text
+        return is_pattern_found
+
+    def get_qc_conditions_for_workflow(self, sample_id) -> dict:
+        # TODO: Fill this out for Trana
+        # TODO: Make this vary on workflow
+        pass
