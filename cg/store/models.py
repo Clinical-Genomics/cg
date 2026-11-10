@@ -16,12 +16,7 @@ from sqlalchemy import (
     Table,
 )
 from sqlalchemy import Text as SLQText
-from sqlalchemy import (
-    UniqueConstraint,
-    orm,
-    select,
-    types,
-)
+from sqlalchemy import UniqueConstraint, orm, select, types
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
@@ -555,6 +550,10 @@ class Case(Base, PriorityMixin):
     def latest_ticket(self) -> str | None:
         """Returns the last ticket the family was ordered in"""
         return self.tickets.split(sep=",")[-1] if self.tickets else None
+
+    @property
+    def is_to_be_uploaded_to_scout(self):
+        pass
 
     @property
     def is_to_be_uploaded_to_customer_inbox(self) -> bool:
