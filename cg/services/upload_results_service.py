@@ -8,5 +8,21 @@ def upload_results(case_id: str, status_db: Store):
     _upload(list_of_functions=functions)
 
 
-def _upload(list_of_functions: list[Callable]):
+def _upload():
+    pass
+
+
+def _upload_to_scout():
+    pass
+
+
+def _upload_to_loqus_db():
+    pass
+
+
+def _upload_to_chanjo():
+    pass
+
+
+def _upload_to_customer_inbox():
     pass
