@@ -2040,11 +2040,13 @@ def context_config(
             "binary_path": "echo",
             "config_path": "mutacc-auto-stage-hg19.yaml",
             "padding": 300,
+            "reference": "hg19-genome.fa",
         },
         "mutacc_auto_hg38": {
             "binary_path": "echo",
             "config_path": "mutacc-auto-stage-hg38.yaml",
             "padding": 300,
+            "reference": "hg38-genome.fa",
         },
         "mutant": {
             "binary_path": "echo",
