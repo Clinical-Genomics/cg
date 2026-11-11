@@ -30,12 +30,25 @@ def _upload_to_customer_inbox():
     # Case id -> workflow
     # Case id -> Case delivery
     # Workflow -> File_types
-    # file_types + case_id -> case files in housekeeper
-    # for sample in case.samples:
-    #   file_types + sample_id -> sample files in housekeeper
     # Create ticket dir on caesar
-    # Create case dir
-    # Create sample dir
     #
 
+    pass
+
+
+def _link_analysis_files():
+    # file_types + case_id -> case files in housekeeper
+    # create case dir using the case name in ticket dir if non-existent
+    # Rename and link case files
+    # for sample in case.samples:
+    #   create sample dir with sample name in ticket dir if non-existent
+    #   file_types + sample_id -> sample analysis files in housekeeper
+    # .  Rename and link sample files
+    pass
+
+
+def _link_raw_data():
+    # for sample in case.samples:
+    #   create sample dir with sample name in ticket dir if non-existent
+    #   Get sample raw data from sample bundle
     pass
