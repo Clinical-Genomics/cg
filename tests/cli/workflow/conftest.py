@@ -212,7 +212,7 @@ class MockTB:
         """Override TrailblazerAPI get_analysis_status method to avoid default behaviour"""
         return None
 
-    def set_analysis_uploaded(self, case_id: str, uploaded_at: datetime):
+    def set_analysis_uploaded(self, analysis_id: int, uploaded_at: datetime):
         return None
 
 

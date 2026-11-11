@@ -58,9 +58,6 @@ def test_store_success(
     # GIVEN that the bundle is not present in Housekeeper
     assert not context.housekeeper_api.bundle(case_id)
 
-    # GIVEN that the analysis is not already stored in status_db
-    assert not context.status_db.get_case_by_internal_id(internal_id=case_id).analyses
-
     # mock update_analysis_as_completed_statusdb so we can assert is was called
     mocker.patch.object(NfAnalysisAPI, "update_analysis_as_completed_statusdb")
 

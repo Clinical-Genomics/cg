@@ -1,3 +1,5 @@
+from unittest.mock import create_autospec
+
 from cg.apps.tb.models import TrailblazerAnalysis
 
 
@@ -40,10 +42,10 @@ class MockTB:
     def is_latest_analysis_qc(self, case_id: str):
         return True
 
-    def set_analysis_status(self, case_id: str, status: str):
+    def set_analysis_status(self, analysis_id: int, status: str):
         return
 
-    def add_comment(self, case_id: str, comment: str):
+    def add_comment(self, analysis_id: int, comment: str):
         return
 
     def get_summaries(self, order_ids: list[int]):
