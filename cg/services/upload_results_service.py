@@ -1,4 +1,6 @@
-from cg.store.models import Case
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.constants import Workflow
+from cg.store.models import Case, UploadKeys
 from cg.store.store import Store
 
 
@@ -24,27 +26,31 @@ def _upload_to_chanjo():
     pass
 
 
-def _upload_to_customer_inbox():
+def _upload_to_customer_inbox(case: Case, housekeeper_api: HousekeeperAPI, status_db: Store):
     # Take a case id as input
     # Case id -> customer
     # Case id -> workflow
-    # Case id -> Case delivery
+    # Case id -> data delivery
     # Workflow -> File_types
+
     # Create ticket dir on caesar
-    #
+    _link_analysis_files(case=case, housekeeper_api=housekeeper_api, status_db=status_db)
+    _link_raw_data()
+    # Rsync case and samples dir to Caesar
 
-    pass
 
-
-def _link_analysis_files():
+def _link_analysis_files(case: Case, housekeeper_api: HousekeeperAPI, status_db: Store):
     # file_types + case_id -> case files in housekeeper
+    upload_keys: list[UploadKeys] = status_db.get_upload_keys(
+        workflow=case.data_analysis, upload_to_customer_inbox=True
+    )
+    # housekeeper_api.
     # create case dir using the case name in ticket dir if non-existent
     # Rename and link case files
     # for sample in case.samples:
     #   create sample dir with sample name in ticket dir if non-existent
     #   file_types + sample_id -> sample analysis files in housekeeper
-    # .  Rename and link sample files
-    pass
+    #   Rename and link sample files
 
 
 def _link_raw_data():

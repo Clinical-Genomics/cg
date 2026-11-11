@@ -1447,8 +1447,11 @@ class OrderTypeApplication(Base):
 
 class UploadKeys(Base):
     __tablename__ = "upload_keys"
-    file_type: str
-    scout_key: str | None
-    loqusdb_key: str | None
-    upload_to_customer_inbox: bool
-    chanjo_key: str
+    id: Mapped[PrimaryKeyInt]
+    file_type: Mapped[str]
+    workflow: Mapped[Workflow]
+    is_archived: Mapped[bool]
+    scout_key: Mapped[str | None]
+    loqusdb_key: Mapped[str | None]
+    upload_to_customer_inbox: Mapped[bool]
+    chanjo_key: Mapped[str]
