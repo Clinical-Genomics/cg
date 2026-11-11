@@ -20,16 +20,20 @@ class MutaccAutoAPI:
     """
 
     def __init__(self, config: MutaccAutoConfig):
-        self.config = config
-        self.mutacc_auto_config = config.config_path
-        self.mutacc_auto_binary = config.binary_path
-        self.mutacc_padding = config.padding
-        self.base_call = [self.mutacc_auto_binary, "--config-file", self.mutacc_auto_config]
+        self.mutacc_auto_config: str = config.config_path
+        self.mutacc_auto_binary: str = config.binary_path
+        self.mutacc_padding: int = config.padding
+        self.base_call: list[str] = [
+            self.mutacc_auto_binary,
+            "--config-file",
+            self.mutacc_auto_config,
+        ]
+        self.reference: Path = config.reference
 
     @property
     def reference_path(self) -> Path:
         """Return the path to the reference FASTA."""
-        return self.config.reference
+        return self.reference
 
     def extract_reads(self, case: dict, variants: dict):
         """
