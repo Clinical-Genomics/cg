@@ -25,4 +25,17 @@ def _upload_to_chanjo():
 
 
 def _upload_to_customer_inbox():
+    # Take a case id as input
+    # Case id -> customer
+    # Case id -> workflow
+    # Case id -> Case delivery
+    # Workflow -> File_types
+    # file_types + case_id -> case files in housekeeper
+    # for sample in case.samples:
+    #   file_types + sample_id -> sample files in housekeeper
+    # Create ticket dir on caesar
+    # Create case dir
+    # Create sample dir
+    #
+
     pass
