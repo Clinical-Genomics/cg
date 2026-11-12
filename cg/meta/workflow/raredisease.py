@@ -16,10 +16,9 @@ from cg.constants.nf_analysis import (
 )
 from cg.constants.scout import RAREDISEASE_CASE_TAGS
 from cg.constants.sequencing import SeqLibraryPrepCategory
-from cg.constants.subject import PlinkSex
-from cg.exc import MissingMultiqcSectionError
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.utils.chanjo1 import CoverageMetricsChanjo1, chanjo1_get_sample_coverage
+from cg.meta.workflow.utils.somalier import get_somalier_dict, set_somalier_sex_for_sample
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
@@ -66,7 +65,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             metric_conditions: dict[str, dict[str, Any]] = (
                 self.get_metric_conditions_by_prep_category(sample_id=sample.internal_id)
             )
-            self.set_somalier_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
+            set_somalier_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
             self.set_order_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
         else:
             metric_conditions = RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION.copy()
@@ -132,25 +131,9 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         metric_dicts: list[dict[str, Any]] = multiqc_json.report_general_stats_data
         list_copy: list[dict[str, Any]] = copy.deepcopy(metric_dicts)
         list_copy.append(self._get_multiqc_picard_dict(multiqc_json))
-        list_copy.append(self._get_somalier_dict(multiqc_json))
+        list_copy.append(get_somalier_dict(multiqc_json))
 
         return list_copy
-
-    @staticmethod
-    def _get_somalier_dict(multiqc_json: MultiqcDataJson) -> dict[str, Any]:
-        raw_data: dict[str, dict] = multiqc_json.report_saved_raw_data or {}
-
-        somalier_section = "multiqc_somalier"
-        if somalier_section not in raw_data:
-            raise MissingMultiqcSectionError(
-                f"Section `{somalier_section}` not found in MultiQC report_saved_raw_data"
-            )
-
-        somalier_raw = copy.deepcopy(raw_data[somalier_section])
-        for sample_id, metrics in somalier_raw.items():
-            somalier_raw[sample_id] = {f"somalier_{k}": v for k, v in metrics.items()}
-
-        return somalier_raw
 
     @staticmethod
     def _get_multiqc_picard_dict(multiqc_json: MultiqcDataJson) -> dict:
@@ -171,17 +154,6 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         ):
             metric_conditions["gender"]["threshold"] = sample.sex
         metric_conditions["predicted_sex_sex_check"]["threshold"] = sample.sex
-
-    @staticmethod
-    def set_somalier_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
-        if "somalier_sex" in metric_conditions:
-            metric_conditions["somalier_sex"]["threshold"] = float(
-                {
-                    "male": PlinkSex.MALE,
-                    "female": PlinkSex.FEMALE,
-                    "unknown": PlinkSex.UNKNOWN,
-                }[sample.sex]
-            )
 
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]
