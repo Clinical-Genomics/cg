@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from cg.constants import FileExtensions, Workflow
+from cg.constants import DataDelivery, FileExtensions, Workflow
 from cg.exc import CgDataError, MissingConfigFilesError
 from cg.io.controller import WriteFile
 from cg.meta.workflow.fastq import FastqHandler, MicrosaltFastqHandler
@@ -118,6 +118,28 @@ def test_get_case_config_single_sample(
         )
         # THEN the sample fastq path should be used
         mock_path.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "data_delivery, expected_qc_only",
+    [(DataDelivery.FASTQ_QC, True), (DataDelivery.FASTQ_QC_ANALYSIS, False)],
+)
+def test_get_case_config_delivery_type(
+    microsalt_configurator: MicrosaltConfigurator,
+    microsalt_case: Case,
+    data_delivery: DataDelivery,
+    expected_qc_only: bool,
+):
+    # GIVEN a microSALT case with the specified delivery type
+    microsalt_case.data_delivery = data_delivery
+
+    with mock.patch.object(Path, "exists", return_value=True):
+        # WHEN getting the case config
+        config: MicrosaltCaseConfig = microsalt_configurator.get_config(microsalt_case.internal_id)
+
+    # THEN QC-only mode and the start command reflect the delivery type
+    assert config.qc_only is expected_qc_only
+    assert ("--qc-only" in config.get_start_command().split()) is expected_qc_only
 
 
 def test_get_config_path_config_not_ready(
