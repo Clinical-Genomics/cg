@@ -8,13 +8,13 @@ from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.cli.workflow.nf_analysis import OPTION_RESUME, OPTION_REVISION
 from cg.constants import Workflow
 from cg.constants.cli_options import COMMENT, FORCE
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import CGConfig, TranaConfig
 from cg.services.analysis_qc_service import analysis_qc_service
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
-from cg.services.storing_service.storing_service import StoreAnalysisService
+from cg.services.storing_service.store_analysis_service import StoreAnalysisService
 
 LOG = logging.getLogger(__name__)
 
@@ -117,7 +117,12 @@ def store(cg_config: CGConfig, case_id: str, comment: str | None, force: bool) -
     # TODO: Create metics QC and validate in a good way
     #
     storing_service = StoreAnalysisService()
-    storing_service.store_output(root_directory=cg_config.trana_16s.root, case_id=case_id)
+    trana_16s_config = cast(TranaConfig, cg_config.trana_16s)
+    storing_service.store_analysis_output(
+        root_directory=trana_16s_config.root,
+        case_id=case_id,
+        housekeeper_api=cg_config.housekeeper_api,
+    )
 
 
 @trana_16s.command("qc-check")
