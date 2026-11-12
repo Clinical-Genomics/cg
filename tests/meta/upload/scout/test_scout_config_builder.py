@@ -574,6 +574,7 @@ def test_raredisease_config_builder(mocker: MockerFixture):
     peddy_check: File = create_autospec(File, full_path="check.peddy")
     peddy_ped: File = create_autospec(File, full_path="ped.peddy")
     peddy_sex: File = create_autospec(File, full_path="ped_sex.peddy")
+    somalier_samples: File = create_autospec(File, full_path="somalier.samples")
     smn_tsv: File = create_autospec(File, full_path="smn_tsv.tsv")
     snv_rank_model: File = create_autospec(File, full_path="/path/to/some/snv_file.-v1.0-.ini")
     sv_rank_model: File = create_autospec(File, full_path="/path/to/some/sv_file.-v2.0-.ini")
@@ -625,6 +626,8 @@ def test_raredisease_config_builder(mocker: MockerFixture):
             return saltshaker_report
         if tags == {"sex-check", "peddy"}:
             return peddy_sex
+        if tags == {"somalier", "relate-samples"}:
+            return somalier_samples
         if tags == {"smn-calling"}:
             return smn_tsv
         if tags == {"rank-model-snv"}:
@@ -812,6 +815,7 @@ def test_raredisease_config_builder(mocker: MockerFixture):
         peddy_check=peddy_check.full_path,
         peddy_ped=peddy_ped.full_path,
         peddy_sex=peddy_sex.full_path,
+        somalier_samples=somalier_samples.full_path,
         custom_images=CustomImages(
             case_images=CaseImages(
                 saltshaker=[
