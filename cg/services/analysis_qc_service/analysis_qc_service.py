@@ -13,7 +13,9 @@ def perform_qc(
     # TODO parse case deliverables file
     # TODO validate all mandatory files are in place (in the case directory)
     # TODO consider: checking for file integrity of some files
-    # TODO inform prodbio info via slack of failure and mark as failed in Trailblazer
+    # TODO inform prodbio info via slack (if high prio) of failure and mark as failed in Trailblazer
+    # TODO set TB to completed if success
+    # TODO publish event if success
     pass
 
     # multi_qc_parser = MultiQCParser(status_db)
