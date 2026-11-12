@@ -134,6 +134,7 @@ class Workflow(StrEnum):
     MIP_RNA = "mip-rna"
     MUTANT = "mutant"
     NALLO = "nallo"
+    ONCOFLOW = "oncoflow"
     RAREDISEASE = "raredisease"
     RAW_DATA = "raw-data"
     RNAFUSION = "rnafusion"
