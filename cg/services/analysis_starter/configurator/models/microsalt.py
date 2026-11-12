@@ -29,12 +29,16 @@ class MicrosaltCaseConfig(CaseConfig):
     environment: str
     fastq_directory: str
     pipeline_config_path: str
+    qc_only: bool = False
     workflow: Workflow = Workflow.MICROSALT
 
     def get_start_command(self) -> str:
-        return (
+        command = (
             "{conda_binary} run --name {environment} "
             "{binary} --config {pipeline_config_path} analyse {config_file} --input {fastq_directory}".format(
                 **self.model_dump()
             )
         )
+        if self.qc_only:
+            command += " --qc-only"
+        return command

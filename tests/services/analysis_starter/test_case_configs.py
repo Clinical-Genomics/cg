@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from cg.constants import Workflow
 from cg.constants.priority import SlurmQos
 from cg.services.analysis_starter.configurator.models.balsamic import BalsamicCaseConfig
@@ -7,7 +9,8 @@ from cg.services.analysis_starter.configurator.models.microsalt import Microsalt
 from cg.services.analysis_starter.configurator.models.mip_dna import MIPDNACaseConfig
 
 
-def test_microsalt_get_start_command():
+@pytest.mark.parametrize("qc_only", [False, True])
+def test_microsalt_get_start_command(qc_only: bool):
     # GIVEN a microSALT case config
     microsalt_case_config = MicrosaltCaseConfig(
         binary="/path/to/microsalt/binary",
@@ -17,6 +20,7 @@ def test_microsalt_get_start_command():
         environment="S_microsalt",
         fastq_directory="/path/to/microsalt_case/fastq",
         pipeline_config_path="/path/to/microsalt/pipeline/config.json",
+        qc_only=qc_only,
     )
 
     # WHEN getting the start command
@@ -28,6 +32,9 @@ def test_microsalt_get_start_command():
         f"{microsalt_case_config.binary} --config {microsalt_case_config.pipeline_config_path} analyse {microsalt_case_config.config_file} "
         f"--input {microsalt_case_config.fastq_directory}"
     )
+
+    if qc_only:
+        expected_command += " --qc-only"
 
     assert start_command == expected_command
 
