@@ -1,8 +1,12 @@
+import pytest
+from pytest_mock import MockerFixture
+
 from cg.constants import SexOptions
+from cg.exc import MissingMultiqcSectionError
 from cg.meta.workflow.nallo import NalloAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
-from cg.models.deliverables.metric_deliverables import MetricsBase
+from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 
 
 def test_parse_analysis(
@@ -29,3 +33,27 @@ def test_parse_analysis(
         "percent_duplicates": 1.7232745723252236,
         "predicted_sex": SexOptions.FEMALE,
     }
+
+
+def test_create_metrics_deliverables_content_missing_somalier_section(
+    nallo_context: CGConfig,
+    nallo_case_id: str,
+    mocker: MockerFixture,
+):
+    # GIVEN a Nallo analysis API
+    analysis_api: NalloAnalysisAPI = nallo_context.meta_apis["analysis_api"]
+
+    # GIVEN a MultiQC data JSON without a Somalier section
+    mocker.patch.object(
+        analysis_api,
+        "get_multiqc_data_json",
+        return_value=MultiqcDataJson(
+            report_general_stats_data=[],
+            report_saved_raw_data={"Some_not_empty_metrics": {}},
+        ),
+    )
+
+    # WHEN creating the metrics deliverables content
+    # THEN an error is raised with the missing section mentioned
+    with pytest.raises(MissingMultiqcSectionError, match="multiqc_somalier"):
+        analysis_api.create_metrics_deliverables_content(nallo_case_id)
