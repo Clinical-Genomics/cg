@@ -15,6 +15,7 @@ def perform_qc(
     # TODO consider: checking for file integrity of some files
     # TODO inform prodbio info via slack (if high prio) of failure and mark as failed in Trailblazer
     # TODO set TB to completed if success
+    # TODO set analysis completed_at in StatusDB to now if success
     # TODO publish event if success
     pass
 

@@ -29,5 +29,5 @@ def store_analysis_output(root_directory: Path, case_id: str, housekeeper_api: H
         raise MandatoryFileMissingError(f"Missing files: {missing_files}")
 
     housekeeper_api.add_bundle(bundle_data={"name": case_id, "files": existing_files})
-    # TODO: Update StatusDB
+    # TODO: Update analysis in StatusDB with housekeeper version
     # TODO:
