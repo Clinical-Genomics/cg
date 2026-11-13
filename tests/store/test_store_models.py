@@ -492,3 +492,67 @@ def test_application_expected_express_hifi_yield_zero_yield():
 
     # THEN the expected express hifi yield should be 0
     assert expected_express_hifi_yield == 0
+
+
+def _add_case_with_n_samples(
+    store: Store, helpers: StoreHelpers, case_id: str, nr_samples: int
+) -> Case:
+    """Add a case with exactly the given number of linked samples."""
+    case: Case = helpers.add_case(store=store, internal_id=case_id, name=case_id)
+    samples: list[Sample] = [
+        helpers.add_sample(store=store, internal_id=f"{case_id}_sample_{index}")
+        for index in range(nr_samples)
+    ]
+    helpers.relate_samples(base_store=store, case=case, samples=samples)
+    return case
+
+
+def test_case_sample_count(base_store: Store, helpers: StoreHelpers):
+    """Test that the sample count of a case is the number of linked samples."""
+    # GIVEN a case with three samples
+    case: Case = _add_case_with_n_samples(
+        store=base_store, helpers=helpers, case_id="trio", nr_samples=3
+    )
+
+    # WHEN getting the sample count
+    sample_count: int = case.sample_count
+
+    # THEN it is three
+    assert sample_count == 3
+
+
+def test_case_sample_count_no_samples():
+    """Test that a case without samples has a sample count of zero."""
+    # GIVEN a case without samples
+    case = Case()
+
+    # WHEN getting the sample count
+    sample_count: int = case.sample_count
+
+    # THEN it is zero
+    assert sample_count == 0
+
+
+def test_case_sample_count_query(base_store: Store, helpers: StoreHelpers):
+    """Test filtering and sorting cases on sample count in a query."""
+    # GIVEN cases with one, three and zero samples
+    _add_case_with_n_samples(store=base_store, helpers=helpers, case_id="single", nr_samples=1)
+    _add_case_with_n_samples(store=base_store, helpers=helpers, case_id="trio", nr_samples=3)
+    _add_case_with_n_samples(store=base_store, helpers=helpers, case_id="empty", nr_samples=0)
+
+    # WHEN filtering on cases with three samples
+    trio_cases: list[Case] = base_store._get_query(table=Case).filter(Case.sample_count == 3).all()
+
+    # THEN only the trio case is returned
+    assert [case.internal_id for case in trio_cases] == ["trio"]
+
+    # WHEN sorting the cases on sample count
+    sorted_cases: list[Case] = (
+        base_store._get_query(table=Case)
+        .filter(Case.internal_id.in_(["single", "trio", "empty"]))
+        .order_by(Case.sample_count)
+        .all()
+    )
+
+    # THEN the cases are ordered by number of samples
+    assert [case.internal_id for case in sorted_cases] == ["empty", "single", "trio"]

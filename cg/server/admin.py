@@ -15,7 +15,7 @@ from cg.models.orders.constants import OrderType
 from cg.server.app_config import app_config
 from cg.server.ext import applications_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
-from cg.store.models import Application
+from cg.store.models import Application, Case
 from cg.utils.flask.enum import SelectEnumField
 from cg.utils.number_formatter import Si
 
@@ -512,6 +512,7 @@ class CaseView(BaseView):
         "customer",
         "tickets",
         "action",
+        "sample_count",
         "priority",
         "ordered_at",
         "aggregated_sequencing_qc",
@@ -528,7 +529,9 @@ class CaseView(BaseView):
         "data_analysis",
         "data_delivery",
         "tickets",
+        "sample_count",
     ]
+    column_labels = {"sample_count": "Sample count"}
     column_formatters = {
         "customer": view_customer_link,
         "internal_id": view_case_sample_link,
@@ -557,6 +560,12 @@ class CaseView(BaseView):
         "data_analysis": SelectEnumField(enum_class=Workflow),
         "data_delivery": SelectEnumField(enum_class=DataDelivery),
     }
+
+    def scaffold_sortable_columns(self) -> dict:
+        """Add the computed sample count to the default sortable columns."""
+        columns: dict = super().scaffold_sortable_columns()
+        columns["sample_count"] = Case.sample_count
+        return columns
 
     @staticmethod
     def view_case_link(unused1, unused2, model, unused3):
