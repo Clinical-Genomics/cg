@@ -7,22 +7,24 @@ from cg.services.orders.order_service.models import OrderQueryParams
 @pytest.mark.parametrize(
     "workflow, expected_workflows",
     [
-        # Balsamic adds UMI
         ([Workflow.BALSAMIC], [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI]),
-        # Other workflows remain unchanged
         ([Workflow.MIP_DNA], [Workflow.MIP_DNA]),
-        # Balsamic expansion preserves RNAfusion
         (
             [Workflow.BALSAMIC, Workflow.RNAFUSION],
             [Workflow.BALSAMIC, Workflow.RNAFUSION, Workflow.BALSAMIC_UMI],
         ),
-        # Already-selected UMI is not duplicated
         (
             [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI],
             [Workflow.BALSAMIC, Workflow.BALSAMIC_UMI],
         ),
-        # An empty workflow list stays empty
         ([], []),
+    ],
+    ids=[
+        "balsamic-adds-umi",
+        "other-workflows-unchanged",
+        "balsamic-preserves-rnafusion",
+        "umi-not-duplicated",
+        "empty-workflows",
     ],
 )
 def test_order_query_params_field_validator(
