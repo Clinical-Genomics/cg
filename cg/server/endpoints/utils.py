@@ -8,6 +8,7 @@ from flask import abort, current_app, g, jsonify, make_response, request
 from google.auth import exceptions
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
+from werkzeug.datastructures import MultiDict
 
 from cg.server.ext import db
 from cg.store.models import User
@@ -16,6 +17,17 @@ LOG = logging.getLogger(__name__)
 
 session = requests.session()
 cached_session = cachecontrol.CacheControl(session)
+
+
+def parse_args(args: MultiDict) -> dict:
+    """Parse bracket-suffixed query arguments as lists and other arguments as scalars."""
+    parsed = {}
+    for key in args.keys():
+        if key.endswith("[]"):
+            parsed[key[:-2]] = args.getlist(key)
+        else:
+            parsed[key] = args.get(key)
+    return parsed
 
 
 def verify_google_token(token):
