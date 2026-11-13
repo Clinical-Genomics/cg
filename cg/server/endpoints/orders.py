@@ -31,7 +31,7 @@ from cg.server.dto.orders.order_delivery_update_request import OrderOpenUpdateRe
 from cg.server.dto.orders.order_patch_request import OrderOpenPatch
 from cg.server.dto.orders.orders_request import OrdersRequest
 from cg.server.dto.orders.orders_response import Order, OrdersResponse
-from cg.server.endpoints.utils import before_request, parse_args
+from cg.server.endpoints.utils import before_request
 from cg.server.ext import (
     db,
     delivery_message_service,
@@ -53,7 +53,10 @@ LOG = logging.getLogger(__name__)
 @ORDERS_BLUEPRINT.route("/orders")
 def get_orders():
     """Return the latest orders."""
-    query_params: dict = parse_args(request.args)
+    query_params = {
+        **request.args.to_dict(),
+        "workflows": request.args.getlist("workflows[]"),
+    }
     try:
         data = OrdersRequest.model_validate(query_params)
     except RequestValidationError as error:
