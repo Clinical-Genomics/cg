@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 from cg.apps.tb.api import TrailblazerAPI
+from cg.constants.tb import AnalysisStatus
 from cg.exc import MandatoryFileMissingError
 from cg.io.yaml import read_yaml
 from cg.store.models import Analysis
@@ -16,8 +17,8 @@ def perform_qc(
     # TODO parse case deliverables file
     # TODO consider: checking for file integrity of some files
     # TODO inform prodbio info via slack (if high prio) of failure and mark as failed in Trailblazer
-    # TODO set TB to completed if success
-    # TODO set analysis completed_at in StatusDB to now if success
+    # TODO validate that there is content in the case deliverables file
+    # TODO set analysis completed_at in StatusDB to now if success <--- (New behavior?)
     # TODO publish event if success
     analysis: Analysis = status_db.get_analysis_by_entry_id_strict(analysis_id)
     case_id = analysis.case_internal_id
@@ -32,3 +33,5 @@ def perform_qc(
 
     if missing_files:
         raise MandatoryFileMissingError(f"Missing files: {missing_files}")
+
+    trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.COMPLETED)
