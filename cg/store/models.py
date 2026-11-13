@@ -16,7 +16,7 @@ from sqlalchemy import (
     Table,
 )
 from sqlalchemy import Text as SLQText
-from sqlalchemy import UniqueConstraint, orm, select, types
+from sqlalchemy import UniqueConstraint, func, orm, select, types
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
@@ -545,6 +545,21 @@ class Case(Base, PriorityMixin):
     @panels.setter
     def panels(self, panel_list: list[str]):
         self._panels = ",".join(panel_list) if panel_list else None
+
+    @hybrid_property
+    def sample_count(self) -> int:
+        """Return the number of samples linked to the case."""
+        return len(self.links)
+
+    @sample_count.expression
+    @classmethod
+    def sample_count(cls):
+        return (
+            select(func.count(CaseSample.id))
+            .where(CaseSample.case_id == cls.id)
+            .scalar_subquery()
+            .label("sample_count")
+        )
 
     @property
     def latest_ticket(self) -> str | None:
