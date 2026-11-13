@@ -62,7 +62,7 @@ def test_orders_endpoint(
     # THEN the response should be successful
     assert response.status_code == HTTPStatus.OK
 
-    # THEN the response contains the correct number of orders
+    # THEN the response contains the correct orders
     assert len(response.json["orders"]) == expected_orders
     assert response.json["total_count"] == len(expected_ids)
     returned_ids = {item["id"] for item in response.json["orders"]}
