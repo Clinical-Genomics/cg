@@ -8,13 +8,16 @@ from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.cli.workflow.nf_analysis import OPTION_RESUME, OPTION_REVISION
 from cg.constants import Workflow
 from cg.constants.cli_options import COMMENT, FORCE
+from cg.exc import AnalysisDoesNotExistError
 from cg.models.cg_config import CGConfig, TranaConfig
 from cg.services.analysis_qc_service import analysis_qc_service
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
+from cg.services.storing_service import store_analysis_service
 from cg.services.storing_service.store_analysis_service import StoreAnalysisService
+from cg.store.models import Analysis, Case
 
 LOG = logging.getLogger(__name__)
 
@@ -107,21 +110,25 @@ def start_available(cg_config: CGConfig) -> None:
 @click.pass_obj
 def store(cg_config: CGConfig, case_id: str, comment: str | None, force: bool) -> None:
     """
-    Store deliverable files in Housekeeper after meeting QC metrics criteria.
+    Store deliverable files in Housekeeper. No QC or file validation is performed.
 
     Raises:
+        AnalysisDoesNotExistError: if the case has no analyses
         click.Abort: If an error occurs during the deliverables file generation, metrics
         validation, or storage processes.
     """
     # TODO: What checks need to be performed before storing, if any?
-    # TODO: Create metics QC and validate in a good way
     #
-    storing_service = StoreAnalysisService()
+    case: Case = cg_config.status_db.get_case_by_internal_id_strict(case_id)
+    latest_analysis: Analysis | None = case.latest_created_analysis
+    if not latest_analysis:
+        raise AnalysisDoesNotExistError(f"Case {case_id} has no analysis to store")
     trana_16s_config = cast(TranaConfig, cg_config.trana_16s)
-    storing_service.store_analysis_output(
+    store_analysis_service.store_analysis_output(
+        analysis_id=latest_analysis.id,
         root_directory=trana_16s_config.root,
-        case_id=case_id,
         housekeeper_api=cg_config.housekeeper_api,
+        status_db=cg_config.status_db,
     )
 
 

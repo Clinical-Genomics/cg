@@ -575,6 +575,10 @@ class Case(Base, PriorityMixin):
         return sorted_orders[0]
 
     @property
+    def latest_created_analysis(self) -> Analysis | None:
+        return self.analyses[0] if self.analyses else None
+
+    @property
     def latest_completed_analysis(self) -> Analysis | None:
         """Returns the latest completed analysis for this case."""
         valid_analyses: list[Analysis] = [a for a in self.analyses if a.completed_at is not None]

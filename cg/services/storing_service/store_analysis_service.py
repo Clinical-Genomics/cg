@@ -3,10 +3,19 @@ from pathlib import Path
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import MandatoryFileMissingError
 from cg.io.yaml import read_yaml
+from cg.store.models import Analysis
+from cg.store.store import Store
 
 
-def store_analysis_output(root_directory: Path, case_id: str, housekeeper_api: HousekeeperAPI):
-    """Store analysis output in Housekeeper."""
+def store_analysis_output(
+    analysis_id: int, root_directory: Path, housekeeper_api: HousekeeperAPI, status_db: Store
+):
+    """Store analysis output in Housekeeper.
+    :param analysis_id:
+    :param status_db:
+    """
+    analysis: Analysis = status_db.get_analysis_by_entry_id_strict(analysis_id)
+    case_id: str = analysis.case_internal_id
     # TODO find a better location for the definition of this path
     case_deliverables_file = Path(root_directory, case_id, f"{case_id}_deliverables.yaml")
     case_deliverables: list[dict] = read_yaml(case_deliverables_file)
