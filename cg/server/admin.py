@@ -512,6 +512,7 @@ class CaseView(BaseView):
         "customer",
         "tickets",
         "action",
+        "sample_count",
         "priority",
         "ordered_at",
         "aggregated_sequencing_qc",
@@ -519,7 +520,6 @@ class CaseView(BaseView):
         "data_delivery",
         "_panels",
         "comment",
-        "sample_count",
     ]
     column_exclude_list = ["created_at", "_cohorts", "synopsis"]
     column_filters = [
@@ -531,7 +531,7 @@ class CaseView(BaseView):
         "tickets",
         "sample_count",
     ]
-    column_labels = {"sample_count": "Number of samples"}
+    column_labels = {"sample_count": "Sample count"}
     column_formatters = {
         "customer": view_customer_link,
         "internal_id": view_case_sample_link,
