@@ -1,16 +1,18 @@
 from pathlib import Path
+from unittest.mock import Mock
 
+import pytest
 from pyfakefs.fake_filesystem import FakeFilesystem
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.exc import MandatoryFileMissingError
 from cg.io.yaml import write_yaml_stream
 from cg.services.storing_service.store_analysis_service import store_analysis_output
 from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def test_store_pipeline_output_success(fs: FakeFilesystem):
-    # GIVEN a case id with all mandatory files present
-    # GIVEN a case_deliverables file for that given case
+    # GIVEN a case_deliverables file for a given case
     contents = [
         {
             "file_type": "the_first_type_of_file",
@@ -33,6 +35,8 @@ def test_store_pipeline_output_success(fs: FakeFilesystem):
     ]
     contents = write_yaml_stream(contents)
     fs.create_file("/root_directory/case_id/case_id_deliverables.yaml", contents=contents)
+
+    # GIVEN that the case has all mandatory files present
     fs.create_file("/root_directory/case_id/file2.txt")
     fs.create_file("/root_directory/case_id/file3.txt")
     fs.create_file("/root_directory/case_id/file4.txt")
@@ -46,6 +50,7 @@ def test_store_pipeline_output_success(fs: FakeFilesystem):
         case_id="case_id",
         housekeeper_api=housekeeper_api.as_type,
     )
+
     # THEN the housekeeper bundle for the case should have been created
     expected_bundle_data = {
         "name": "case_id",
@@ -68,3 +73,30 @@ def test_store_pipeline_output_success(fs: FakeFilesystem):
         ],
     }
     housekeeper_api.as_mock.add_bundle.assert_called_once_with(bundle_data=expected_bundle_data)
+
+    # THEN
+
+
+def test_store_output_pipeline_output_missing_mandatory_file(fs: FakeFilesystem):
+    # GIVEN a case with deliverables file
+    contents = [
+        {
+            "file_type": "the_first_type_of_file",
+            "id": "case_id",
+            "paths": ["/root_directory/case_id/file1.txt"],
+            "mandatory": True,
+        }
+    ]
+    contents = write_yaml_stream(contents)
+    fs.create_file("/root_directory/case_id/case_id_deliverables.yaml", contents=contents)
+
+    # GIVEN that a mandatory file does not exist
+
+    # WHEN storing the pipeline outputs
+    # THEN a MandatoryFileMissingError was raised
+    with pytest.raises(MandatoryFileMissingError):
+        store_analysis_output(
+            root_directory=Path("/root_directory"),
+            case_id="case_id",
+            housekeeper_api=Mock(),
+        )
