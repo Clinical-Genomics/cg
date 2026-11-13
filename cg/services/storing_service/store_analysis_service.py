@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import cast
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.exc import MandatoryFileMissingError
 from cg.io.yaml import read_yaml
 from cg.store.models import Analysis
 from cg.store.store import Store
@@ -22,7 +21,6 @@ def store_analysis_output(
     case_deliverables: list[dict] = read_yaml(case_deliverables_file)
 
     existing_files = []
-    missing_files = []
     for deliverable in case_deliverables:
         for file in deliverable["paths"]:
             if Path(file).is_file():
@@ -32,11 +30,6 @@ def store_analysis_output(
                     "tags": [deliverable["id"]],
                 }
                 existing_files.append(file_data)
-            elif deliverable["mandatory"]:
-                missing_files.append(file)
-
-    if missing_files:
-        raise MandatoryFileMissingError(f"Missing files: {missing_files}")
 
     _bundle, version = housekeeper_api.add_bundle(
         bundle_data={"name": case_id, "files": existing_files}

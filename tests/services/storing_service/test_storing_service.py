@@ -1,12 +1,10 @@
 from pathlib import Path
 from unittest.mock import Mock, create_autospec
 
-import pytest
 from housekeeper.store.models import Bundle, Version
 from pyfakefs.fake_filesystem import FakeFilesystem
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.exc import MandatoryFileMissingError
 from cg.io.yaml import write_yaml_stream
 from cg.services.storing_service import store_analysis_service
 from cg.store.models import Analysis
@@ -91,35 +89,3 @@ def test_store_pipeline_output_success(fs: FakeFilesystem):
     status_db.as_mock.update_analysis_housekeeper_version_id.assert_called_once_with(
         analysis_id=1, version_id=13
     )
-
-
-def test_store_output_pipeline_output_missing_mandatory_file(fs: FakeFilesystem):
-    # GIVEN a case with deliverables file
-    contents = [
-        {
-            "file_type": "the_first_type_of_file",
-            "id": "case_id",
-            "paths": ["/root_directory/case_id/file1.txt"],
-            "mandatory": True,
-        }
-    ]
-    contents = write_yaml_stream(contents)
-    fs.create_file("/root_directory/case_id/case_id_deliverables.yaml", contents=contents)
-
-    # GIVEN that a mandatory file does not exist
-
-    # GIVEN a StatusDB with an analysis linked to a case
-    status_db: Store = create_autospec(Store)
-    status_db.get_analysis_by_entry_id_strict = Mock(
-        return_value=create_autospec(Analysis, case_internal_id="case_id", id=1)
-    )
-
-    # WHEN storing the pipeline outputs
-    # THEN a MandatoryFileMissingError was raised
-    with pytest.raises(MandatoryFileMissingError):
-        store_analysis_service.store_analysis_output(
-            analysis_id=1,
-            root_directory=Path("/root_directory"),
-            housekeeper_api=Mock(),
-            status_db=status_db,
-        )

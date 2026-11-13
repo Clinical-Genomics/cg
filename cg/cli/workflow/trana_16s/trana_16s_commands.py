@@ -16,7 +16,6 @@ from cg.services.analysis_starter.configurator.implementations.nextflow import N
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
 from cg.services.storing_service import store_analysis_service
-from cg.services.storing_service.store_analysis_service import StoreAnalysisService
 from cg.store.models import Analysis, Case
 
 LOG = logging.getLogger(__name__)
