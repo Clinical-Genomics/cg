@@ -141,8 +141,8 @@ def perform_qc_check(cg_config: CGConfig, case_id: str) -> None:
 
     """
     analysis_qc_service.perform_qc(
-        case_id=case_id,
-        status_db=cg_config.status_db,
         root_directory=cg_config.trana_16s.root,
+        status_db=cg_config.status_db,
         trailblazer_api=cg_config.trailblazer_api,
+        analysis_id=1,
     )

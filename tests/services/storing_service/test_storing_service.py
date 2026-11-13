@@ -8,7 +8,7 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.exc import MandatoryFileMissingError
 from cg.io.yaml import write_yaml_stream
-from cg.services.storing_service.store_analysis_service import store_analysis_output
+from cg.services.storing_service import store_analysis_service
 from cg.store.models import Analysis
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
@@ -57,7 +57,7 @@ def test_store_pipeline_output_success(fs: FakeFilesystem):
     )
 
     # WHEN storing the pipeline outputs
-    store_analysis_output(
+    store_analysis_service.store_analysis_output(
         analysis_id=1,
         root_directory=Path("/root_directory"),
         housekeeper_api=housekeeper_api.as_type,
@@ -117,7 +117,7 @@ def test_store_output_pipeline_output_missing_mandatory_file(fs: FakeFilesystem)
     # WHEN storing the pipeline outputs
     # THEN a MandatoryFileMissingError was raised
     with pytest.raises(MandatoryFileMissingError):
-        store_analysis_output(
+        store_analysis_service.store_analysis_output(
             analysis_id=1,
             root_directory=Path("/root_directory"),
             housekeeper_api=Mock(),
