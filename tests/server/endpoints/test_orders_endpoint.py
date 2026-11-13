@@ -39,11 +39,12 @@ def test_orders_endpoint(
     """Tests that orders are returned from the orders endpoint"""
     # GIVEN a store with three orders, two of which are MIP-DNA and the last is BALSAMIC
 
-    selected_workflows = workflows or ([workflow] if workflow else [])
-    expected_ids = {
-        item.id
-        for item in (order, order_another, order_balsamic)
-        if not selected_workflows or item.workflow in selected_workflows
+    # GIVEN the workflows selected for filtering the orders
+    selected_workflows: list[str] = workflows or ([workflow] if workflow else [])
+    expected_ids: set[int] = {
+        order_entry.id
+        for order_entry in (order, order_another, order_balsamic)
+        if not selected_workflows or order_entry.workflow in selected_workflows
     }
 
     # WHEN a request is made to get all orders
