@@ -40,7 +40,7 @@ def test_orders_endpoint(
     # GIVEN a store with three orders, two of which are MIP-DNA and the last is BALSAMIC
 
     # GIVEN the workflows selected for filtering the orders
-    selected_workflows: list[str] = workflows or ([workflow] if workflow else [])
+    selected_workflows: list[str] = [workflow] if workflow else workflows
     expected_ids: set[int] = {
         order_entry.id
         for order_entry in (order, order_another, order_balsamic)
