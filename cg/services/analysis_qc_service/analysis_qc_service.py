@@ -2,6 +2,8 @@ import logging
 from pathlib import Path
 
 from cg.apps.tb.api import TrailblazerAPI
+from cg.exc import MandatoryFileMissingError
+from cg.io.yaml import read_yaml
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -17,7 +19,17 @@ def perform_qc(
     # TODO set TB to completed if success
     # TODO set analysis completed_at in StatusDB to now if success
     # TODO publish event if success
-    pass
+    case_deliverables_file = Path(root_directory, case_id, f"{case_id}_deliverables.yaml")
+    case_deliverables: list[dict] = read_yaml(case_deliverables_file)
+
+    missing_files = []
+    for deliverable in case_deliverables:
+        for file in deliverable["paths"]:
+            if deliverable["mandatory"] and not Path(file).is_file():
+                missing_files.append(file)
+
+    if missing_files:
+        raise MandatoryFileMissingError(f"Missing files: {missing_files}")
 
     # multi_qc_parser = MultiQCParser(status_db)
     # file = Path(root_directory, case_id, MultiQC.MULTIQC, MultiQC.MULTIQC_DATA, "multiqc_data.json")

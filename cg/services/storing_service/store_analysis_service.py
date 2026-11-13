@@ -44,3 +44,4 @@ def store_analysis_output(
     status_db.update_analysis_housekeeper_version_id(
         analysis_id=analysis_id, version_id=cast(int, version.id)
     )
+    # TODO: submit event?
