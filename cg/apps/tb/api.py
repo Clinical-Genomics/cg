@@ -189,6 +189,7 @@ class TrailblazerAPI:
 
     def set_analysis_status(self, case_id: str, status: str) -> None:
         """Set an analysis to a given status."""
+        # TODO: it would be greate if this uses analysis_id instead of case_id
         request_body = {"case_id": case_id, "status": status}
 
         LOG.debug(f"Request body: {request_body}")

@@ -129,6 +129,7 @@ class HousekeeperAPI:
         tags: set[str] = None,
         version: int | None = None,
         path: str = None,
+        # TODO: Add support for file types
     ) -> Query:
         """Fetch files."""
         return self._store.get_files(
