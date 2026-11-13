@@ -13,15 +13,21 @@ def test_store_pipeline_output_success(fs: FakeFilesystem):
     # GIVEN a case_deliverables file for that given case
     contents = [
         {
-            "file_type": "a_type_of_file",
+            "file_type": "the_first_type_of_file",
             "id": "case_id",
             "paths": ["/root_directory/case_id/file1.txt"],
             "mandatory": False,
         },
         {
-            "file_type": "a_type_of_file",
-            "id": "case_id",
+            "file_type": "a_second_type_of_file",
+            "id": "sample_id",
             "paths": ["/root_directory/case_id/file2.txt", "/root_directory/case_id/file3.txt"],
+            "mandatory": True,
+        },
+        {
+            "file_type": "a_third_type_of_file",
+            "id": "case_id",
+            "paths": ["/root_directory/case_id/file4.txt"],
             "mandatory": True,
         },
     ]
@@ -29,6 +35,7 @@ def test_store_pipeline_output_success(fs: FakeFilesystem):
     fs.create_file("/root_directory/case_id/case_id_deliverables.yaml", contents=contents)
     fs.create_file("/root_directory/case_id/file2.txt")
     fs.create_file("/root_directory/case_id/file3.txt")
+    fs.create_file("/root_directory/case_id/file4.txt")
 
     # GIVEN a HousekeeperAPI
     housekeeper_api: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
@@ -45,12 +52,17 @@ def test_store_pipeline_output_success(fs: FakeFilesystem):
         "files": [
             {
                 "path": "/root_directory/case_id/file2.txt",
-                "file_type": "a_type_of_file",
-                "tags": ["case_id"],
+                "file_type": "a_second_type_of_file",
+                "tags": ["sample_id"],
             },
             {
                 "path": "/root_directory/case_id/file3.txt",
-                "file_type": "a_type_of_file",
+                "file_type": "a_second_type_of_file",
+                "tags": ["sample_id"],
+            },
+            {
+                "path": "/root_directory/case_id/file4.txt",
+                "file_type": "a_third_type_of_file",
                 "tags": ["case_id"],
             },
         ],
