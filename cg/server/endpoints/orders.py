@@ -5,6 +5,7 @@ from http import HTTPStatus
 from pathlib import Path
 
 from flask import Blueprint, abort, g, jsonify, make_response, request
+from pydantic import ValidationError as RequestValidationError
 from pydantic.v1 import ValidationError
 from requests.exceptions import HTTPError
 from sqlalchemy.exc import IntegrityError
@@ -52,7 +53,16 @@ LOG = logging.getLogger(__name__)
 @ORDERS_BLUEPRINT.route("/orders")
 def get_orders():
     """Return the latest orders."""
-    data = OrdersRequest.model_validate(request.args.to_dict())
+    query_params = {
+        **request.args.to_dict(),
+        "workflows": request.args.getlist("workflows[]"),
+    }
+    try:
+        data = OrdersRequest.model_validate(query_params)
+    except RequestValidationError as error:
+        message = "; ".join(item["msg"] for item in error.errors())
+        return jsonify(error=message), HTTPStatus.BAD_REQUEST
+
     response: OrdersResponse = order_service.get_orders(data)
     return make_response(response.model_dump())
 
