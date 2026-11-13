@@ -2,6 +2,7 @@ from pathlib import Path
 from unittest.mock import Mock, create_autospec
 
 import pytest
+from housekeeper.store.models import Bundle, Version
 from pyfakefs.fake_filesystem import FakeFilesystem
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -45,6 +46,9 @@ def test_store_pipeline_output_success(fs: FakeFilesystem):
 
     # GIVEN a HousekeeperAPI
     housekeeper_api: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
+    housekeeper_api.as_type.add_bundle = Mock(
+        return_value=(create_autospec(Bundle), create_autospec(Version, id=13))
+    )
 
     # GIVEN a StatusDB with an analysis linked to a case
     status_db: TypedMock[Store] = create_typed_mock(Store)
@@ -84,6 +88,9 @@ def test_store_pipeline_output_success(fs: FakeFilesystem):
     housekeeper_api.as_mock.add_bundle.assert_called_once_with(bundle_data=expected_bundle_data)
 
     # THEN the analysis in StatusDB was updated with a Housekeeper version
+    status_db.as_mock.update_analysis_housekeeper_version_id.assert_called_once_with(
+        analysis_id=1, version_id=13
+    )
 
 
 def test_store_output_pipeline_output_missing_mandatory_file(fs: FakeFilesystem):
@@ -101,6 +108,12 @@ def test_store_output_pipeline_output_missing_mandatory_file(fs: FakeFilesystem)
 
     # GIVEN that a mandatory file does not exist
 
+    # GIVEN a StatusDB with an analysis linked to a case
+    status_db: Store = create_autospec(Store)
+    status_db.get_analysis_by_entry_id_strict = Mock(
+        return_value=create_autospec(Analysis, case_internal_id="case_id", id=1)
+    )
+
     # WHEN storing the pipeline outputs
     # THEN a MandatoryFileMissingError was raised
     with pytest.raises(MandatoryFileMissingError):
@@ -108,5 +121,5 @@ def test_store_output_pipeline_output_missing_mandatory_file(fs: FakeFilesystem)
             analysis_id=1,
             root_directory=Path("/root_directory"),
             housekeeper_api=Mock(),
-            status_db=None,
+            status_db=status_db,
         )
