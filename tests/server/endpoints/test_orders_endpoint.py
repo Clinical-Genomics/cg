@@ -67,7 +67,7 @@ def test_orders_endpoint(
     assert response.json["total_count"] == len(expected_ids)
     returned_ids = {item["id"] for item in response.json["orders"]}
     if limit and limit < len(expected_ids):
-        assert returned_ids <= expected_ids
+        assert returned_ids.issubset(expected_ids)
     else:
         assert returned_ids == expected_ids
 
