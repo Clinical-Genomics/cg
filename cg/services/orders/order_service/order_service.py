@@ -41,6 +41,10 @@ class OrderService:
 
     @staticmethod
     def _get_order_query_params(orders_request: OrdersRequest) -> OrderQueryParams:
+        workflows: list[str] = [workflow.value for workflow in orders_request.workflows]
+        if orders_request.workflow:
+            workflows = [orders_request.workflow]
+
         return OrderQueryParams(
             page=orders_request.page,
             page_size=orders_request.page_size,
@@ -48,10 +52,7 @@ class OrderService:
             is_open=orders_request.is_open,
             sort_field=orders_request.sort_field,
             sort_order=orders_request.sort_order,
-            workflows=(
-                [workflow.value for workflow in orders_request.workflows]
-                or ([orders_request.workflow] if orders_request.workflow else [])
-            ),
+            workflows=workflows,
         )
 
     @staticmethod
