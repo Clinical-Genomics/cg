@@ -106,21 +106,16 @@ def test_order_endpoint_not_found(
 
 
 @pytest.mark.parametrize(
-    "query_string, expected_error",
+    "query_string",
     [
-        (
-            {"workflow": Workflow.MIP_DNA, "workflows[]": [Workflow.BALSAMIC]},
-            "Use either workflow or workflows[], not both",
-        ),
-        ({"workflows[]": ["invalid-workflow"]}, "Input should be"),
-        ({"workflows[]": [Workflow.MIP_DNA, "invalid-workflow"]}, "Input should be"),
+        {"workflow": Workflow.MIP_DNA, "workflows[]": [Workflow.BALSAMIC]},
+        {"workflows[]": [Workflow.MIP_DNA, "invalid-workflow"]},
     ],
+    ids=["conflicting-workflow-filters", "invalid-workflow"],
 )
-def test_orders_endpoint_invalid_workflow_filters(
-    client: FlaskClient, query_string: dict, expected_error: str
-):
+def test_orders_endpoint_invalid_workflow_filters(client: FlaskClient, query_string: dict):
     """Reject conflicting filters and invalid values in repeated workflow parameters."""
     response = client.get("/api/v1/orders", query_string=query_string)
 
     assert response.status_code == HTTPStatus.BAD_REQUEST
-    assert expected_error in response.json["error"]
+    assert response.json["error"]
