@@ -124,7 +124,11 @@ def test_order_endpoint_not_found(
 )
 def test_orders_endpoint_invalid_workflow_filters(client: FlaskClient, query_string: dict):
     """Reject conflicting filters and invalid values in repeated workflow parameters."""
+    # GIVEN conflicting workflow filters or an invalid workflow value
+
+    # WHEN requesting orders with those filters
     response = client.get("/api/v1/orders", query_string=query_string)
 
+    # THEN the response is HTTP 400 with a JSON error
     assert response.status_code == HTTPStatus.BAD_REQUEST
     assert response.json["error"]
