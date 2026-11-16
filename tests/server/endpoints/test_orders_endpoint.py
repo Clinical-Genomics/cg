@@ -11,18 +11,24 @@ from cg.store.models import Order
 
 
 @pytest.mark.parametrize(
-    "limit, workflow, workflows, expected_orders",
+    "limit, workflow, workflows, expected_order_names, expected_total",
     [
-        (None, Workflow.MIP_DNA, [], 2),
-        (1, Workflow.MIP_DNA, [], 1),
-        (2, Workflow.MIP_DNA, [], 2),
-        (None, Workflow.BALSAMIC, [], 1),
-        (None, Workflow.FLUFFY, [], 0),
-        (None, None, [], 3),
-        (None, None, [Workflow.MIP_DNA], 2),
-        (None, None, [Workflow.MIP_DNA, Workflow.BALSAMIC], 3),
-        (None, None, [Workflow.BALSAMIC, Workflow.FLUFFY], 1),
-        (1, None, [Workflow.MIP_DNA, Workflow.BALSAMIC], 1),
+        (None, Workflow.MIP_DNA, [], ["order", "order_another"], 2),
+        (1, Workflow.MIP_DNA, [], ["order"], 2),
+        (2, Workflow.MIP_DNA, [], ["order", "order_another"], 2),
+        (None, Workflow.BALSAMIC, [], ["order_balsamic"], 1),
+        (None, Workflow.FLUFFY, [], [], 0),
+        (None, None, [], ["order", "order_another", "order_balsamic"], 3),
+        (None, None, [Workflow.MIP_DNA], ["order", "order_another"], 2),
+        (
+            None,
+            None,
+            [Workflow.MIP_DNA, Workflow.BALSAMIC],
+            ["order", "order_another", "order_balsamic"],
+            3,
+        ),
+        (None, None, [Workflow.BALSAMIC, Workflow.FLUFFY], ["order_balsamic"], 1),
+        (1, None, [Workflow.MIP_DNA, Workflow.BALSAMIC], ["order"], 3),
     ],
 )
 def test_orders_endpoint(
@@ -33,19 +39,19 @@ def test_orders_endpoint(
     limit: int | None,
     workflow: str | None,
     workflows: list[str],
-    expected_orders: int,
+    expected_order_names: list[str],
+    expected_total: int,
     analysis_summaries: list[AnalysisSummary],
 ):
     """Tests that orders are returned from the orders endpoint"""
     # GIVEN a store with three orders, two of which are MIP-DNA and the last is BALSAMIC
 
-    # GIVEN the workflows selected for filtering the orders
-    selected_workflows: list[str] = [workflow] if workflow else workflows
-    expected_ids: set[int] = {
-        order_entry.id
-        for order_entry in (order, order_another, order_balsamic)
-        if not selected_workflows or order_entry.workflow in selected_workflows
+    orders_by_name = {
+        "order": order,
+        "order_another": order_another,
+        "order_balsamic": order_balsamic,
     }
+    expected_returned_ids = {orders_by_name[name].id for name in expected_order_names}
 
     # WHEN a request is made to get all orders
     endpoint: str = "/api/v1/orders"
@@ -56,20 +62,23 @@ def test_orders_endpoint(
     ):
         response = client.get(
             endpoint,
-            query_string={"pageSize": limit, "workflow": workflow, "workflows[]": workflows},
+            query_string={
+                "pageSize": limit,
+                "workflow": workflow,
+                "workflows[]": workflows,
+                "sortField": "id",
+                "sortOrder": "asc",
+            },
         )
 
     # THEN the response should be successful
     assert response.status_code == HTTPStatus.OK
 
     # THEN the response contains the correct orders
-    assert len(response.json["orders"]) == expected_orders
-    assert response.json["total_count"] == len(expected_ids)
+    assert len(response.json["orders"]) == len(expected_order_names)
+    assert response.json["total_count"] == expected_total
     returned_ids = {item["id"] for item in response.json["orders"]}
-    if limit and limit < len(expected_ids):
-        assert returned_ids.issubset(expected_ids)
-    else:
-        assert returned_ids == expected_ids
+    assert returned_ids == expected_returned_ids
 
 
 def test_order_endpoint(
