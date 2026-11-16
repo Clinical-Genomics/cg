@@ -11,6 +11,7 @@ from cg.clients.chanjo2.models import CoverageMetricsChanjo1
 from cg.constants import SexOptions, Workflow
 from cg.constants.constants import GenomeBuild, GenomeVersion
 from cg.constants.sequencing import SeqLibraryPrepCategory
+from cg.exc import MissingMultiqcSectionError
 from cg.meta.workflow import raredisease as raredisease_analysis_api
 from cg.meta.workflow.raredisease import RarediseaseAnalysisAPI
 from cg.models.analysis import NextflowAnalysis
@@ -22,7 +23,7 @@ from cg.models.cg_config import (
     RunInstruments,
     SlurmConfig,
 )
-from cg.models.deliverables.metric_deliverables import MetricsBase
+from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
 from cg.store.models import Application, ApplicationVersion, Sample
 from cg.store.store import Store
 
@@ -38,6 +39,7 @@ def expected_wgs_qc_metrics() -> dict[str, dict[str, Any]]:
         "GC_DROPOUT": {"norm": "lt", "threshold": 5},
         "MEDIAN_TARGET_COVERAGE": {"norm": "gt", "threshold": 25},
         "predicted_sex_sex_check": {"norm": "eq", "threshold": SexOptions.FEMALE},
+        "somalier_sex": {"norm": "eq", "threshold": 2.0},
         "gender": {"norm": "eq", "threshold": SexOptions.FEMALE},
     }
 
@@ -51,6 +53,7 @@ def expected_wes_qc_metrics() -> dict[str, dict[str, Any]]:
         "AT_DROPOUT": {"norm": "lt", "threshold": 10},
         "GC_DROPOUT": {"norm": "lt", "threshold": 10},
         "predicted_sex_sex_check": {"norm": "eq", "threshold": SexOptions.FEMALE},
+        "somalier_sex": {"norm": "eq", "threshold": 2.0},
     }
 
 
@@ -187,6 +190,7 @@ def test_get_qc_conditions_for_workflow(
     )
     status_db = create_autospec(Store)
     status_db.get_sample_by_internal_id = Mock(return_value=sample)
+    status_db.get_sample_by_internal_id_strict = Mock(return_value=sample)
     # GIVEN Raredisease analysis API
     analysis_api: RarediseaseAnalysisAPI = RarediseaseAnalysisAPI(
         config=create_autospec(
@@ -223,3 +227,27 @@ def test_get_qc_conditions_for_workflow(
     qc_conditions: dict = analysis_api.get_qc_conditions_for_workflow("sample_id")
     expected_conditions: dict = request.getfixturevalue(expected_conditions_fixture)
     assert qc_conditions == expected_conditions
+
+
+def test_create_metrics_deliverables_content_missing_somalier_section(
+    raredisease_context: CGConfig,
+    raredisease_case_id: str,
+    mocker: MockerFixture,
+):
+    # GIVEN a Raredisease analysis API
+    analysis_api: RarediseaseAnalysisAPI = raredisease_context.meta_apis["analysis_api"]
+
+    # GIVEN a MultiQC data JSON without a Somalier section
+    mocker.patch.object(
+        analysis_api,
+        "get_multiqc_data_json",
+        return_value=MultiqcDataJson(
+            report_general_stats_data=[],
+            report_saved_raw_data={"multiqc_picard_AlignmentSummaryMetrics": {}},
+        ),
+    )
+
+    # WHEN creating the metrics deliverables content
+    # THEN an error is raised with the missing section mentioned
+    with pytest.raises(MissingMultiqcSectionError, match="multiqc_somalier"):
+        analysis_api.create_metrics_deliverables_content(raredisease_case_id)

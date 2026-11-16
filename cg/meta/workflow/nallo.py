@@ -15,9 +15,9 @@ from cg.constants.nf_analysis import (
     NALLO_RAW_METRIC_CONDITIONS,
 )
 from cg.constants.scout import NALLO_CASE_TAGS
-from cg.constants.subject import PlinkSex
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.utils.chanjo1 import CoverageMetricsChanjo1, chanjo1_get_sample_coverage
+from cg.meta.workflow.utils.somalier import get_somalier_dict, set_somalier_sex_for_sample
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
@@ -68,7 +68,7 @@ class NalloAnalysisAPI(NfAnalysisAPI):
         if "-" not in sample_id:
             metric_conditions: dict[str, dict[str, Any]] = NALLO_GENERAL_METRIC_CONDITIONS.copy()
             metric_conditions.update(NALLO_RAW_METRIC_CONDITIONS)
-            self.set_somalier_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
+            set_somalier_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
         else:
             metric_conditions = NALLO_PARENT_PEDDY_METRIC_CONDITION.copy()
         return metric_conditions
@@ -135,28 +135,9 @@ class NalloAnalysisAPI(NfAnalysisAPI):
     def _get_list_of_metric_dicts(self, multiqc_json: MultiqcDataJson) -> list[dict[str, Any]]:
         metric_dicts: list[dict[str, Any]] = multiqc_json.report_general_stats_data
         list_copy: list[dict[str, Any]] = copy.deepcopy(metric_dicts)
-        list_copy.append(self._get_somalier_dict(multiqc_json))
+        list_copy.append(get_somalier_dict(multiqc_json))
 
         return list_copy
-
-    def _get_somalier_dict(self, multiqc_json: MultiqcDataJson) -> dict[str, Any]:
-        somalier_raw = copy.deepcopy(multiqc_json.report_saved_raw_data["multiqc_somalier"])
-
-        for sample_id, metrics in somalier_raw.items():
-            somalier_raw[sample_id] = {f"somalier_{k}": v for k, v in metrics.items()}
-
-        return somalier_raw
-
-    @staticmethod
-    def set_somalier_sex_for_sample(sample: Sample, metric_conditions: dict) -> None:
-        if "somalier_sex" in metric_conditions:
-            metric_conditions["somalier_sex"]["threshold"] = float(
-                {
-                    "male": PlinkSex.MALE,
-                    "female": PlinkSex.FEMALE,
-                    "unknown": PlinkSex.UNKNOWN,
-                }[sample.sex]
-            )
 
     def get_sample_coverage(
         self, case_id: str, sample_id: str, gene_ids: list[int]

@@ -18,6 +18,7 @@ from cg.constants.scout import RAREDISEASE_CASE_TAGS
 from cg.constants.sequencing import SeqLibraryPrepCategory
 from cg.meta.workflow.nf_analysis import NfAnalysisAPI
 from cg.meta.workflow.utils.chanjo1 import CoverageMetricsChanjo1, chanjo1_get_sample_coverage
+from cg.meta.workflow.utils.somalier import get_somalier_dict, set_somalier_sex_for_sample
 from cg.models.analysis import NextflowAnalysis
 from cg.models.cg_config import CGConfig
 from cg.models.deliverables.metric_deliverables import MetricsBase, MultiqcDataJson
@@ -64,13 +65,14 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
             metric_conditions: dict[str, dict[str, Any]] = (
                 self.get_metric_conditions_by_prep_category(sample_id=sample.internal_id)
             )
+            set_somalier_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
             self.set_order_sex_for_sample(sample=sample, metric_conditions=metric_conditions)
         else:
             metric_conditions = RAREDISEASE_PARENT_PEDDY_METRIC_CONDITION.copy()
         return metric_conditions
 
     def get_metric_conditions_by_prep_category(self, sample_id: str) -> dict:
-        sample: Sample = self.status_db.get_sample_by_internal_id(internal_id=sample_id)
+        sample: Sample = self.status_db.get_sample_by_internal_id_strict(internal_id=sample_id)
         if (
             sample.application_version.application.analysis_type
             == SeqLibraryPrepCategory.WHOLE_GENOME_SEQUENCING
@@ -129,6 +131,7 @@ class RarediseaseAnalysisAPI(NfAnalysisAPI):
         metric_dicts: list[dict[str, Any]] = multiqc_json.report_general_stats_data
         list_copy: list[dict[str, Any]] = copy.deepcopy(metric_dicts)
         list_copy.append(self._get_multiqc_picard_dict(multiqc_json))
+        list_copy.append(get_somalier_dict(multiqc_json))
 
         return list_copy
 

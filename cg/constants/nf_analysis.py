@@ -2,6 +2,8 @@
 
 from typing import Any
 
+SOMALIER_PREDICTED_SEX_METRIC = "somalier_sex"
+
 NALLO_GENERAL_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
     "median_coverage": {"norm": "ge", "threshold": 20},
 }
@@ -11,7 +13,7 @@ NALLO_PARENT_PEDDY_METRIC_CONDITION: dict[str, dict[str, Any]] = {
 }
 
 NALLO_RAW_METRIC_CONDITIONS: dict[str, dict[str, Any]] = {
-    "somalier_sex": {"norm": "eq", "threshold": None},
+    SOMALIER_PREDICTED_SEX_METRIC: {"norm": "eq", "threshold": None},
 }
 
 RAREDISEASE_PREDICTED_SEX_METRIC = "predicted_sex_sex_check"
@@ -23,6 +25,7 @@ RAREDISEASE_METRIC_CONDITIONS_WES: dict[str, dict[str, Any]] = {
     "AT_DROPOUT": {"norm": "lt", "threshold": 10},
     "GC_DROPOUT": {"norm": "lt", "threshold": 10},
     RAREDISEASE_PREDICTED_SEX_METRIC: {"norm": "eq", "threshold": None},
+    SOMALIER_PREDICTED_SEX_METRIC: {"norm": "eq", "threshold": None},
 }
 
 RAREDISEASE_METRIC_CONDITIONS_WGS: dict[str, dict[str, Any]] = {
@@ -33,6 +36,7 @@ RAREDISEASE_METRIC_CONDITIONS_WGS: dict[str, dict[str, Any]] = {
     "AT_DROPOUT": {"norm": "lt", "threshold": 5},
     "GC_DROPOUT": {"norm": "lt", "threshold": 5},
     RAREDISEASE_PREDICTED_SEX_METRIC: {"norm": "eq", "threshold": None},
+    SOMALIER_PREDICTED_SEX_METRIC: {"norm": "eq", "threshold": None},
     "gender": {"norm": "eq", "threshold": None},
     "FREEMIX": {"norm": "lt", "threshold": 0.02},
 }

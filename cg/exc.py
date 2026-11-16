@@ -423,3 +423,7 @@ class MissingNegativeControlError(CgError):
 
 class MultipleNegativeControlsError(CgError):
     """Exception raised when a case has multiple a negative control"""
+
+
+class MissingMultiqcSectionError(CgError):
+    """Exception raised when a section is missing from a MultiQC data file"""
