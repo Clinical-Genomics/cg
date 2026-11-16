@@ -531,7 +531,6 @@ class CaseView(BaseView):
         "sample_count",
         "tickets",
     ]
-    column_labels = {"sample_count": "Sample count"}
     column_formatters = {
         "customer": view_customer_link,
         "internal_id": view_case_sample_link,
