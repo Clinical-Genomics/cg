@@ -15,7 +15,7 @@ from cg.models.orders.constants import OrderType
 from cg.server.app_config import app_config
 from cg.server.ext import applications_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
-from cg.store.models import Application, Case
+from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
 from cg.utils.number_formatter import Si
 
@@ -560,13 +560,6 @@ class CaseView(BaseView):
         "data_analysis": SelectEnumField(enum_class=Workflow),
         "data_delivery": SelectEnumField(enum_class=DataDelivery),
     }
-
-    def scaffold_sortable_columns(self) -> dict:
-        """Add the computed columns to the default sortable columns."""
-        columns: dict = super().scaffold_sortable_columns()
-        columns["sample_count"] = Case.sample_count
-        columns["has_parent_links"] = Case.has_parent_links
-        return columns
 
     @staticmethod
     def view_case_link(unused1, unused2, model, unused3):
