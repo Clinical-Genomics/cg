@@ -522,14 +522,14 @@ class CaseView(BaseView):
     ]
     column_exclude_list = ["created_at", "_cohorts", "synopsis"]
     column_filters = [
-        "customer.internal_id",
-        "priority",
         "action",
+        "customer.internal_id",
         "data_analysis",
         "data_delivery",
-        "tickets",
-        "sample_count",
         "has_parent_links",
+        "priority",
+        "sample_count",
+        "tickets",
     ]
     column_labels = {"sample_count": "Sample count"}
     column_formatters = {
