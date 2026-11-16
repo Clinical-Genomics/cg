@@ -35,7 +35,7 @@ poetry install
 ```
 
 For development, use `poetry install --all-extras` to install development dependencies.
-
+I will remove this line, needed to trigger the pre-commits on github. There might be a better way but this one works as well.
 
 [portal]: https://clinical.scilifelab.se/
 [trailblazer]: https://github.com/Clinical-Genomics/trailblazer
