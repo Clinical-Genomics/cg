@@ -16,7 +16,7 @@ from sqlalchemy import (
     Table,
 )
 from sqlalchemy import Text as SLQText
-from sqlalchemy import UniqueConstraint, func, orm, select, types
+from sqlalchemy import UniqueConstraint, func, or_, orm, select, types
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.orm.attributes import InstrumentedAttribute
@@ -547,7 +547,7 @@ class Case(Base, PriorityMixin):
         self._panels = ",".join(panel_list) if panel_list else None
 
     @hybrid_property
-    def sample_count(self) -> int:
+    def sample_count(self) -> int:  # type: ignore
         """Return the number of samples linked to the case."""
         return len(self.links)
 
@@ -559,6 +559,24 @@ class Case(Base, PriorityMixin):
             .where(CaseSample.case_id == cls.id)
             .scalar_subquery()
             .label("sample_count")
+        )
+
+    @hybrid_property
+    def has_parent_links(self) -> bool:  # type: ignore
+        """Returns true if case contains sample with parent link"""
+        return any(link.mother_id or link.father_id for link in self.links)
+
+    @has_parent_links.expression
+    @classmethod
+    def has_parent_links(cls):
+        return (
+            select(CaseSample.id)
+            .where(
+                CaseSample.case_id == cls.id,
+                or_(CaseSample.mother_id.is_not(None), CaseSample.father_id.is_not(None)),
+            )
+            .exists()
+            .label("has_parent_links")
         )
 
     @property

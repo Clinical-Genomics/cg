@@ -512,7 +512,6 @@ class CaseView(BaseView):
         "customer",
         "tickets",
         "action",
-        "sample_count",
         "priority",
         "ordered_at",
         "aggregated_sequencing_qc",
@@ -530,6 +529,7 @@ class CaseView(BaseView):
         "data_delivery",
         "tickets",
         "sample_count",
+        "has_parent_links",
     ]
     column_labels = {"sample_count": "Sample count"}
     column_formatters = {
@@ -562,9 +562,10 @@ class CaseView(BaseView):
     }
 
     def scaffold_sortable_columns(self) -> dict:
-        """Add the computed sample count to the default sortable columns."""
+        """Add the computed columns to the default sortable columns."""
         columns: dict = super().scaffold_sortable_columns()
         columns["sample_count"] = Case.sample_count
+        columns["has_parent_links"] = Case.has_parent_links
         return columns
 
     @staticmethod

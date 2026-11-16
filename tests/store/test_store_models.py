@@ -494,25 +494,14 @@ def test_application_expected_express_hifi_yield_zero_yield():
     assert expected_express_hifi_yield == 0
 
 
-def _add_case_with_n_samples(
-    store: Store, helpers: StoreHelpers, case_id: str, nr_samples: int
-) -> Case:
-    """Add a case with exactly the given number of linked samples."""
-    case: Case = helpers.add_case(store=store, internal_id=case_id, name=case_id)
-    samples: list[Sample] = [
-        helpers.add_sample(store=store, internal_id=f"{case_id}_sample_{index}")
-        for index in range(nr_samples)
-    ]
-    helpers.relate_samples(base_store=store, case=case, samples=samples)
-    return case
-
-
 def test_case_sample_count(base_store: Store, helpers: StoreHelpers):
     """Test that the sample count of a case is the number of linked samples."""
     # GIVEN a case with three samples
-    case: Case = _add_case_with_n_samples(
-        store=base_store, helpers=helpers, case_id="trio", nr_samples=3
-    )
+    case: Case = helpers.add_case(store=base_store, internal_id="trio", name="trio")
+    samples: list[Sample] = [
+        helpers.add_sample(store=base_store, internal_id=f"sample_{index}") for index in range(3)
+    ]
+    helpers.relate_samples(base_store=base_store, case=case, samples=samples)
 
     # WHEN getting the sample count
     sample_count: int = case.sample_count
@@ -536,9 +525,19 @@ def test_case_sample_count_no_samples():
 def test_case_sample_count_query(base_store: Store, helpers: StoreHelpers):
     """Test filtering and sorting cases on sample count in a query."""
     # GIVEN cases with one, three and zero samples
-    _add_case_with_n_samples(store=base_store, helpers=helpers, case_id="single", nr_samples=1)
-    _add_case_with_n_samples(store=base_store, helpers=helpers, case_id="trio", nr_samples=3)
-    _add_case_with_n_samples(store=base_store, helpers=helpers, case_id="empty", nr_samples=0)
+    single: Case = helpers.add_case(store=base_store, internal_id="single", name="single")
+    single_sample: Sample = helpers.add_sample(store=base_store, internal_id="single_sample")
+    helpers.relate_samples(base_store=base_store, case=single, samples=[single_sample])
+
+    trio: Case = helpers.add_case(store=base_store, internal_id="trio", name="trio")
+    trio_samples: list[Sample] = [
+        helpers.add_sample(store=base_store, internal_id="trio_sample_1"),
+        helpers.add_sample(store=base_store, internal_id="trio_sample_2"),
+        helpers.add_sample(store=base_store, internal_id="trio_sample_3"),
+    ]
+    helpers.relate_samples(base_store=base_store, case=trio, samples=trio_samples)
+
+    helpers.add_case(store=base_store, internal_id="empty", name="empty")
 
     # WHEN filtering on cases with three samples
     trio_cases: list[Case] = base_store._get_query(table=Case).filter(Case.sample_count == 3).all()
@@ -556,3 +555,69 @@ def test_case_sample_count_query(base_store: Store, helpers: StoreHelpers):
 
     # THEN the cases are ordered by number of samples
     assert [case.internal_id for case in sorted_cases] == ["empty", "single", "trio"]
+
+
+def test_case_has_parent_links_trio(base_store: Store, helpers: StoreHelpers):
+    """Test that a trio case has parent links."""
+    # GIVEN a case with an index sample linked to its mother and father
+    case: Case = helpers.add_case(store=base_store, internal_id="trio", name="trio")
+    mother: Sample = helpers.add_sample(store=base_store, internal_id="mother")
+    father: Sample = helpers.add_sample(store=base_store, internal_id="father")
+    index: Sample = helpers.add_sample(store=base_store, internal_id="index")
+    helpers.add_relationship(store=base_store, sample=mother, case=case)
+    helpers.add_relationship(store=base_store, sample=father, case=case)
+    helpers.add_relationship(
+        store=base_store, sample=index, case=case, mother=mother, father=father
+    )
+
+    # WHEN checking if the case has parent links
+    has_parent_links: bool = case.has_parent_links
+
+    # THEN it does
+    assert has_parent_links
+
+
+def test_case_has_parent_links_siblings_without_parents(base_store: Store, helpers: StoreHelpers):
+    """Test that a case with several samples but no parents linked has no parent links."""
+    # GIVEN a case with two samples and no parents linked
+    case: Case = helpers.add_case(store=base_store, internal_id="siblings", name="siblings")
+    first_sibling: Sample = helpers.add_sample(store=base_store, internal_id="first_sibling")
+    second_sibling: Sample = helpers.add_sample(store=base_store, internal_id="second_sibling")
+    helpers.relate_samples(
+        base_store=base_store, case=case, samples=[first_sibling, second_sibling]
+    )
+
+    # WHEN checking if the case has parent links
+    has_parent_links: bool = case.has_parent_links
+
+    # THEN it does not
+    assert not has_parent_links
+
+
+def test_case_has_parent_links_query(base_store: Store, helpers: StoreHelpers):
+    """Test filtering cases on parent links in a query."""
+    # GIVEN a case with an index sample linked to its father
+    duo: Case = helpers.add_case(store=base_store, internal_id="duo", name="duo")
+    father: Sample = helpers.add_sample(store=base_store, internal_id="father")
+    index: Sample = helpers.add_sample(store=base_store, internal_id="index")
+    helpers.add_relationship(store=base_store, sample=father, case=duo)
+    helpers.add_relationship(store=base_store, sample=index, case=duo, father=father)
+
+    # GIVEN a case with two samples and no parents linked
+    siblings: Case = helpers.add_case(store=base_store, internal_id="siblings", name="siblings")
+    first_sibling: Sample = helpers.add_sample(store=base_store, internal_id="first_sibling")
+    second_sibling: Sample = helpers.add_sample(store=base_store, internal_id="second_sibling")
+    helpers.relate_samples(
+        base_store=base_store, case=siblings, samples=[first_sibling, second_sibling]
+    )
+    case_ids: list[str] = ["duo", "siblings"]
+
+    # WHEN filtering on cases with parent links
+    cases_with_parent_links: list[Case] = (
+        base_store._get_query(table=Case)
+        .filter(Case.internal_id.in_(case_ids), Case.has_parent_links)
+        .all()
+    )
+
+    # THEN only the duo case is returned
+    assert [case.internal_id for case in cases_with_parent_links] == ["duo"]
