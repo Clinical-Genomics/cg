@@ -19,6 +19,12 @@ def set_somalier_sex_for_sample(sample: Sample, metric_conditions: dict) -> None
 
 
 def get_somalier_dict(multiqc_json: MultiqcDataJson) -> dict[str, Any]:
+    """
+    Return the Somalier metrics per sample from the MultiQC raw data, with each metric name
+    prefixed with `somalier_` to avoid clashes with metrics from other tools, e.g. `sex`.
+    Raises:
+        MissingMultiqcSectionError: If the `multiqc_somalier` section is missing.
+    """
     raw_data: dict[str, dict] = multiqc_json.report_saved_raw_data or {}
 
     somalier_section = "multiqc_somalier"
@@ -29,6 +35,6 @@ def get_somalier_dict(multiqc_json: MultiqcDataJson) -> dict[str, Any]:
 
     somalier_raw = copy.deepcopy(raw_data[somalier_section])
     for sample_id, metrics in somalier_raw.items():
-        somalier_raw[sample_id] = {f"somalier_{k}": v for k, v in metrics.items()}
+        somalier_raw[sample_id] = {f"somalier_{key}": value for key, value in metrics.items()}
 
     return somalier_raw
