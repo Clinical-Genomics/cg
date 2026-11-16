@@ -5,8 +5,7 @@ from http import HTTPStatus
 from pathlib import Path
 
 from flask import Blueprint, abort, g, jsonify, make_response, request
-from pydantic import ValidationError as RequestValidationError
-from pydantic.v1 import ValidationError
+from pydantic import ValidationError
 from requests.exceptions import HTTPError
 from sqlalchemy.exc import IntegrityError
 from urllib3.exceptions import MaxRetryError, NewConnectionError
@@ -59,7 +58,7 @@ def get_orders():
     }
     try:
         data = OrdersRequest.model_validate(query_params)
-    except RequestValidationError as error:
+    except ValidationError as error:
         message = "; ".join(item["msg"] for item in error.errors())
         return jsonify(error=message), HTTPStatus.BAD_REQUEST
 
