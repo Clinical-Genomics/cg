@@ -20,7 +20,7 @@ jobs:
           virtualenvs-create: false
 
       - name: Install Dependencies
-        run: poetry install --no-interaction --no-root --all-extras
+        run: poetry install --no-interaction --no-root --extras black
 
       - name: Check formatting with Black
         run: black . --check
