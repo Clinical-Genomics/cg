@@ -36,6 +36,7 @@ from cg.constants.lims import LimsStatus
 from cg.constants.priority import PriorityTerms, SlurmQos, TrailblazerPriority
 from cg.constants.sequencing import ReadType, SeqLibraryPrepCategory
 from cg.constants.symbols import EMPTY_STRING
+from cg.exc import AnalysisDoesNotExistError
 from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.models.orders.constants import OrderType
 
@@ -580,6 +581,15 @@ class Case(Base, PriorityMixin):
             valid_analyses, key=lambda analysis: analysis.completed_at, reverse=True
         )
         return sorted_analyses[0]
+
+    @property
+    def latest_analysis_strict(self) -> Analysis:
+        if latest_analyses := sorted(
+            self.analyses, key=lambda analysis: analysis.created_at, reverse=True
+        ):
+            return latest_analyses[0]
+        else:
+            raise AnalysisDoesNotExistError(f"No analyses for case {self.internal_id}")
 
     def are_all_samples_control(self) -> bool:
         """Return True if all case samples are controls."""
