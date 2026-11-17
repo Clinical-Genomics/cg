@@ -1,3 +1,4 @@
+from datetime import datetime
 from pathlib import Path
 from typing import cast
 
@@ -25,7 +26,6 @@ def store_analysis_output(
         for file in deliverable["paths"]:
             if Path(file).is_file():
                 file_data: dict = {
-                    # TODO: Add archive
                     "path": file,
                     "file_type": deliverable["file_type"],
                     "tags": [deliverable["id"]],
@@ -43,4 +43,5 @@ def store_analysis_output(
         analysis_id=analysis_id, version_id=cast(int, version.id)
     )
     # TODO: Update analysis completed_at
+    status_db.update_analysis_completed_at(analysis_id=analysis_id, completed_at=datetime.now())
     # TODO: submit event?

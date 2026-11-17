@@ -1,6 +1,8 @@
+from datetime import datetime
 from pathlib import Path
 from unittest.mock import Mock, create_autospec
 
+import pytest
 from housekeeper.store.models import Bundle, Version
 from pyfakefs.fake_filesystem import FakeFilesystem
 
@@ -12,6 +14,7 @@ from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
 
+@pytest.mark.freeze_time()
 def test_store_pipeline_output_success(fs: FakeFilesystem):
     # GIVEN a case_deliverables file for a given case
     contents = [
@@ -44,9 +47,9 @@ def test_store_pipeline_output_success(fs: FakeFilesystem):
 
     # GIVEN a HousekeeperAPI
     housekeeper_api: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
-    housekeeper_api.as_type.add_bundle = Mock(
-        return_value=(create_autospec(Bundle), create_autospec(Version, id=13))
-    )
+    bundle: Bundle = create_autospec(Bundle)
+    version: Version = create_autospec(Version, id=13)
+    housekeeper_api.as_type.add_bundle = Mock(return_value=(bundle, version))
 
     # GIVEN a StatusDB with an analysis linked to a case
     status_db: TypedMock[Store] = create_typed_mock(Store)
@@ -85,7 +88,17 @@ def test_store_pipeline_output_success(fs: FakeFilesystem):
     }
     housekeeper_api.as_mock.add_bundle.assert_called_once_with(bundle_data=expected_bundle_data)
 
+    # THEN the version should have been included
+    housekeeper_api.as_mock.include.assert_called_once_with(version)
+    housekeeper_api.as_mock.add_commit.assert_any_call(bundle)
+    housekeeper_api.as_mock.add_commit.assert_any_call(version)
+
     # THEN the analysis in StatusDB was updated with a Housekeeper version
     status_db.as_mock.update_analysis_housekeeper_version_id.assert_called_once_with(
         analysis_id=1, version_id=13
+    )
+
+    # THEN the analysis should have completed_at set
+    status_db.as_mock.update_analysis_completed_at.assert_called_once_with(
+        analysis_id=1, completed_at=datetime.now()
     )
