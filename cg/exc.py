@@ -423,3 +423,7 @@ class MissingNegativeControlError(CgError):
 
 class MultipleNegativeControlsError(CgError):
     """Exception raised when a case has multiple a negative control"""
+
+
+class CommentMissingError(CgError):
+    """Exception raised when required comment is missing"""

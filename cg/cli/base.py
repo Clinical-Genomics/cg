@@ -12,6 +12,7 @@ import cg
 from cg.cli.add import add as add_cmd
 from cg.cli.archive import archive
 from cg.cli.backup import backup
+from cg.cli.cancel.base import cancel
 from cg.cli.clean import clean
 from cg.cli.compress.base import compress, decompress
 from cg.cli.delete.base import delete
@@ -115,6 +116,7 @@ def search(query):
 base.add_command(add_cmd)
 base.add_command(archive)
 base.add_command(backup)
+base.add_command(cancel)
 base.add_command(clean)
 base.add_command(compress)
 base.add_command(decompress)

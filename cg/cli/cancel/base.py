@@ -2,6 +2,7 @@ import logging
 
 import rich_click as click
 
+from cg.cli.cancel.cases import cases
 from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 
 LOG = logging.getLogger(__name__)
@@ -11,3 +12,6 @@ LOG = logging.getLogger(__name__)
 def cancel():
     """Cancel object in Statusdb."""
     LOG.info("Running CG cancel")
+
+
+cancel.add_command(cases)
