@@ -7,7 +7,7 @@ from pytest_mock import MockerFixture
 from cg.cli.cancel.cases import cases
 from cg.exc import CgError, CommentMissingError
 from cg.models.cg_config import CGConfig
-from cg.services import cancelation_service
+from cg.services import cancellation_service
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -18,7 +18,7 @@ def test_cases_cancellation_success(mocker: MockerFixture):
     cg_config: CGConfig = create_autospec(CGConfig, status_db=status_db.as_type)
 
     # GIVEN a mocked cancelation service
-    cancel_cases: Mock = mocker.patch.object(cancelation_service, "cases")
+    cancel_cases: Mock = mocker.patch.object(cancellation_service, "cases")
 
     # GIVEN case ids and a comment
     case_ids: list[str] = ["case_1", "case_2"]
@@ -49,7 +49,7 @@ def test_cases_comment_missing(mocker: MockerFixture, comment: str):
     cg_config: CGConfig = create_autospec(CGConfig, status_db=status_db.as_type)
 
     # GIVEN a mocked cancelation service
-    cancel_cases: Mock = mocker.patch.object(cancelation_service, "cases")
+    cancel_cases: Mock = mocker.patch.object(cancellation_service, "cases")
 
     # GIVEN case ids and an invalid comment
     case_ids: list[str] = ["case_1", "case_2"]
@@ -74,7 +74,7 @@ def test_cases_cancellation_service_error(mocker: MockerFixture):
     cg_config: CGConfig = create_autospec(CGConfig, status_db=status_db.as_type)
 
     # GIVEN a cancelation service that raises a CgError
-    mocker.patch.object(cancelation_service, "cases", side_effect=CgError("Cancellation failed"))
+    mocker.patch.object(cancellation_service, "cases", side_effect=CgError("Cancellation failed"))
 
     # GIVEN case ids and a comment
     case_ids: list[str] = ["case_1", "case_2"]

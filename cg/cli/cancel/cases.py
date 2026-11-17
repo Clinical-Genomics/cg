@@ -4,7 +4,7 @@ import rich_click as click
 
 from cg.exc import CgError, CommentMissingError
 from cg.models.cg_config import CGConfig
-from cg.services import cancelation_service
+from cg.services import cancellation_service
 from cg.store.store import Store
 
 LOG = logging.getLogger(__name__)
@@ -26,11 +26,12 @@ def cases(cg_config: CGConfig, comment: str, case_ids: tuple[str, ...]):
         - Blocks reorders of case
     """
     if not comment or not comment.strip():
+        # TODO: it could be better to use - raise click.BadParameter("Please add a reason for the cancellation.", param_hint="--comment")
         raise CommentMissingError(f"Please add a reason for the cancellation. User {comment=}")
 
     status_db: Store = cg_config.status_db
     try:
-        cancelation_service.cases(case_ids=list(case_ids), comment=comment, status_db=status_db)
+        cancellation_service.cases(case_ids=list(case_ids), comment=comment, status_db=status_db)
         status_db.commit_to_store()
     except CgError as error:
         status_db.rollback()
