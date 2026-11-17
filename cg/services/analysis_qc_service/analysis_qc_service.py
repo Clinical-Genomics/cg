@@ -14,11 +14,9 @@ LOG = logging.getLogger(__name__)
 def perform_qc(
     analysis_id: int, root_directory: Path, status_db: Store, trailblazer_api: TrailblazerAPI
 ) -> None:
-    # TODO parse case deliverables file
     # TODO consider: checking for file integrity of some files
     # TODO inform prodbio info via slack (if high prio) of failure and mark as failed in Trailblazer
     # TODO validate that there is content in the case deliverables file
-    # TODO set analysis completed_at in StatusDB to now if success <--- (New behavior?)
     # TODO publish event if success
     analysis: Analysis = status_db.get_analysis_by_entry_id_strict(analysis_id)
     case_id = analysis.case_internal_id
