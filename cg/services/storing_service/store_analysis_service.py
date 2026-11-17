@@ -25,15 +25,20 @@ def store_analysis_output(
         for file in deliverable["paths"]:
             if Path(file).is_file():
                 file_data: dict = {
+                    # TODO: Add archive
                     "path": file,
                     "file_type": deliverable["file_type"],
                     "tags": [deliverable["id"]],
                 }
                 existing_files.append(file_data)
 
-    _bundle, version = housekeeper_api.add_bundle(
+    bundle, version = housekeeper_api.add_bundle(
         bundle_data={"name": case_id, "files": existing_files}
     )
+    housekeeper_api.include(version)
+    housekeeper_api.add_commit(bundle)
+    # TODO: Check if both commits are necessary
+    housekeeper_api.add_commit(version)
     status_db.update_analysis_housekeeper_version_id(
         analysis_id=analysis_id, version_id=cast(int, version.id)
     )
