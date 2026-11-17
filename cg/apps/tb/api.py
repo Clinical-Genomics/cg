@@ -202,7 +202,7 @@ class TrailblazerAPI:
         request_body = {"analysis_id": analysis_id, "comment": comment}
 
         LOG.debug(f"Request body: {request_body}")
-        LOG.info(f"Adding comment: {comment} to analysis {analysis_id}")
+        LOG.info(f"Adding comment: {comment} to Trailblazer analysis {analysis_id}")
         self.query_trailblazer(
             command="add-comment", request_body=request_body, method=APIMethods.PUT
         )
