@@ -50,11 +50,18 @@ def _link_analysis_files(analysis: Analysis, housekeeper_api: HousekeeperAPI, st
         workflow=case.data_analysis, upload_to_customer_inbox=True
     )
     file_types: list[str] = [key.file_type for key in upload_keys]
-    case_files: list[File] = housekeeper_api.get_files_from_file_types(
-        file_types=file_types, version_id=analysis.housekeeper_version_id, tags={case.internal_id}
-    )
+    files: list[File] = housekeeper_api.files(
+        file_types=file_types, version=analysis.housekeeper_version_id
+    ).all()
 
     # create case dir using the case name in ticket dir if non-existent
+
+    replacements: dict = {
+        case.internal_id: case.name,
+        **{sample.id: sample.name for sample in case.samples},
+    }
+    for file in files:
+        new_name = file.path.translate(str.maketrans(replacements))
 
     # Rename and link case files
 

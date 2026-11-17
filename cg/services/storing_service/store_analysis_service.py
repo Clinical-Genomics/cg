@@ -42,6 +42,5 @@ def store_analysis_output(
     status_db.update_analysis_housekeeper_version_id(
         analysis_id=analysis_id, version_id=cast(int, version.id)
     )
-    # TODO: Update analysis completed_at
     status_db.update_analysis_completed_at(analysis_id=analysis_id, completed_at=datetime.now())
     # TODO: submit event?
