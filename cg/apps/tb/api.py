@@ -192,7 +192,7 @@ class TrailblazerAPI:
         request_body = {"analysis_id": analysis_id, "status": status}
 
         LOG.debug(f"Request body: {request_body}")
-        LOG.info(f"Setting analysis status to {status} for analysis {analysis_id}.")
+        LOG.info(f"Setting analysis status to {status} for Trailblazer analysis {analysis_id}.")
         self.query_trailblazer(
             command="set-analysis-status", request_body=request_body, method=APIMethods.PUT
         )
