@@ -584,8 +584,10 @@ class Case(Base, PriorityMixin):
 
     @property
     def latest_analysis_strict(self) -> Analysis:
-        if latest_analysis := self.latest_completed_analysis:
-            return latest_analysis
+        if latest_analyses := sorted(
+            self.analyses, key=lambda analysis: analysis.created_at, reverse=True
+        ):
+            return latest_analyses[0]
         else:
             raise AnalysisDoesNotExistError(f"No analyses for case {self.internal_id}")
 
