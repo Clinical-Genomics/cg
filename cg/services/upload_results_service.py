@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -42,7 +45,9 @@ def _upload_to_customer_inbox(
     # Rsync case and samples dir to Caesar
 
 
-def _link_analysis_files(analysis: Analysis, housekeeper_api: HousekeeperAPI, status_db: Store):
+def _link_analysis_files(
+    analysis: Analysis, housekeeper_api: HousekeeperAPI, status_db: Store, base_delivery_path: Path
+):
     case: Case = analysis.case
 
     # file_types + case_id -> case files in housekeeper
@@ -55,13 +60,19 @@ def _link_analysis_files(analysis: Analysis, housekeeper_api: HousekeeperAPI, st
     ).all()
 
     # create case dir using the case name in ticket dir if non-existent
+    case_delivery_directory = Path(
+        base_delivery_path, case.customer.internal_id, "inbox", analysis.order.ticket_id, case.name
+    )
+    case_delivery_directory.mkdir(parents=True, exist_ok=True)
 
     replacements: dict = {
         case.internal_id: case.name,
         **{sample.id: sample.name for sample in case.samples},
     }
     for file in files:
+        # TODO change this because it will cause trouble in the renaming
         new_name = file.path.translate(str.maketrans(replacements))
+        os.link(src=file.full_path, dst=Path(case_delivery_directory, new_name))
 
     # Rename and link case files
 
