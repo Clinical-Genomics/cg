@@ -584,14 +584,10 @@ class Case(Base, PriorityMixin):
 
     @property
     def latest_analysis_strict(self) -> Analysis:
-        """Returns the latest analysis for this case."""
-        valid_analyses: list[Analysis] = [a for a in self.analyses]
-        if not valid_analyses:
+        if latest_analysis := self.latest_completed_analysis:
+            return latest_analysis
+        else:
             raise AnalysisDoesNotExistError(f"No analyses for case {self.internal_id}")
-        sorted_analyses: list[Analysis] = sorted(
-            valid_analyses, key=lambda analysis: analysis.completed_at, reverse=True
-        )
-        return sorted_analyses[0]
 
     def are_all_samples_control(self) -> bool:
         """Return True if all case samples are controls."""
