@@ -29,6 +29,7 @@ def store_analysis_output(
                     "path": file,
                     "file_type": deliverable["file_type"],
                     "tags": [deliverable["id"]],
+                    # TODO: See if we need to set archive here
                 }
                 existing_files.append(file_data)
 
