@@ -5,7 +5,7 @@ from typing import Any
 from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
-from cg.constants import Workflow
+from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.store.models import Analysis, Case, UploadKeys
 from cg.store.store import Store
 
@@ -45,12 +45,17 @@ def _upload_to_customer_inbox(
     _link_raw_data()
     # Rsync case and samples dir to Caesar
     # Add RSYNC analysis to Trailblazer
+    # Potentially: write trailblazer config file if needed
     # Add upload job to the new rsync trailblazer analysis
     # Add upload job to the main trailblazer analysis
 
 
 def _link_analysis_files(
-    analysis: Analysis, housekeeper_api: HousekeeperAPI, status_db: Store, base_delivery_path: Path
+    analysis: Analysis,
+    housekeeper_api: HousekeeperAPI,
+    rsync_service: DeliveryRsyncService,
+    status_db: Store,
+    base_delivery_path: Path,
 ):
     case: Case = analysis.case
     case_delivery_directory = Path(
@@ -66,29 +71,42 @@ def _link_analysis_files(
         workflow=case.data_analysis, upload_to_customer_inbox=True
     )
     file_types: list[str] = [key.file_type for key in upload_keys]
-    case_files: list[File] = housekeeper_api.files(
-        file_types=file_types, version=analysis.housekeeper_version_id, tags={case.internal_id}
-    ).all()
-    replacements: dict = {
-        case.internal_id: case.name,
-    }
-    _rename_and_link_files(
-        case_delivery_directory=case_delivery_directory, files=case_files, replacements=replacements
-    )
 
-    for sample in case.samples:
-        sample_files: list[File] = housekeeper_api.files(
-            bundle=case.internal_id,
-            file_types=file_types,
-            version=analysis.housekeeper_version_id,
-            tags={sample.internal_id},
-        ).all()
-        sample_replacements = {sample.internal_id: sample.name, **replacements}
-        _rename_and_link_files(
-            case_delivery_directory=case_delivery_directory,
-            files=sample_files,
-            replacements=sample_replacements,
-        )
+    # get File objects from HK
+    files: list[File] = housekeeper_api.files(
+        file_types=file_types, version=analysis.housekeeper_version_id
+    ).all()
+    # for every file, get path and full path
+    # for each file, link to customer directory in hasta
+    for file in files:
+        source_path = Path(file.full_path)
+        os.link(src=source_path, dst=Path(case_delivery_directory, source_path.name))
+    # rsync the directory to caesar
+    rsync_service.run_rsync_for_analysis()
+
+    # case_files: list[File] = housekeeper_api.files(
+    #     file_types=file_types, version=analysis.housekeeper_version_id, tags={case.internal_id}
+    # ).all()
+    # replacements: dict = {
+    #     case.internal_id: case.name,
+    # }
+    # _rename_and_link_files(
+    #     case_delivery_directory=case_delivery_directory, files=case_files, replacements=replacements
+    # )
+
+    # for sample in case.samples:
+    #     sample_files: list[File] = housekeeper_api.files(
+    #         bundle=case.internal_id,
+    #         file_types=file_types,
+    #         version=analysis.housekeeper_version_id,
+    #         tags={sample.internal_id},
+    #     ).all()
+    #     sample_replacements = {sample.internal_id: sample.name, **replacements}
+    #     _rename_and_link_files(
+    #         case_delivery_directory=case_delivery_directory,
+    #         files=sample_files,
+    #         replacements=sample_replacements,
+    #     )
 
 
 def _rename_and_link_files(

@@ -212,6 +212,7 @@ class DeliveryRsyncService:
         else:
             log_dir.mkdir(parents=True, exist_ok=True)
 
+    # TODO: create run_rsync_for_analysis very similar to this
     def run_rsync_for_case(self, case: Case, dry_run: bool, folders_to_deliver: set[Path]) -> int:
         """Submit Rsync commands for delivering a case to the delivery server and return the job id."""
         ticket: str | None = case.latest_ticket
@@ -293,6 +294,7 @@ class DeliveryRsyncService:
             commands=commands, error_command=error_command, job_name=job_name, dry_run=dry_run
         )
 
+    # TODO: add optional analysis_id that does not call get_latest_completed_analysis_for_case
     def _deliver_folder_contents(
         self,
         case: Case,
