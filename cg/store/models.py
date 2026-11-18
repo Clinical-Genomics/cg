@@ -552,6 +552,10 @@ class Case(Base, PriorityMixin):
         return self.tickets.split(sep=",")[-1] if self.tickets else None
 
     @property
+    def is_to_be_uploaded_to_scout(self):
+        pass
+
+    @property
     def is_to_be_uploaded_to_customer_inbox(self) -> bool:
         return not DataDelivery(self.data_delivery).excludes_customer_inbox_delivery
 
@@ -569,6 +573,10 @@ class Case(Base, PriorityMixin):
             self.orders, key=lambda order: order.order_date, reverse=True
         )
         return sorted_orders[0]
+
+    @property
+    def latest_created_analysis(self) -> Analysis | None:
+        return self.analyses[0] if self.analyses else None
 
     @property
     def latest_completed_analysis(self) -> Analysis | None:
@@ -1439,3 +1447,15 @@ class OrderTypeApplication(Base):
     application: Mapped[Application] = orm.relationship(
         "Application", back_populates="order_type_applications"
     )
+
+
+class UploadKeys(Base):
+    __tablename__ = "upload_keys"
+    id: Mapped[PrimaryKeyInt]
+    file_type: Mapped[str]
+    workflow: Mapped[Workflow]
+    is_archived: Mapped[bool]
+    scout_key: Mapped[str | None]
+    loqusdb_key: Mapped[str | None]
+    upload_to_customer_inbox: Mapped[bool]
+    chanjo_key: Mapped[str]

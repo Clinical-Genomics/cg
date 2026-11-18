@@ -1,0 +1,73 @@
+import os
+from pathlib import Path
+
+from housekeeper.store.models import File
+
+from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.services.deliver_files.rsync.service import DeliveryRsyncService
+from cg.store.models import Analysis, Case, UploadKeys
+from cg.store.store import Store
+
+
+def upload_results(
+    analysis: Analysis,
+    base_delivery_path: Path,
+    housekeeper_api: HousekeeperAPI,
+    rsync_service: DeliveryRsyncService,
+    status_db: Store,
+):
+    _upload_to_customer_inbox(
+        analysis=analysis,
+        base_delivery_path=base_delivery_path,
+        housekeeper_api=housekeeper_api,
+        rsync_service=rsync_service,
+        status_db=status_db,
+    )
+
+
+def _upload_to_customer_inbox(
+    analysis: Analysis,
+    base_delivery_path: Path,
+    housekeeper_api: HousekeeperAPI,
+    rsync_service: DeliveryRsyncService,
+    status_db: Store,
+):
+    _link_analysis_files(
+        analysis=analysis,
+        base_delivery_path=base_delivery_path,
+        housekeeper_api=housekeeper_api,
+        status_db=status_db,
+    )
+    rsync_service.run_rsync_for_analysis()
+    # TODO Add RSYNC analysis to Trailblazer
+    # TODO Add upload job to the new rsync trailblazer analysis
+    # TODO Add upload job to the main trailblazer analysis
+
+
+def _link_analysis_files(
+    analysis: Analysis,
+    housekeeper_api: HousekeeperAPI,
+    status_db: Store,
+    base_delivery_path: Path,
+):
+    case: Case = analysis.case
+    case_delivery_directory = Path(
+        base_delivery_path,
+        case.customer.internal_id,
+        "inbox",
+        str(analysis.order.ticket_id),
+        case.name,
+    )
+    case_delivery_directory.mkdir(parents=True, exist_ok=True)
+
+    upload_keys: list[UploadKeys] = status_db.get_upload_keys(
+        workflow=case.data_analysis, upload_to_customer_inbox=True
+    )
+    file_types: list[str] = [key.file_type for key in upload_keys]
+
+    files: list[File] = housekeeper_api.files(
+        file_types=file_types, version=analysis.housekeeper_version_id
+    ).all()
+    for file in files:
+        source_path = Path(file.full_path)
+        os.link(src=source_path, dst=Path(case_delivery_directory, source_path.name))

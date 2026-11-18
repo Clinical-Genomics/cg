@@ -423,3 +423,7 @@ class MissingNegativeControlError(CgError):
 
 class MultipleNegativeControlsError(CgError):
     """Exception raised when a case has multiple a negative control"""
+
+
+class MandatoryFileMissingError(CgError):
+    """Exception raised when mandatory file is missing"""

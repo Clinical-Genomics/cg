@@ -286,7 +286,7 @@ class DeliveryServiceFactory:
         case: Case,
         delivery_type: DataDelivery | None = None,
         delivery_destination: DeliveryDestination = DeliveryDestination.CUSTOMER,
-        delivery_structure: DeliveryStructure = DeliveryStructure.NESTED,
+        delivery_structure: DeliveryStructure = DeliveryStructure.NESTED,  # TODO: Find out if we still need to support both
     ) -> DeliverFilesService:
         """Build a delivery service for a case.
         args:

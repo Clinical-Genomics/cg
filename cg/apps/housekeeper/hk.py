@@ -129,10 +129,16 @@ class HousekeeperAPI:
         tags: set[str] = None,
         version: int | None = None,
         path: str = None,
+        file_types: list[str] | None = None,
+        # TODO: Add support for file types
     ) -> Query:
         """Fetch files."""
         return self._store.get_files(
-            bundle_name=bundle, tag_names=tags, version_id=version, file_path=path
+            bundle_name=bundle,
+            tag_names=tags,
+            version_id=version,
+            file_path=path,
+            file_types=file_types,
         )
 
     def get_file_insensitive_path(self, path: Path) -> File | None:
