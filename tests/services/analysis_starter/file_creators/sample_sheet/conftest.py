@@ -5,6 +5,9 @@ import pytest
 from cg.constants import Workflow
 from cg.constants.constants import Strandedness
 from cg.constants.sequencing import SequencingPlatform
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.oncoflow_sample_sheet_creator import (
+    OncoflowSampleSheetCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease_sample_sheet_creator import (
     RarediseaseSampleSheetCreator,
 )
@@ -58,6 +61,38 @@ def expected_nallo_sample_sheet_content() -> list[list[str]]:
         ],
         row1,
         row2,
+    ]
+
+
+@pytest.fixture
+def oncoflow_sample_sheet_expected_content(
+    nextflow_case_id: str,
+    fastq_path_1: Path,
+    fastq_path_2: Path,
+) -> list[list[str]]:
+    """Return the expected sample sheet content for oncoflow."""
+    entry_1: list[str] = [
+        nextflow_case_id,
+        nextflow_case_id,
+        "sample-1",
+        "tumor",
+        "dna",
+        "fastq",
+        f"library_id:2XXXXXX;lane:1",
+        f"{fastq_path_1.as_posix()};{fastq_path_2.as_posix()}",
+    ]
+    return [
+        [
+            "group_id",
+            "subject_id",
+            "sample_id",
+            "sample_type",
+            "sequence_type",
+            "filetype",
+            "info",
+            "filepath",
+        ],
+        entry_1,
     ]
 
 
@@ -171,6 +206,8 @@ def trana_sample_sheet_expected_content(
 
 @pytest.fixture
 def sample_sheet_scenario(
+    oncoflow_sample_sheet_creator: OncoflowSampleSheetCreator,
+    oncoflow_sample_sheet_expected_content: list[list[str]],
     raredisease_sample_sheet_creator: RarediseaseSampleSheetCreator,
     raredisease_sample_sheet_expected_content: list[list[str]],
     rnafusion_sample_sheet_creator: RNAFusionSampleSheetCreator,
@@ -183,6 +220,10 @@ def sample_sheet_scenario(
     trana_sample_sheet_expected_content: list[list[str]],
 ) -> dict:
     return {
+        Workflow.ONCOFLOW: (
+            raredisease_sample_sheet_creator,
+            oncoflow_sample_sheet_expected_content,
+        ),
         Workflow.RAREDISEASE: (
             raredisease_sample_sheet_creator,
             raredisease_sample_sheet_expected_content,

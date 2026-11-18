@@ -112,6 +112,34 @@ def mock_store_for_nallo_file_creators() -> Store:
 
 
 @pytest.fixture
+def mock_store_for_oncoflow_file_creators(nextflow_case_id: str, nextflow_sample_id: str) -> Store:
+    """Fixture to provide a mock store for the Oncoflow sample sheet creator."""
+    sample: Sample = create_autospec(Sample)
+    sample.name = "sample-1"
+    # sample.application_version.application.analysis_type = "wgs"
+    # sample.sex = SexEnum.male
+    case: Case = create_autospec(Case)
+    case.internal_id = nextflow_case_id
+    link: CaseSample = create_autospec(
+        CaseSample, get_maternal_sample_id="", get_paternal_sample_id=""
+    )
+    # link.status = StatusEnum.affected
+    link.sample = sample
+    link.case = case
+    case.links = [link]
+    case.data_analysis = Workflow.ONCOFLOW
+    store: Store = create_autospec(Store)
+    store.get_case_by_internal_id_strict.return_value = case
+    # store.get_case_priority.return_value = SlurmQos.NORMAL
+    # store.get_case_workflow.return_value = Workflow.ONCOFLOW
+    # store.get_samples_by_case_id.return_value = [sample]
+    store.get_sample_by_internal_id.return_value = sample
+    # bed_version: BedVersion = create_autospec(BedVersion)
+    # bed_version.filename = "bed_version_file.bed"
+    return store
+
+
+@pytest.fixture
 def mock_store_for_raredisease_file_creators(
     nextflow_case_id: str, nextflow_sample_id: str
 ) -> Store:
