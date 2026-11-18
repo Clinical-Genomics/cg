@@ -3,6 +3,9 @@ from unittest.mock import Mock, create_autospec
 import pytest
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.oncoflow_sample_sheet_creator import (
+    OncoflowSampleSheetCreator,
+)
 from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_sheet.raredisease_sample_sheet_creator import (
     RarediseaseSampleSheetCreator,
 )
@@ -20,6 +23,17 @@ from cg.services.analysis_starter.configurator.file_creators.nextflow.sample_she
 )
 from cg.store.models import Case, Sample
 from cg.store.store import Store
+
+
+@pytest.fixture
+def oncoflow_sample_sheet_creator(
+    mock_store_for_oncoflow_file_creators: Store,
+    mock_housekeeper_for_nf_sample_sheet: HousekeeperAPI,
+) -> OncoflowSampleSheetCreator:
+    return OncoflowSampleSheetCreator(
+        store=mock_store_for_oncoflow_file_creators,
+        housekeeper_api=mock_housekeeper_for_nf_sample_sheet,
+    )
 
 
 @pytest.fixture

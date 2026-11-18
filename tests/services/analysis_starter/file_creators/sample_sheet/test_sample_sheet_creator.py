@@ -199,6 +199,7 @@ def test_parse_fastq_header_raises_error():
 @pytest.mark.parametrize(
     "workflow",
     [
+        Workflow.ONCOFLOW,
         Workflow.RAREDISEASE,
         Workflow.RNAFUSION,
         Workflow.TAXPROFILER,
