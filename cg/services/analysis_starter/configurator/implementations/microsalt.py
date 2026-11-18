@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 from cg.apps.lims import LimsAPI
+from cg.constants import DataDelivery
 from cg.exc import MissingConfigFilesError
 from cg.meta.workflow.fastq import MicrosaltFastqHandler
 from cg.models.cg_config import MicrosaltConfig
@@ -38,6 +39,7 @@ class MicrosaltConfigurator(Configurator):
         return self.get_config(case_id=case_id, **flags)
 
     def get_config(self, case_id: str, **flags) -> MicrosaltCaseConfig:
+        case: Case = self.store.get_case_by_internal_id(case_id)
         config_file_path: Path = flags.get(
             "config_path", self.config_file_creator.get_config_path(case_id)
         )
@@ -50,6 +52,7 @@ class MicrosaltConfigurator(Configurator):
             environment=self.config.conda_env,
             fastq_directory=fastq_directory.as_posix(),
             pipeline_config_path=self.config.config,
+            qc_only=case.data_delivery == DataDelivery.FASTQ_QC,
         )
         config: MicrosaltCaseConfig = self._set_flags(config=config, **flags)
         self._ensure_required_config_files_exist(config)
