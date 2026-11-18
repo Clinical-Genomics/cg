@@ -1,5 +1,4 @@
 from http import HTTPStatus
-from typing import Generator
 
 import pytest
 from flask import Flask
@@ -26,7 +25,7 @@ from tests.store_helpers import StoreHelpers
 
 
 @pytest.fixture
-def admin_client(app: Flask, mocker: MockerFixture) -> Generator[FlaskClient, None, None]:
+def admin_client(app: Flask, mocker: MockerFixture) -> FlaskClient:
     # Bypass the Google login of the admin views
     mocker.patch.object(BaseView, "is_accessible", return_value=True)
 
@@ -35,7 +34,7 @@ def admin_client(app: Flask, mocker: MockerFixture) -> Generator[FlaskClient, No
         if isinstance(view, BaseView):
             mocker.patch.object(view, "session", store.session)
 
-    yield app.test_client()
+    return app.test_client()
 
 
 def test_export_selected_cases(admin_client: FlaskClient, helpers: StoreHelpers):
