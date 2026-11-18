@@ -32,7 +32,7 @@ class CaseDeliverablesFileCreator:
         case_replacements = {"CASEID": case.internal_id, "PATHTOCASE": file_path.parent.as_posix()}
 
         for file_type_dict in template:
-            if file_type_dict["id"] == "SAMPLEID":  # TODO: We have to revise if this applies
+            if file_type_dict["id"] == "SAMPLEID":
                 content.extend(
                     self._create_transformed_sample_dicts(
                         samples=case.samples,
