@@ -32,7 +32,7 @@ def test_cases_cancellation_success(mocker: MockerFixture):
 
     # THEN the cancelation service was correctly called
     cancel_cases.assert_called_once_with(
-        case_ids=case_ids, comment=comment, status_db=status_db.as_type
+        case_ids=set(case_ids), comment=comment, status_db=status_db.as_type
     )
 
     # THEN the changes were committed

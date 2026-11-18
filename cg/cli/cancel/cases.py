@@ -31,7 +31,7 @@ def cases(cg_config: CGConfig, comment: str, case_ids: tuple[str, ...]):
 
     status_db: Store = cg_config.status_db
     try:
-        cancellation_service.cases(case_ids=list(case_ids), comment=comment, status_db=status_db)
+        cancellation_service.cases(case_ids=set(case_ids), comment=comment, status_db=status_db)
         status_db.commit_to_store()
     except (
         CgError

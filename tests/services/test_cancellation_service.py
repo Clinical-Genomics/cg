@@ -14,7 +14,7 @@ def test_cases_success():
     status_db: TypedMock[Store] = create_typed_mock(Store)
 
     # GIVEN case ids that exist in statusDB, each case with linked samples
-    cases_ids = ["amazingdog", "shittycow"]
+    cases_ids = {"amazingdog", "shittycow"}
     comment = "a comment"
 
     dog_link: CaseSample = create_autospec(CaseSample, instance=True)
@@ -22,15 +22,15 @@ def test_cases_success():
     cow_link_2: CaseSample = create_autospec(CaseSample, instance=True)
 
     dog_case: Case = create_autospec(
-        Case, instance=True, internal_id=cases_ids[0], links=[dog_link]
+        Case, instance=True, internal_id="amazingdog", links=[dog_link]
     )
     cow_case: Case = create_autospec(
-        Case, instance=True, internal_id=cases_ids[1], links=[cow_link_1, cow_link_2]
+        Case, instance=True, internal_id="shittycow", links=[cow_link_1, cow_link_2]
     )
 
     status_db.as_mock.get_cases_by_internal_ids.return_value = [dog_case, cow_case]
 
-    # WHEN cancelling a list of case_ids
+    # WHEN cancelling a set of case_ids
     cancellation_service.cases(case_ids=cases_ids, comment=comment, status_db=status_db.as_type)
 
     # THEN each case is marked as cancelled
@@ -60,17 +60,22 @@ def test_cases_missing_case_raises():
     # GIVEN a store
     status_db: TypedMock[Store] = create_typed_mock(Store)
 
-    # GIVEN case ids where one does not exist in statusDB
-    cases_ids = ["amazingdog", "shittycow"]
-    dog_case: Case = create_autospec(Case, instance=True, internal_id=cases_ids[0], links=[])
+    # GIVEN case ids where two are missing in statusDB
+    cases_ids = {"existingdog", "missingcow", "missinghuman"}
+    dog_case: Case = create_autospec(Case, instance=True, internal_id="existingdog", links=[])
     status_db.as_mock.get_cases_by_internal_ids.return_value = [dog_case]
 
     # WHEN cancelling the cases
-    # THEN a CaseNotFoundError is raised naming the missing case
-    with pytest.raises(CaseNotFoundError, match="shittycow"):
+    # THEN a CaseNotFoundError is raised naming the missing cases
+    with pytest.raises(CaseNotFoundError) as exc_info:
         cancellation_service.cases(
             case_ids=cases_ids, comment="a comment", status_db=status_db.as_type
         )
+    assert "missingcow" in str(exc_info.value)
+    assert "missinghuman" in str(exc_info.value)
+
+    # THEN existing case is not in the error message
+    assert "existingdog" not in str(exc_info.value)
 
     # THEN no case is modified
     status_db.as_mock.update_case_is_cancelled.assert_not_called()
