@@ -11,12 +11,14 @@ from cg.store.store import Store
 
 def upload_results(
     analysis: Analysis,
+    base_delivery_path: Path,
     housekeeper_api: HousekeeperAPI,
     rsync_service: DeliveryRsyncService,
     status_db: Store,
 ):
     _upload_to_customer_inbox(
         analysis=analysis,
+        base_delivery_path=base_delivery_path,
         housekeeper_api=housekeeper_api,
         rsync_service=rsync_service,
         status_db=status_db,
@@ -25,11 +27,17 @@ def upload_results(
 
 def _upload_to_customer_inbox(
     analysis: Analysis,
+    base_delivery_path: Path,
     housekeeper_api: HousekeeperAPI,
     rsync_service: DeliveryRsyncService,
     status_db: Store,
 ):
-    _link_analysis_files(analysis=analysis, housekeeper_api=housekeeper_api, status_db=status_db)
+    _link_analysis_files(
+        analysis=analysis,
+        base_delivery_path=base_delivery_path,
+        housekeeper_api=housekeeper_api,
+        status_db=status_db,
+    )
     rsync_service.run_rsync_for_analysis()
     # TODO Add RSYNC analysis to Trailblazer
     # TODO Add upload job to the new rsync trailblazer analysis
