@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest.mock import ANY, MagicMock, Mock, create_autospec
 
 import pytest
@@ -324,6 +325,7 @@ def test_get_analysis_starter_for_workflow_trana(
         root="root",
         repository="repository",
         revision="revision",
+        pipeline_deliverables=Path("path/to/deliverables"),
         profile="profile",
         pre_run_script="pre_run_script",
         slurm=create_autospec(SlurmConfig, account="slurm account"),
