@@ -29,12 +29,12 @@ def store_analysis_output(
                     "path": file,
                     "file_type": deliverable["file_type"],
                     "tags": [deliverable["id"]],
-                    # TODO: See if we need to set archive here
+                    # TODO: Set "archive" to False
                 }
                 existing_files.append(file_data)
 
     bundle, version = housekeeper_api.add_bundle(
-        bundle_data={"name": case_id, "files": existing_files}
+        bundle_data={"name": case_id, "files": existing_files}  # TODO: Set created or created_at
     )
     housekeeper_api.include(version)
     housekeeper_api.add_commit(bundle)
