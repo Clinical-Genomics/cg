@@ -20,11 +20,11 @@ def cases(cg_config: CGConfig, comment: str, case_ids: tuple[str, ...]):
 
     \b
     Following actions are performed:
-        - Set the case value `is_canceled` to true
-        - Set the CaseSample links to no-delivery
+        - Set the case value `is_cancelled` to true [X]
+        - Set the CaseSample links to no-delivery [X]
         - Blocks linked analyses from being analyzed
         - Blocks reorders of case
-    """
+    """  # TODO: remove the check marks
     if not comment or not comment.strip():
         # TODO: it could be better to use - raise click.BadParameter("Please add a reason for the cancellation.", param_hint="--comment")
         raise CommentMissingError(f"Please add a reason for the cancellation. User {comment=}")
@@ -33,7 +33,10 @@ def cases(cg_config: CGConfig, comment: str, case_ids: tuple[str, ...]):
     try:
         cancellation_service.cases(case_ids=list(case_ids), comment=comment, status_db=status_db)
         status_db.commit_to_store()
-    except CgError as error:
+    except (
+        CgError
+    ) as error:  # TODO: should I only rollback if I get a CgError? Should I not always rollback?
         status_db.rollback()
         LOG.error(error)
+        # TODO: Message should state that nothing was committed, no changes were made.
         raise click.Abort
