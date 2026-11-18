@@ -11,6 +11,8 @@ from cg.constants.sequencing import Sequencers
 from cg.services.run_devices.pacbio.data_transfer_service.dto import PacBioSequencingRunDTO
 from cg.store.models import (
     Analysis,
+    Case,
+    CaseSample,
     ExternalSample,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
@@ -373,3 +375,67 @@ def test_update_external_sample(store: Store, helpers: StoreHelpers):
     # THEN the transferred_at field should have been updated
     assert updated_external_sample == external_sample
     assert updated_external_sample.transferred_at == timestamp_now
+
+
+def test_update_case_is_cancelled(store: Store, helpers: StoreHelpers):
+    # GIVEN a case that is not cancelled
+    case: Case = helpers.add_case(store=store)
+    assert case.is_cancelled is False
+
+    # WHEN marking the case as cancelled
+    store.update_case_is_cancelled(case=case, state=True)
+
+    # THEN the case is cancelled
+    assert case.is_cancelled is True
+
+
+def test_update_case_comment_without_existing_comment(store: Store, helpers: StoreHelpers):
+    # GIVEN a case without a comment
+    case: Case = helpers.add_case(store=store)
+    assert not case.comment
+
+    # WHEN updating the comment
+    store.update_case_comment(case=case, comment="Customer withdrew the order")
+
+    # THEN the comment is set
+    assert case.comment == "Customer withdrew the order"
+
+
+def test_update_case_comment_appends_to_existing_comment(store: Store, helpers: StoreHelpers):
+    # GIVEN a case with an existing comment
+    case: Case = helpers.add_case(store=store)
+    case.comment = "Old comment"
+
+    # WHEN updating the comment
+    store.update_case_comment(case=case, comment="Customer withdrew the order")
+
+    # THEN the new comment is appended to the existing one
+    assert case.comment == "Old comment Customer withdrew the order"
+
+
+def test_update_should_deliver_sample(store: Store, helpers: StoreHelpers):
+    # GIVEN a case-sample link where the sample should be delivered
+    case: Case = helpers.add_case(store=store)
+    sample = helpers.add_sample(store=store)
+    link: CaseSample = helpers.add_relationship(
+        store=store, case=case, sample=sample, should_deliver_sample=True
+    )
+
+    # WHEN setting the sample to not be delivered
+    store.update_should_deliver_sample(link=link, state=False)
+
+    # THEN the sample should not be delivered
+    assert link.should_deliver_sample is False
+
+
+def test_update_case_is_cancelled_does_not_commit(store: Store, helpers: StoreHelpers):
+    # GIVEN a committed case that is not cancelled
+    case: Case = helpers.add_case(store=store)
+    store.commit_to_store()
+
+    # WHEN marking the case as cancelled and then rolling back
+    store.update_case_is_cancelled(case=case, state=True)
+    store.rollback()
+
+    # THEN the change was not persisted
+    assert case.is_cancelled is False
