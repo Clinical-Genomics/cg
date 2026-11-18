@@ -5,7 +5,7 @@ from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
 from cg.cli.cancel.cases import cases
-from cg.exc import CgError, CommentMissingError
+from cg.exc import CgError
 from cg.models.cg_config import CGConfig
 from cg.services import cancellation_service
 from cg.store.store import Store
@@ -41,7 +41,7 @@ def test_cases_cancellation_success(mocker: MockerFixture):
 
 @pytest.mark.parametrize(
     "comment",
-    ["", " "],
+    ["", "   "],
 )
 def test_cases_comment_missing(mocker: MockerFixture, comment: str):
     # GIVEN a cg_config with a status_db
@@ -55,11 +55,10 @@ def test_cases_comment_missing(mocker: MockerFixture, comment: str):
     case_ids: list[str] = ["case_1", "case_2"]
 
     # WHEN canceling the cases
-    # THEN a CommentMissingError is raised
-    with pytest.raises(CommentMissingError):
-        CliRunner().invoke(
-            cases, args=[*case_ids, "--comment", comment], obj=cg_config, catch_exceptions=False
-        )
+    result = CliRunner().invoke(cases, args=[*case_ids, "--comment", comment], obj=cg_config)
+
+    # THEN the command fails with a usage error
+    assert result.exit_code == 2
 
     # THEN the cancelation service was not called
     cancel_cases.assert_not_called()
