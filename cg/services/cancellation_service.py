@@ -1,6 +1,10 @@
+import logging
+
 from cg.exc import CaseNotFoundError
 from cg.store.models import Case
 from cg.store.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
 def cases(case_ids: set[str], comment: str, status_db: Store) -> None:
@@ -41,5 +45,7 @@ def _get_cases_strict(case_ids: set[str], status_db: Store) -> list[Case]:
 def _cancel_case(case: Case, comment: str, status_db: Store) -> None:
     status_db.update_case_is_cancelled(case=case, state=True)
     status_db.update_case_comment(case=case, comment=comment)
+    LOG.debug(f"Case {case.internal_id} cancelled with {comment=}")
     for link in case.links:
         status_db.update_should_deliver_sample(link=link, state=False)
+        LOG.debug(f"Case {case.internal_id} will not deliver sample {link.sample.internal_id}")

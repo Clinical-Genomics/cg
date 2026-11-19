@@ -30,10 +30,16 @@ def cases(cg_config: CGConfig, comment: str, case_ids: tuple[str, ...]):
             "Please add a reason for the cancellation.", param_hint="--comment"
         )
 
+    unique_case_ids: set[str] = set(case_ids)
+
     status_db: Store = cg_config.status_db
     try:
-        cancellation_service.cases(case_ids=set(case_ids), comment=comment, status_db=status_db)
+        cancellation_service.cases(case_ids=unique_case_ids, comment=comment, status_db=status_db)
         status_db.commit_to_store()
+        click.secho(
+            message=f"Cancellation successfully performed for: {', '.join(sorted(unique_case_ids))}",
+            fg="green",
+        )
     except CgError as error:
         status_db.rollback()
         LOG.error(f"Cancellation failed: {error}. No changes were made.")
