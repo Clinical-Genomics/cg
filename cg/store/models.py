@@ -508,6 +508,7 @@ class Case(Base, PriorityMixin):
     )
     id: Mapped[PrimaryKeyInt]
     internal_id: Mapped[UniqueStr]
+    is_cancelled: Mapped[bool] = mapped_column(default=False, nullable=False)
     name: Mapped[Str128]
     ordered_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
     _panels: Mapped[Text | None]
