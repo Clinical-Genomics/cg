@@ -32,6 +32,7 @@ from cg.meta.archive.ddn.models import (
 from cg.meta.archive.ddn.utils import get_request_log
 from cg.meta.archive.models import ArchiveHandler, FileAndSample
 from cg.models.cg_config import DataFlowConfig
+from cg.utils.http import raise_for_status_with_body
 
 LOG = logging.getLogger(__name__)
 
@@ -249,7 +250,7 @@ class DDNDataFlowClient(ArchiveHandler):
             json=body.model_dump(by_alias=True),
             verify=False,
         )
-        response.raise_for_status()
+        raise_for_status_with_body(response)
         return response
 
     def _get_job_status(self, headers: dict, job_id: int) -> GetJobStatusResponse:
@@ -262,5 +263,5 @@ class DDNDataFlowClient(ArchiveHandler):
             json={},
             verify=False,
         )
-        response.raise_for_status()
+        raise_for_status_with_body(response)
         return GetJobStatusResponse.model_validate(response.json())

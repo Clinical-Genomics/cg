@@ -11,13 +11,16 @@ from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_cli
 )
 
 
+@pytest.mark.parametrize("launch_id", [None, "previous_launch_id"])
 def test_run_case(
+    launch_id: str | None,
     seqera_platform_client: SeqeraPlatformClient,
     workflow_launch_request: WorkflowLaunchRequest,
     http_workflow_launch_response: Response,
     mocker: MockerFixture,
 ):
     # GIVEN a workflow launch request
+    workflow_launch_request.launch.id = launch_id
 
     # WHEN running the case using the request
     mock_submitter: mocker.MagicMock = mocker.patch.object(
@@ -30,10 +33,17 @@ def test_run_case(
     # THEN the request should be sent to the Seqera platform API
     mock_submitter.assert_called_once_with(
         headers=seqera_platform_client.auth_headers,
-        json=workflow_launch_request.model_dump(),
+        json=workflow_launch_request.model_dump(exclude_none=True),
         params={"workspaceId": seqera_platform_client.workspace_id},
         url=f"{seqera_platform_client.base_url}/workflow/launch",
     )
+
+    # THEN fresh launches omit the ID and resumes include the previous launch ID
+    payload: dict = mock_submitter.call_args.kwargs["json"]["launch"]
+    if launch_id:
+        assert payload["id"] == launch_id
+    else:
+        assert "id" not in payload
 
 
 def test_run_case_raises_exception_on_error(
