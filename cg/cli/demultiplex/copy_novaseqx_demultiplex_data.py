@@ -122,7 +122,9 @@ def are_all_files_synced(files_at_source: list[Path], target_directory: Path) ->
     """Checks if all relevant files in the source are present in the target directory."""
     for file in files_at_source:
         target_file_path = Path(target_directory, file)
-        if is_file_relevant_for_demultiplexing(file) and not target_file_path.exists():
+        if (
+            is_file_relevant_for_demultiplexing(file) or is_file_relevant_for_post_processing(file)
+        ) and not target_file_path.exists():
             LOG.info(f"File: {file}, has not been transferred from source to {target_directory}")
             return False
     return True
@@ -214,6 +216,16 @@ def is_file_relevant_for_demultiplexing(file: Path) -> bool:
         if relevant_directory in file.parts:
             return True
     return False
+
+
+def is_file_relevant_for_post_processing(file: Path) -> bool:
+    """Returns whether a file is relevant for post-processing."""
+    relevant_files = [
+        DemultiplexingDirsAndFiles.RUN_COMPLETION_STATUS,
+        DemultiplexingDirsAndFiles.RUN_PARAMETERS_PASCAL_CASE,
+        DemultiplexingDirsAndFiles.RUN_PARAMETERS_CAMEL_CASE,
+    ]
+    return file.name in relevant_files
 
 
 def link_onboard_demultiplexed_flow_cell(
