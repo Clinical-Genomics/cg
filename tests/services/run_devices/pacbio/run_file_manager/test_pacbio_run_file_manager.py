@@ -2,9 +2,11 @@ from pathlib import Path
 from unittest import mock
 
 import pytest
+from pytest_mock import MockerFixture
 
 from cg.services.run_devices.exc import PostProcessingRunFileManagerError
 from cg.services.run_devices.pacbio.run_data_generator.run_data import PacBioRunData
+from cg.services.run_devices.pacbio.run_file_manager import run_file_manager
 from cg.services.run_devices.pacbio.run_file_manager.models import PacBioRunValidatorFiles
 from cg.services.run_devices.pacbio.run_file_manager.run_file_manager import PacBioRunFileManager
 
@@ -77,7 +79,7 @@ def test_get_files_to_parse_error(
             pac_bio_run_file_manager.get_files_to_parse(pacbio_barcoded_run_data)
 
 
-def test_get_run_validator_files(
+def test_get_run_validator_files_success(
     expected_pac_bio_run_data_1_b01, pac_bio_run_file_manager, expected_1_b01_run_validation_files
 ):
     # GIVEN a run data object
@@ -89,3 +91,28 @@ def test_get_run_validator_files(
 
     # THEN the correct paths are returned
     assert validation_file_paths == expected_1_b01_run_validation_files
+
+
+def test_get_run_validator_files_fail(
+    tmp_path: Path,
+    pac_bio_run_file_manager: PacBioRunFileManager,
+    expected_1_b01_run_validation_files: PacBioRunValidatorFiles,
+    mocker: MockerFixture,
+):
+    # GIVEN a run data object with a missing zipped reports
+    pacbio_run_data = PacBioRunData(
+        full_path=tmp_path / "run_name" / "1_B01",
+        sequencing_run_name="run_name",
+        well_name="1_B01",
+        plate=1,
+    )
+
+    # GIVEN that no zipped nor unzipped reports file is found
+    mocker.patch.object(
+        run_file_manager, "get_files_matching_pattern", side_effect=[[Path("some", "file")], [], []]
+    )
+
+    # WHEN getting the run validation file paths
+    # THEN a file not found exception is raised
+    with pytest.raises(PostProcessingRunFileManagerError):
+        pac_bio_run_file_manager.get_run_validation_files(pacbio_run_data)
