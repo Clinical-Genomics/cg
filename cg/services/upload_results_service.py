@@ -5,6 +5,10 @@ from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb.api import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
+from cg.constants import Workflow
+from cg.constants.tb import AnalysisType
+from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.store.models import Analysis, Case, UploadKeys
 from cg.store.store import Store
@@ -16,7 +20,7 @@ def upload_results(
     housekeeper_api: HousekeeperAPI,
     rsync_service: DeliveryRsyncService,
     status_db: Store,
-    trailblazer_api: TrailblazerAPI
+    trailblazer_api: TrailblazerAPI,
 ):
     _upload_to_customer_inbox(
         analysis=analysis,
@@ -24,6 +28,7 @@ def upload_results(
         housekeeper_api=housekeeper_api,
         rsync_service=rsync_service,
         status_db=status_db,
+        trailblazer_api=trailblazer_api,
     )
 
 
@@ -33,6 +38,7 @@ def _upload_to_customer_inbox(
     housekeeper_api: HousekeeperAPI,
     rsync_service: DeliveryRsyncService,
     status_db: Store,
+    trailblazer_api: TrailblazerAPI,
 ):
     case: Case = analysis.case
     case_delivery_directory = Path(
@@ -54,6 +60,16 @@ def _upload_to_customer_inbox(
         analysis=analysis, folders_to_deliver={case_delivery_directory}
     )
     # TODO Add RSYNC analysis to Trailblazer
+    analysis: TrailblazerAnalysis = trailblazer_api.add_pending_analysis(
+        case_id=f"{case.internal_id}_rsync",
+        analysis_type=AnalysisType.OTHER,
+        config_path="",
+        order_id=analysis.order_id,
+        out_dir=rsync_service.log_dir.as_posix(),
+        priority=MAP_TO_TRAILBLAZER_PRIORITY[case.priority],
+        workflow=Workflow.RSYNC,
+        ticket=str(analysis.order.ticket_id),
+    )
     # TODO Add upload job to the new rsync trailblazer analysis
     # TODO Add upload job to the main trailblazer analysis
 

@@ -8,6 +8,8 @@ from sqlalchemy.orm import Query
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb.api import TrailblazerAPI
 from cg.constants.constants import Workflow
+from cg.constants.priority import Priority, TrailblazerPriority
+from cg.constants.tb import AnalysisType
 from cg.services import upload_results_service
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.store.models import Analysis, Case, Customer, Order, UploadKeys
@@ -19,10 +21,15 @@ def test_upload_results_trana(fs: FakeFilesystem):
     # GIVEN an analysis ready to be uploaded
     customer: Customer = create_autospec(Customer, internal_id="cust000")
     order: Order = create_autospec(Order, ticket_id=123456)
-    case: Case = create_autospec(Case, customer=customer)
+    case: Case = create_autospec(Case, customer=customer, priority=Priority.priority)
     case.name = "test-case"
     analysis: Analysis = create_autospec(
-        Analysis, case=case, housekeeper_version_id=123666, order=order, workflow=Workflow.TRANA_16S
+        Analysis,
+        case=case,
+        housekeeper_version_id=123666,
+        order=order,
+        order_id=12,
+        workflow=Workflow.TRANA_16S,
     )
 
     # GIVEN HK files
@@ -50,7 +57,9 @@ def test_upload_results_trana(fs: FakeFilesystem):
     trailblazer_api: TypedMock[TrailblazerAPI] = create_typed_mock(TrailblazerAPI)
 
     # GIVEN an DeliveryRsyncService
-    rsync_service: TypedMock[DeliveryRsyncService] = create_typed_mock(DeliveryRsyncService)
+    rsync_service: TypedMock[DeliveryRsyncService] = create_typed_mock(
+        DeliveryRsyncService, log_dir="/path/to/rsync/log/dir"
+    )
 
     # WHEN uploading the Trana results
     upload_results_service.upload_results(
@@ -59,6 +68,7 @@ def test_upload_results_trana(fs: FakeFilesystem):
         housekeeper_api=housekeeper_api,
         rsync_service=rsync_service.as_type,
         status_db=status_db,
+        trailblazer_api=trailblazer_api.as_type,
     )
 
     # THEN the case_delivery_directory should have been created
@@ -80,7 +90,16 @@ def test_upload_results_trana(fs: FakeFilesystem):
     )
 
     # THEN an RSYNC "analysis" should have been created in Trailblazer
-    trailblazer_api.as_mock.add_pending_analysis.assert_called_once_with("something?")
+    trailblazer_api.as_mock.add_pending_analysis.assert_called_once_with(
+        case_id="test-case_rsync",
+        analysis_type=AnalysisType.OTHER,
+        config_path="",
+        order_id=12,
+        out_dir="/path/to/rsync/log/dir",
+        priority=TrailblazerPriority.HIGH,
+        workflow=Workflow.RSYNC,
+        ticket="123456",
+    )
 
     # THEN the upload job was added to the RSYNC "analysis" in Trailblazer
 
