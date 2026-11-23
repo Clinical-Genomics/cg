@@ -2176,7 +2176,9 @@ class ReadHandler(BaseHandler):
                 f"Could not find external sample with name {sample_name} for customer {customer_id}"
             )
 
-        # TODO: create get upload keys method
+    # TODO: create get upload keys method
+    def get_upload_keys(self, workflow: Workflow, upload_to_customer_inbox: bool):
+        pass
 
 
 def _paginate(query: Query, page: int, page_size: int) -> tuple[list, int]:

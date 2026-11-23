@@ -1,20 +1,31 @@
 from pathlib import Path
-from unittest.mock import create_autospec
+from unittest.mock import Mock, create_autospec
+
+from pyfakefs.fake_filesystem import FakeFilesystem
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import Workflow
 from cg.services import upload_results_service
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
-from cg.store.models import Analysis
+from cg.store.models import Analysis, Case, Customer, Order
 from cg.store.store import Store
 
 
-def test_upload_results_trana():
+def test_upload_results_trana(fs: FakeFilesystem):
     # GIVEN an analysis ready to be uploaded
-    analysis: Analysis = create_autospec(Analysis, workflow=Workflow.TRANA_16S)
+    customer: Customer = create_autospec(Customer, internal_id="cust000")
+    order: Order = create_autospec(Order, ticket_id=123456)
+    case: Case = create_autospec(Case, customer=customer)
+    case.name = "test-case"
+    analysis: Analysis = create_autospec(
+        Analysis, case=case, order=order, workflow=Workflow.TRANA_16S
+    )
+
+    # GIVEN
 
     # GIVEN a HousekeeperAPI
     housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
+    housekeeper_api.files = Mock(return_value="")
 
     # GIVEN a StatusDB
     status_db: Store = create_autospec(Store)
@@ -32,6 +43,7 @@ def test_upload_results_trana():
     )
 
     # THEN the case_delivery_directory should have been created
+    assert Path("base/delivery/path/cust000/inbox/123456/test-case").exists()
 
     # THEN the expected files were linked to the customer directory
 

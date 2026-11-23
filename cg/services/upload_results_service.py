@@ -66,7 +66,7 @@ def _link_analysis_files(
     case_delivery_directory.mkdir(parents=True, exist_ok=True)
 
     upload_keys: list[UploadKeys] = status_db.get_upload_keys(
-        workflow=analysis.case.data_analysis, upload_to_customer_inbox=True
+        workflow=analysis.workflow, upload_to_customer_inbox=True
     )
     file_types: list[str] = [key.file_type for key in upload_keys]
 
