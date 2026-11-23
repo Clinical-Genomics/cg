@@ -44,6 +44,7 @@ For development, use `poetry install --all-extras` to install development depend
 [scilife]: https://www.scilifelab.se/
 [pypi]: https://pypi.org/
 
+
 [black]: https://black.readthedocs.io/en/stable/
 
 <!-- badges -->
