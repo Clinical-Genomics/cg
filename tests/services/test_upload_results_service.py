@@ -6,11 +6,13 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 from sqlalchemy.orm import Query
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.tb.api import TrailblazerAPI
 from cg.constants.constants import Workflow
 from cg.services import upload_results_service
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
-from cg.store.models import Analysis, Case, Customer, Order
+from cg.store.models import Analysis, Case, Customer, Order, UploadKeys
 from cg.store.store import Store
+from tests.typed_mock import TypedMock, create_typed_mock
 
 
 def test_upload_results_trana(fs: FakeFilesystem):
@@ -20,9 +22,8 @@ def test_upload_results_trana(fs: FakeFilesystem):
     case: Case = create_autospec(Case, customer=customer)
     case.name = "test-case"
     analysis: Analysis = create_autospec(
-        Analysis, case=case, order=order, workflow=Workflow.TRANA_16S
+        Analysis, case=case, housekeeper_version_id=123666, order=order, workflow=Workflow.TRANA_16S
     )
-
 
     # GIVEN HK files
     file_one: File = create_autospec(File, full_path="/path/to/file_one")
@@ -33,26 +34,30 @@ def test_upload_results_trana(fs: FakeFilesystem):
     # GIVEN a HousekeeperAPI
     housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
     file_query: Query = create_autospec(Query)
-    file_query.all = Mock(
-        return_value=[file_one, file_two]
-    )
+    file_query.all = Mock(return_value=[file_one, file_two])
     housekeeper_api.files = Mock(return_value=file_query)
 
     # GIVEN a StatusDB with the upload keys for the files
     status_db: Store = create_autospec(Store)
-    #TODO: add two file types
-    status_db.get_upload_keys = Mock(return_value=[])
+    status_db.get_upload_keys = Mock(
+        return_value=[
+            create_autospec(UploadKeys, file_type="file-type-1"),
+            create_autospec(UploadKeys, file_type="file-type-2"),
+        ]
+    )
 
+    # GIVEN a TrailblazerAPI
+    trailblazer_api: TypedMock[TrailblazerAPI] = create_typed_mock(TrailblazerAPI)
 
     # GIVEN an DeliveryRsyncService
-    rsync_service: DeliveryRsyncService = create_autospec(DeliveryRsyncService)
+    rsync_service: TypedMock[DeliveryRsyncService] = create_typed_mock(DeliveryRsyncService)
 
     # WHEN uploading the Trana results
     upload_results_service.upload_results(
         analysis=analysis,
         base_delivery_path=Path("base/delivery/path"),
         housekeeper_api=housekeeper_api,
-        rsync_service=rsync_service,
+        rsync_service=rsync_service.as_type,
         status_db=status_db,
     )
 
@@ -63,12 +68,19 @@ def test_upload_results_trana(fs: FakeFilesystem):
     assert Path("base/delivery/path/cust000/inbox/123456/test-case/file_one").exists()
     assert Path("base/delivery/path/cust000/inbox/123456/test-case/file_two").exists()
 
-    # THEN
-    housekeeper_api.files.assert_called_once_with(file_types=[], version=)
+    # THEN we query housekeeper with the correct parameters
+    housekeeper_api.files.assert_called_once_with(
+        file_types=["file-type-1", "file-type-2"], version=123666
+    )
 
     # THEN the files were submitted to be rsynced to the delivery server
+    rsync_service.as_mock.run_rsync_for_analysis.assert_called_once_with(
+        analysis=analysis,
+        folders_to_deliver={Path("base/delivery/path/cust000/inbox/123456/test-case")},
+    )
 
     # THEN an RSYNC "analysis" should have been created in Trailblazer
+    trailblazer_api.as_mock.add_pending_analysis.assert_called_once_with("something?")
 
     # THEN the upload job was added to the RSYNC "analysis" in Trailblazer
 

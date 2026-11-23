@@ -4,6 +4,7 @@ from pathlib import Path
 from housekeeper.store.models import File
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
+from cg.apps.tb.api import TrailblazerAPI
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.store.models import Analysis, Case, UploadKeys
 from cg.store.store import Store
@@ -15,6 +16,7 @@ def upload_results(
     housekeeper_api: HousekeeperAPI,
     rsync_service: DeliveryRsyncService,
     status_db: Store,
+    trailblazer_api: TrailblazerAPI
 ):
     _upload_to_customer_inbox(
         analysis=analysis,
