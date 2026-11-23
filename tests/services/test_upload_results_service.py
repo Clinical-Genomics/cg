@@ -21,7 +21,9 @@ def test_upload_results_trana(fs: FakeFilesystem):
     # GIVEN an analysis ready to be uploaded
     customer: Customer = create_autospec(Customer, internal_id="cust000")
     order: Order = create_autospec(Order, ticket_id=123456)
-    case: Case = create_autospec(Case, customer=customer, priority=Priority.priority)
+    case: Case = create_autospec(
+        Case, customer=customer, internal_id="case_1", priority=Priority.priority
+    )
     case.name = "test-case"
     analysis: Analysis = create_autospec(
         Analysis,
@@ -58,7 +60,7 @@ def test_upload_results_trana(fs: FakeFilesystem):
 
     # GIVEN an DeliveryRsyncService
     rsync_service: TypedMock[DeliveryRsyncService] = create_typed_mock(
-        DeliveryRsyncService, log_dir="/path/to/rsync/log/dir"
+        DeliveryRsyncService, log_dir=Path("/path/to/rsync/log/dir")
     )
 
     # WHEN uploading the Trana results
@@ -91,7 +93,7 @@ def test_upload_results_trana(fs: FakeFilesystem):
 
     # THEN an RSYNC "analysis" should have been created in Trailblazer
     trailblazer_api.as_mock.add_pending_analysis.assert_called_once_with(
-        case_id="test-case_rsync",
+        case_id="case_1_rsync",
         analysis_type=AnalysisType.OTHER,
         config_path="",
         order_id=12,
