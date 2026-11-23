@@ -14,7 +14,6 @@ LOG = logging.getLogger(__name__)
 def perform_qc(
     analysis_id: int, root_directory: Path, status_db: Store, trailblazer_api: TrailblazerAPI
 ) -> None:
-    # TODO mark as failed in Trailblazer
     analysis: Analysis = status_db.get_analysis_by_entry_id_strict(analysis_id)
     case_id = analysis.case_internal_id
     case_deliverables_file = Path(root_directory, case_id, f"{case_id}_deliverables.yaml")
@@ -27,7 +26,7 @@ def perform_qc(
                 missing_files.append(file)
 
     if missing_files:
-
+        trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.FAILED)
         raise MandatoryFileMissingError(f"Missing files: {missing_files}")
-
-    trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.COMPLETED)
+    else:
+        trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.COMPLETED)

@@ -11,6 +11,7 @@ from cg.io.yaml import write_yaml_stream
 from cg.services.analysis_qc_service import analysis_qc_service
 from cg.store.models import Analysis
 from cg.store.store import Store
+from tests.conftest import case_id
 from tests.typed_mock import TypedMock, create_typed_mock
 
 
@@ -66,6 +67,9 @@ def test_perform_qc_mandatory_file_missing(fs: FakeFilesystem):
 
     # GIVEN that a mandatory file does not exist
 
+    # GIVEN a Trailblazer API
+    trailblazer_api: TypedMock[TrailblazerAPI] = create_typed_mock(TrailblazerAPI)
+
     # GIVEN a StatusDB with an analysis linked to a case
     status_db: Store = create_autospec(Store)
     status_db.get_analysis_by_entry_id_strict = Mock(
@@ -78,6 +82,11 @@ def test_perform_qc_mandatory_file_missing(fs: FakeFilesystem):
         analysis_qc_service.perform_qc(
             root_directory=Path("root_directory"),
             status_db=status_db,
-            trailblazer_api=create_autospec(TrailblazerAPI),
+            trailblazer_api=trailblazer_api.as_type,
             analysis_id=1,
         )
+
+    # THEN a status was set as failed in TB
+    trailblazer_api.as_mock.set_analysis_status.assert_called_once_with(
+        case_id="case_one", status=AnalysisStatus.FAILED
+    )
