@@ -244,7 +244,7 @@ def test_concatenate_rsync_commands_mutant(
 
 
 @pytest.mark.freeze_time("2025-06-11 10:05:01")
-def test_slurm_rsync_single_analysis(
+def test_run_rsync_for_analysis(
     created_sbatch_information: str,
     rsync_destination_host: str,
     inbox_path: str,
@@ -272,7 +272,7 @@ def test_slurm_rsync_single_analysis(
     # GIVEN some folders to sync
     dir_one = fs.create_dir(directory_path="/path/to/dir_one")
     dir_two = fs.create_dir(directory_path="/path/to/dir_two")
-    folders_to_deliver = {Path("/path/to/dir_one"), Path("/path/to/dir_two")}
+    folders_to_deliver = {Path(dir_one.path), Path(dir_two.path)}
 
     # WHEN run_rsync_for_case is run
     sbatch_number: int = rsync_service.run_rsync_for_analysis(
