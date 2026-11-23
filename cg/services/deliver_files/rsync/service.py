@@ -327,6 +327,7 @@ class DeliveryRsyncService:
         folders_to_deliver: set[Path],
         ticket: str,
         source_and_destination_paths: dict[str, Path],
+        analysis_id: int | None = None,
         dry_run: bool = False,
     ) -> int:
         """Submit the job that rsyncs case data to the delivery server and return the job id."""
@@ -336,9 +337,10 @@ class DeliveryRsyncService:
             ticket=ticket,
             case=case,
         )
-        analysis_id: int = self.status_db.get_latest_completed_analysis_for_case(
-            case.internal_id
-        ).id
+        if not analysis_id:
+            analysis_id: int = self.status_db.get_latest_completed_analysis_for_case(
+                case.internal_id
+            ).id
         data = {
             "cg.analysis_id": analysis_id,
             "uploaded_at": "$(date +%Y-%m-%dT%H:%M:%S)",

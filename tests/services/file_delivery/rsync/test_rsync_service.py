@@ -255,7 +255,6 @@ def test_slurm_rsync_single_analysis(
     rsync_destination_path: str,
     rsync_mail_user: str,
     rsync_service: DeliveryRsyncService,
-    folders_to_deliver: set[Path],
     slurm_api_mock: SlurmAPI,
     fs: FakeFilesystem,
 ):
@@ -269,6 +268,11 @@ def test_slurm_rsync_single_analysis(
     analysis: Analysis = create_autospec(
         Analysis, case=case, case_internal_id="case_one", order=order, id=42
     )
+
+    # GIVEN some folders to sync
+    dir_one = fs.create_dir(directory_path="/path/to/dir_one")
+    dir_two = fs.create_dir(directory_path="/path/to/dir_two")
+    folders_to_deliver = {Path("/path/to/dir_one"), Path("/path/to/dir_two")}
 
     # WHEN run_rsync_for_case is run
     sbatch_number: int = rsync_service.run_rsync_for_analysis(
@@ -308,7 +312,7 @@ ssh {rsync_destination_host} "mkdir -p {inbox_path}/{customer.internal_id}/inbox
             f"rsync -rvL {rsync_delivery_path}/{customer.internal_id}/inbox/{ticket}/{type} "
             f"{rsync_destination_path}/{customer.internal_id}/inbox/{ticket}"
         )
-        for type in ["case", "father", "mother", "child"]
+        for type in ["dir_one", "dir_two"]
     ]
     expected_rsync_commands.append(
         "path/to/nats_binary pub --jetstream --server nats://example.nats.server:4222 --tlsca "
