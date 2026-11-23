@@ -1,7 +1,9 @@
 from pathlib import Path
 from unittest.mock import Mock, create_autospec
 
+from housekeeper.store.models import File
 from pyfakefs.fake_filesystem import FakeFilesystem
+from sqlalchemy.orm import Query
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.constants.constants import Workflow
@@ -21,14 +23,26 @@ def test_upload_results_trana(fs: FakeFilesystem):
         Analysis, case=case, order=order, workflow=Workflow.TRANA_16S
     )
 
-    # GIVEN
+
+    # GIVEN HK files
+    file_one: File = create_autospec(File, full_path="/path/to/file_one")
+    fs.create_file("/path/to/file_one")
+    file_two: File = create_autospec(File, full_path="/path/to/file_two")
+    fs.create_file("/path/to/file_two")
 
     # GIVEN a HousekeeperAPI
     housekeeper_api: HousekeeperAPI = create_autospec(HousekeeperAPI)
-    housekeeper_api.files = Mock(return_value="")
+    file_query: Query = create_autospec(Query)
+    file_query.all = Mock(
+        return_value=[file_one, file_two]
+    )
+    housekeeper_api.files = Mock(return_value=file_query)
 
-    # GIVEN a StatusDB
+    # GIVEN a StatusDB with the upload keys for the files
     status_db: Store = create_autospec(Store)
+    #TODO: add two file types
+    status_db.get_upload_keys = Mock(return_value=[])
+
 
     # GIVEN an DeliveryRsyncService
     rsync_service: DeliveryRsyncService = create_autospec(DeliveryRsyncService)
@@ -46,6 +60,11 @@ def test_upload_results_trana(fs: FakeFilesystem):
     assert Path("base/delivery/path/cust000/inbox/123456/test-case").exists()
 
     # THEN the expected files were linked to the customer directory
+    assert Path("base/delivery/path/cust000/inbox/123456/test-case/file_one").exists()
+    assert Path("base/delivery/path/cust000/inbox/123456/test-case/file_two").exists()
+
+    # THEN
+    housekeeper_api.files.assert_called_once_with(file_types=[], version=)
 
     # THEN the files were submitted to be rsynced to the delivery server
 
