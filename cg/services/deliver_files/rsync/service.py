@@ -212,7 +212,7 @@ class DeliveryRsyncService:
         else:
             log_dir.mkdir(parents=True, exist_ok=True)
 
-    def run_rsync_for_analysis(self, analysis: Analysis, folders_to_deliver: set[Path]):
+    def run_rsync_for_analysis(self, analysis: Analysis, folders_to_deliver: set[Path]) -> int:
         ticket: int = analysis.order.ticket_id
         source_and_destination_paths: dict[str, Path] = self.get_source_and_destination_paths(
             ticket=str(ticket), customer_internal_id=analysis.case.customer.internal_id

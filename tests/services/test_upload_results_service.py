@@ -7,6 +7,7 @@ from sqlalchemy.orm import Query
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb.api import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants.constants import Workflow
 from cg.constants.priority import Priority, TrailblazerPriority
 from cg.constants.tb import AnalysisType
@@ -31,6 +32,7 @@ def test_upload_results_trana(fs: FakeFilesystem):
         housekeeper_version_id=123666,
         order=order,
         order_id=12,
+        trailblazer_id=53,
         workflow=Workflow.TRANA_16S,
     )
 
@@ -57,11 +59,15 @@ def test_upload_results_trana(fs: FakeFilesystem):
 
     # GIVEN a TrailblazerAPI
     trailblazer_api: TypedMock[TrailblazerAPI] = create_typed_mock(TrailblazerAPI)
+    trailblazer_api.as_type.add_pending_analysis = Mock(
+        return_value=create_autospec(TrailblazerAnalysis, id=1)
+    )
 
     # GIVEN an DeliveryRsyncService
     rsync_service: TypedMock[DeliveryRsyncService] = create_typed_mock(
         DeliveryRsyncService, log_dir=Path("/path/to/rsync/log/dir")
     )
+    rsync_service.as_type.run_rsync_for_analysis = Mock(return_value=93)
 
     # WHEN uploading the Trana results
     upload_results_service.upload_results(
@@ -104,5 +110,11 @@ def test_upload_results_trana(fs: FakeFilesystem):
     )
 
     # THEN the upload job was added to the RSYNC "analysis" in Trailblazer
+    trailblazer_api.as_mock.add_upload_job_to_analysis.assert_called_once_with(
+        analysis_id=1, slurm_id=93
+    )
 
     # THEN the upload job was added to the Trana-16s analysis in Trailblazer
+    trailblazer_api.as_mock.add_upload_job_to_analysis.assert_called_once_with(
+        analysis_id=53, slurm_id=93
+    )

@@ -56,11 +56,11 @@ def _upload_to_customer_inbox(
         status_db=status_db,
     )
 
-    rsync_service.run_rsync_for_analysis(
+    slurm_job_id: int = rsync_service.run_rsync_for_analysis(
         analysis=analysis, folders_to_deliver={case_delivery_directory}
     )
-    # TODO Add RSYNC analysis to Trailblazer
-    analysis: TrailblazerAnalysis = trailblazer_api.add_pending_analysis(
+
+    tb_analysis: TrailblazerAnalysis = trailblazer_api.add_pending_analysis(
         case_id=f"{case.internal_id}_rsync",
         analysis_type=AnalysisType.OTHER,
         config_path="",
@@ -70,7 +70,9 @@ def _upload_to_customer_inbox(
         workflow=Workflow.RSYNC,
         ticket=str(analysis.order.ticket_id),
     )
-    # TODO Add upload job to the new rsync trailblazer analysis
+
+    trailblazer_api.add_upload_job_to_analysis(analysis_id=tb_analysis.id, slurm_id=slurm_job_id)
+
     # TODO Add upload job to the main trailblazer analysis
 
 
