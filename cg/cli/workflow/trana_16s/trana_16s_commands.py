@@ -116,8 +116,6 @@ def store(cg_config: CGConfig, case_id: str, comment: str | None, force: bool) -
         click.Abort: If an error occurs during the deliverables file generation, metrics
         validation, or storage processes.
     """
-    # TODO: What checks need to be performed before storing, if any?
-    #
     case: Case = cg_config.status_db.get_case_by_internal_id_strict(case_id)
     latest_analysis: Analysis | None = case.latest_created_analysis
     if not latest_analysis:
