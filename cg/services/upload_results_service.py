@@ -1,3 +1,4 @@
+import logging
 import os
 from pathlib import Path
 from typing import cast
@@ -13,6 +14,8 @@ from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.store.models import Analysis, Case, UploadKeys
 from cg.store.store import Store
+
+LOG = logging.getLogger(__name__)
 
 
 def upload_results(
@@ -45,7 +48,6 @@ def _upload_to_customer_inbox(
     case_delivery_directory: Path = _create_case_delivery_directory(
         analysis=analysis, base_delivery_path=base_delivery_path
     )
-
     _link_analysis_files(
         analysis=analysis,
         case_delivery_directory=case_delivery_directory,
@@ -101,6 +103,8 @@ def _link_analysis_files(
     upload_keys: list[UploadKeys] = status_db.get_upload_keys(
         workflow=analysis.workflow, upload_to_customer_inbox=True
     )
+    # if not upload_keys:
+    #    LOG.warning
     file_types: list[str] = [key.file_type for key in upload_keys]
 
     files: list[File] = housekeeper_api.files(

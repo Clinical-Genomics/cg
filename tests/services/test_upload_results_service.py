@@ -115,3 +115,17 @@ def test_upload_results_trana(fs: FakeFilesystem):
 
     # THEN the upload job was added to the Trana-16s analysis in Trailblazer
     trailblazer_api.as_mock.add_upload_job_to_analysis.assert_any_call(analysis_id=53, slurm_id=93)
+
+
+def test_upload_results_no_upload_keys():
+    status_db: Store = create_autospec(Store)
+    status_db.get_upload_keys = Mock(return_value=[])
+    # WHEN
+    upload_results_service.upload_results(
+        analysis=create_autospec(Analysis),
+        base_delivery_path=Path("base/delivery/path"),
+        housekeeper_api=create_autospec(HousekeeperAPI),
+        rsync_service=create_autospec(DeliveryRsyncService),
+        status_db=status_db,
+        trailblazer_api=create_autospec(TrailblazerAPI),
+    )
