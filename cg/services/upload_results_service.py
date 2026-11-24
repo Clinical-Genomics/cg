@@ -84,7 +84,10 @@ def _upload_to_customer_inbox(
         trailblazer_api.set_analysis_status(
             case_id=analysis.case_internal_id, status=AnalysisStatus.FAILED
         )
-        trailblazer_api.add_comment(case_id=analysis.case_internal_id, comment=f"ERROR: C")
+        trailblazer_api.add_comment(
+            case_id=analysis.case_internal_id,
+            comment=f"ERROR: No files to upload to customer inbox",
+        )
         LOG.error(message)
         raise MissingFilesError(message)
 

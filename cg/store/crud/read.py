@@ -121,6 +121,7 @@ from cg.store.models import (
     RunDevice,
     Sample,
     SampleRunMetrics,
+    UploadKeys,
     User,
 )
 
@@ -2178,7 +2179,15 @@ class ReadHandler(BaseHandler):
 
     # TODO: create get upload keys method
     def get_upload_keys(self, workflow: Workflow, upload_to_customer_inbox: bool):
-        pass
+        return self.session.scalars(
+            select(UploadKeys).where(
+                and_(
+                    UploadKeys.upload_to_customer_inbox.is_(upload_to_customer_inbox),
+                    UploadKeys.workflow == workflow,
+                    UploadKeys.is_archived.is_(False),
+                )
+            )
+        ).all()
 
 
 def _paginate(query: Query, page: int, page_size: int) -> tuple[list, int]:

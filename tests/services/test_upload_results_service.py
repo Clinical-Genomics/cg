@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import Mock, create_autospec
+from unittest.mock import ANY, Mock, create_autospec
 
 import pytest
 from housekeeper.store.models import File
@@ -19,8 +19,6 @@ from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.upload_results_service import os as upload_os
 from cg.store.models import Analysis, Case, Customer, Order, UploadKeys
 from cg.store.store import Store
-from tests.services.analysis_starter.tracker.test_microsalt_tracker import trailblazer_api
-from tests.services.file_delivery.rsync.conftest import rsync_service
 from tests.typed_mock import TypedMock, create_typed_mock
 
 
@@ -123,7 +121,7 @@ def test_upload_results_trana(fs: FakeFilesystem):
     trailblazer_api.as_mock.add_upload_job_to_analysis.assert_any_call(analysis_id=53, slurm_id=93)
 
 
-def test_upload_results_no_upload_keys(mocker: MockerFixture):
+def test_uplad_results_no_upload_keys(mocker: MockerFixture):
     # GIVEN a store without upload keys for the analysis
     status_db: Store = create_autospec(Store)
     status_db.get_upload_keys = Mock(return_value=[])
@@ -169,3 +167,6 @@ def test_upload_results_no_upload_keys(mocker: MockerFixture):
     trailblazer_api.as_mock.set_analysis_status.assert_called_once_with(
         case_id="case_1", status=AnalysisStatus.FAILED
     )
+
+    # THEN a comment should have been added to Trailblazer
+    trailblazer_api.as_mock.add_comment.assert_called_once_with(case_id="case_1", comment=ANY)
