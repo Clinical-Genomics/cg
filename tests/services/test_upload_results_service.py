@@ -17,6 +17,7 @@ from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.upload_results_service import os as upload_os
 from cg.store.models import Analysis, Case, Customer, Order, UploadKeys
 from cg.store.store import Store
+from tests.services.file_delivery.rsync.conftest import rsync_service
 from tests.typed_mock import TypedMock, create_typed_mock
 
 
@@ -130,12 +131,15 @@ def test_upload_results_no_upload_keys(mocker: MockerFixture):
     # GIVEN a spy on link
     link_spy = mocker.spy(upload_os, "link")
 
+    # GIVEN
+    rsync_service: TypedMock[DeliveryRsyncService] = create_typed_mock(DeliveryRsyncService)
+
     # WHEN uploading the results
     upload_results_service.upload_results(
         analysis=create_autospec(Analysis),
         base_delivery_path=Path("base/delivery/path"),
         housekeeper_api=housekeeper_api.as_type,
-        rsync_service=create_autospec(DeliveryRsyncService),
+        rsync_service=rsync_service.as_type,
         status_db=status_db,
         trailblazer_api=create_autospec(TrailblazerAPI),
     )
@@ -145,3 +149,8 @@ def test_upload_results_no_upload_keys(mocker: MockerFixture):
 
     # THEN link is not called
     link_spy.assert_not_called()
+
+    # THEN there is no rsync
+    rsync_service.as_mock.run_rsync_for_analysis.assert_not_called()
+
+    # THEN
