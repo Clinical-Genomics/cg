@@ -143,3 +143,6 @@ def perform_qc_check(cg_config: CGConfig, case_id: str) -> None:
         trailblazer_api=cg_config.trailblazer_api,
         analysis_id=1,
     )
+
+
+# TODO: add upload command? also for trana ITS?
