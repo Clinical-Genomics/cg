@@ -29,6 +29,7 @@ def test_upload_results_trana(fs: FakeFilesystem):
     analysis: Analysis = create_autospec(
         Analysis,
         case=case,
+        case_internal_id="case_1",
         housekeeper_version_id=123666,
         order=order,
         order_id=12,
@@ -110,11 +111,7 @@ def test_upload_results_trana(fs: FakeFilesystem):
     )
 
     # THEN the upload job was added to the RSYNC "analysis" in Trailblazer
-    trailblazer_api.as_mock.add_upload_job_to_analysis.assert_called_once_with(
-        analysis_id=1, slurm_id=93
-    )
+    trailblazer_api.as_mock.add_upload_job_to_analysis.assert_any_call(analysis_id=1, slurm_id=93)
 
     # THEN the upload job was added to the Trana-16s analysis in Trailblazer
-    trailblazer_api.as_mock.add_upload_job_to_analysis.assert_called_once_with(
-        analysis_id=53, slurm_id=93
-    )
+    trailblazer_api.as_mock.add_upload_job_to_analysis.assert_any_call(analysis_id=53, slurm_id=93)

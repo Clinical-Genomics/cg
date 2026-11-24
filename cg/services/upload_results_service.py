@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import cast
 
 from housekeeper.store.models import File
 
@@ -40,13 +41,9 @@ def _upload_to_customer_inbox(
     status_db: Store,
     trailblazer_api: TrailblazerAPI,
 ):
-    case: Case = analysis.case
-    case_delivery_directory = Path(
-        base_delivery_path,
-        case.customer.internal_id,
-        "inbox",
-        str(analysis.order.ticket_id),
-        case.name,
+
+    case_delivery_directory: Path = _create_case_delivery_directory(
+        analysis=analysis, base_delivery_path=base_delivery_path
     )
 
     _link_analysis_files(
@@ -60,20 +57,38 @@ def _upload_to_customer_inbox(
         analysis=analysis, folders_to_deliver={case_delivery_directory}
     )
 
-    tb_analysis: TrailblazerAnalysis = trailblazer_api.add_pending_analysis(
-        case_id=f"{case.internal_id}_rsync",
+    tb_rsync_analysis: TrailblazerAnalysis = trailblazer_api.add_pending_analysis(
+        case_id=f"{analysis.case_internal_id}_rsync",
         analysis_type=AnalysisType.OTHER,
         config_path="",
         order_id=analysis.order_id,
         out_dir=rsync_service.log_dir.as_posix(),
-        priority=MAP_TO_TRAILBLAZER_PRIORITY[case.priority],
+        priority=MAP_TO_TRAILBLAZER_PRIORITY[analysis.case.priority],
         workflow=Workflow.RSYNC,
         ticket=str(analysis.order.ticket_id),
     )
 
-    trailblazer_api.add_upload_job_to_analysis(analysis_id=tb_analysis.id, slurm_id=slurm_job_id)
+    trailblazer_api.add_upload_job_to_analysis(
+        analysis_id=tb_rsync_analysis.id, slurm_id=slurm_job_id
+    )
 
-    # TODO Add upload job to the main trailblazer analysis
+    trailblazer_api.add_upload_job_to_analysis(
+        analysis_id=cast(int, analysis.trailblazer_id), slurm_id=slurm_job_id
+    )
+
+
+def _create_case_delivery_directory(analysis: Analysis, base_delivery_path: Path) -> Path:
+    case: Case = analysis.case
+    case_delivery_directory = Path(
+        base_delivery_path,
+        case.customer.internal_id,
+        "inbox",
+        str(analysis.order.ticket_id),
+        case.name,
+    )
+    case_delivery_directory.mkdir(parents=True, exist_ok=True)
+
+    return case_delivery_directory
 
 
 def _link_analysis_files(
@@ -82,8 +97,6 @@ def _link_analysis_files(
     housekeeper_api: HousekeeperAPI,
     status_db: Store,
 ) -> None:
-
-    case_delivery_directory.mkdir(parents=True, exist_ok=True)
 
     upload_keys: list[UploadKeys] = status_db.get_upload_keys(
         workflow=analysis.workflow, upload_to_customer_inbox=True
