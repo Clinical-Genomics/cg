@@ -100,12 +100,15 @@ def _link_analysis_files(
     status_db: Store,
 ) -> None:
 
-    upload_keys: list[UploadKeys] = status_db.get_upload_keys(
+    upload_keys_list: list[UploadKeys] = status_db.get_upload_keys(
         workflow=analysis.workflow, upload_to_customer_inbox=True
     )
-    # if not upload_keys:
-    #    LOG.warning
-    file_types: list[str] = [key.file_type for key in upload_keys]
+    if not upload_keys_list:
+        LOG.warning(
+            f"No upload keys to upload to customer inbox found for case: {analysis.case_internal_id}"
+        )
+
+    file_types: list[str] = [upload_keys.file_type for upload_keys in upload_keys_list]
 
     files: list[File] = housekeeper_api.files(
         file_types=file_types, version=analysis.housekeeper_version_id

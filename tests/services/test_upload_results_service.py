@@ -3,6 +3,7 @@ from unittest.mock import Mock, create_autospec
 
 from housekeeper.store.models import File
 from pyfakefs.fake_filesystem import FakeFilesystem
+from pytest_mock import MockerFixture
 from sqlalchemy.orm import Query
 
 from cg.apps.housekeeper.hk import HousekeeperAPI
@@ -13,6 +14,7 @@ from cg.constants.priority import Priority, TrailblazerPriority
 from cg.constants.tb import AnalysisType
 from cg.services import upload_results_service
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
+from cg.services.upload_results_service import os as upload_os
 from cg.store.models import Analysis, Case, Customer, Order, UploadKeys
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
@@ -117,15 +119,29 @@ def test_upload_results_trana(fs: FakeFilesystem):
     trailblazer_api.as_mock.add_upload_job_to_analysis.assert_any_call(analysis_id=53, slurm_id=93)
 
 
-def test_upload_results_no_upload_keys():
+def test_upload_results_no_upload_keys(mocker: MockerFixture):
+    # GIVEN a store without upload keys for the analysis
     status_db: Store = create_autospec(Store)
     status_db.get_upload_keys = Mock(return_value=[])
-    # WHEN
+
+    # GIVEN a HousekeeperAPI
+    housekeeper_api: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
+
+    # GIVEN a spy on link
+    link_spy = mocker.spy(upload_os, "link")
+
+    # WHEN uploading the results
     upload_results_service.upload_results(
         analysis=create_autospec(Analysis),
         base_delivery_path=Path("base/delivery/path"),
-        housekeeper_api=create_autospec(HousekeeperAPI),
+        housekeeper_api=housekeeper_api.as_type,
         rsync_service=create_autospec(DeliveryRsyncService),
         status_db=status_db,
         trailblazer_api=create_autospec(TrailblazerAPI),
     )
+
+    # THEN Housekeeper is not called
+    housekeeper_api.as_mock.files.assert_not_called()
+
+    # THEN link is not called
+    link_spy.assert_not_called()
