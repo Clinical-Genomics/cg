@@ -288,8 +288,8 @@ def test_run_rsync_for_analysis(
     sbatch_second_job: Sbatch = second_call_kwargs["sbatch_parameters"]
 
     expected_create_inbox_command = f"""
-ssh {rsync_destination_host} "mkdir -p {inbox_path}/{customer.internal_id}/inbox/{ticket}"
-"""
+        ssh {rsync_destination_host} "mkdir -p {inbox_path}/{customer.internal_id}/inbox/{ticket}"
+        """
 
     assert sbatch_first_job == Sbatch(
         job_name=f"{ticket}_create_inbox",
