@@ -1,18 +1,23 @@
 repos:
-  - repo: https://github.com/psf/black
-    rev: 26.1.0
+  - repo: local
     hooks:
       - id: black
-  - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
-    hooks:
+        name: black
+        entry: poetry run black
+        language: system
+        types: [python]
       - id: isort
         name: isort
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.7.4
-    hooks:
+        entry: poetry run isort
+        language: system
+        types: [python]
       - id: ruff
-  - repo: https://github.com/jendrikseipp/vulture
-    rev: 'v2.16'
-    hooks:
+        name: ruff
+        entry: poetry run ruff check --force-exclude
+        language: system
+        types: [python]
       - id: vulture
+        name: vulture
+        entry: poetry run vulture
+        language: system
+        pass_filenames: false
