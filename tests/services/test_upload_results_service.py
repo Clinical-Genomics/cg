@@ -1,6 +1,7 @@
 from pathlib import Path
 from unittest.mock import Mock, create_autospec
 
+import pytest
 from housekeeper.store.models import File
 from pyfakefs.fake_filesystem import FakeFilesystem
 from pytest_mock import MockerFixture
@@ -12,11 +13,13 @@ from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants.constants import Workflow
 from cg.constants.priority import Priority, TrailblazerPriority
 from cg.constants.tb import AnalysisType
+from cg.exc import MissingFilesError
 from cg.services import upload_results_service
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.upload_results_service import os as upload_os
 from cg.store.models import Analysis, Case, Customer, Order, UploadKeys
 from cg.store.store import Store
+from tests.services.analysis_starter.tracker.test_microsalt_tracker import trailblazer_api
 from tests.services.file_delivery.rsync.conftest import rsync_service
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -128,6 +131,9 @@ def test_upload_results_no_upload_keys(mocker: MockerFixture):
     # GIVEN a HousekeeperAPI
     housekeeper_api: TypedMock[HousekeeperAPI] = create_typed_mock(HousekeeperAPI)
 
+    # GIVEN a TrailblazerAPI
+    trailblazer_api: TypedMock[TrailblazerAPI] = create_typed_mock(TrailblazerAPI)
+
     # GIVEN a spy on link
     link_spy = mocker.spy(upload_os, "link")
 
@@ -135,14 +141,16 @@ def test_upload_results_no_upload_keys(mocker: MockerFixture):
     rsync_service: TypedMock[DeliveryRsyncService] = create_typed_mock(DeliveryRsyncService)
 
     # WHEN uploading the results
-    upload_results_service.upload_results(
-        analysis=create_autospec(Analysis),
-        base_delivery_path=Path("base/delivery/path"),
-        housekeeper_api=housekeeper_api.as_type,
-        rsync_service=rsync_service.as_type,
-        status_db=status_db,
-        trailblazer_api=create_autospec(TrailblazerAPI),
-    )
+    # THEN a MissingFilesError should be raised
+    with pytest.raises(MissingFilesError):
+        upload_results_service.upload_results(
+            analysis=create_autospec(Analysis),
+            base_delivery_path=Path("base/delivery/path"),
+            housekeeper_api=housekeeper_api.as_type,
+            rsync_service=rsync_service.as_type,
+            status_db=status_db,
+            trailblazer_api=trailblazer_api.as_type,
+        )
 
     # THEN Housekeeper is not called
     housekeeper_api.as_mock.files.assert_not_called()
@@ -153,4 +161,6 @@ def test_upload_results_no_upload_keys(mocker: MockerFixture):
     # THEN there is no rsync
     rsync_service.as_mock.run_rsync_for_analysis.assert_not_called()
 
-    # THEN
+    # THEN no Trailblazer request was made
+    trailblazer_api.as_mock.add_pending_analysis.assert_not_called()
+    trailblazer_api.as_mock.add_upload_job_to_analysis.assert_not_called()

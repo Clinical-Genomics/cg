@@ -10,6 +10,7 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Workflow
 from cg.constants.tb import AnalysisType
+from cg.exc import MissingFilesError
 from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.store.models import Analysis, Case, UploadKeys
@@ -78,6 +79,11 @@ def _upload_to_customer_inbox(
         trailblazer_api.add_upload_job_to_analysis(
             analysis_id=cast(int, analysis.trailblazer_id), slurm_id=slurm_job_id
         )
+    else:
+        # TODO: Fail analysis in tb?
+        message = f"No files to upload for case {analysis.case_internal_id}"
+        LOG.error(message)
+        raise MissingFilesError(message)
 
 
 def _create_case_delivery_directory(analysis: Analysis, base_delivery_path: Path) -> Path:
