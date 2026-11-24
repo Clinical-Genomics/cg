@@ -12,7 +12,7 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants.constants import Workflow
 from cg.constants.priority import Priority, TrailblazerPriority
-from cg.constants.tb import AnalysisType
+from cg.constants.tb import AnalysisStatus, AnalysisType
 from cg.exc import MissingFilesError
 from cg.services import upload_results_service
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
@@ -144,7 +144,7 @@ def test_upload_results_no_upload_keys(mocker: MockerFixture):
     # THEN a MissingFilesError should be raised
     with pytest.raises(MissingFilesError):
         upload_results_service.upload_results(
-            analysis=create_autospec(Analysis),
+            analysis=create_autospec(Analysis, case_internal_id="case_1"),
             base_delivery_path=Path("base/delivery/path"),
             housekeeper_api=housekeeper_api.as_type,
             rsync_service=rsync_service.as_type,
@@ -164,3 +164,8 @@ def test_upload_results_no_upload_keys(mocker: MockerFixture):
     # THEN no Trailblazer request was made
     trailblazer_api.as_mock.add_pending_analysis.assert_not_called()
     trailblazer_api.as_mock.add_upload_job_to_analysis.assert_not_called()
+
+    # THEN the Trailblazer status should have been set to failed
+    trailblazer_api.as_mock.set_analysis_status.assert_called_once_with(
+        case_id="case_1", status=AnalysisStatus.FAILED
+    )

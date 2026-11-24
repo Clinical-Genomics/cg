@@ -9,7 +9,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Workflow
-from cg.constants.tb import AnalysisType
+from cg.constants.tb import AnalysisStatus, AnalysisType
 from cg.exc import MissingFilesError
 from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
@@ -80,8 +80,11 @@ def _upload_to_customer_inbox(
             analysis_id=cast(int, analysis.trailblazer_id), slurm_id=slurm_job_id
         )
     else:
-        # TODO: Fail analysis in tb?
         message = f"No files to upload for case {analysis.case_internal_id}"
+        trailblazer_api.set_analysis_status(
+            case_id=analysis.case_internal_id, status=AnalysisStatus.FAILED
+        )
+        trailblazer_api.add_comment(case_id=analysis.case_internal_id, comment=f"ERROR: C")
         LOG.error(message)
         raise MissingFilesError(message)
 
@@ -111,7 +114,7 @@ def _link_analysis_files(
         workflow=analysis.workflow, upload_to_customer_inbox=True
     )
     if not upload_keys_list:
-        LOG.warning(
+        LOG.error(
             f"No upload keys to upload to customer inbox found for case: {analysis.case_internal_id}"
         )
         return []
