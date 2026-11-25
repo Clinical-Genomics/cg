@@ -1,3 +1,4 @@
+from datetime import datetime
 from unittest.mock import call, create_autospec
 
 import pytest
@@ -9,6 +10,7 @@ from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
 
+@pytest.mark.freeze_time("1908-12-10 13:37")
 def test_cases_success():
     # GIVEN a store
     status_db: TypedMock[Store] = create_typed_mock(Store)
@@ -16,6 +18,7 @@ def test_cases_success():
     # GIVEN case ids that exist in statusDB, each case with linked samples
     cases_ids = {"amazingdog", "shittycow"}
     comment = "a comment"
+    user = "Ernes.Rutherford"
 
     dog_link: CaseSample = create_autospec(CaseSample, instance=True)
     cow_link_1: CaseSample = create_autospec(CaseSample, instance=True)
@@ -31,17 +34,27 @@ def test_cases_success():
     status_db.as_mock.get_cases_by_internal_ids.return_value = [dog_case, cow_case]
 
     # WHEN cancelling a set of case_ids
-    cancellation_service.cases(case_ids=cases_ids, comment=comment, status_db=status_db.as_type)
-
-    # THEN each case is marked as cancelled
-    status_db.as_mock.update_case_is_cancelled.assert_has_calls(
-        [call(case=dog_case, state=True), call(case=cow_case, state=True)]
+    cancellation_service.cases(
+        case_ids=cases_ids, comment=comment, user=user, status_db=status_db.as_type
     )
-    assert status_db.as_mock.update_case_is_cancelled.call_count == 2
 
-    # THEN the comment is added to each case
+    # THEN each case is marked as cancelled at the current time
+    cancelled_at = datetime(1908, 12, 10, 13, 37)
+    status_db.as_mock.update_case_cancelled_at.assert_has_calls(
+        [
+            call(case=dog_case, cancelled_at=cancelled_at),
+            call(case=cow_case, cancelled_at=cancelled_at),
+        ]
+    )
+    assert status_db.as_mock.update_case_cancelled_at.call_count == 2
+
+    # THEN the comment, signed with timestamp and user, is added to each case
+    signed_comment = "a comment/ 1908-12-10 13:37 Ernes.Rutherford"
     status_db.as_mock.update_case_comment.assert_has_calls(
-        [call(case=dog_case, comment=comment), call(case=cow_case, comment=comment)]
+        [
+            call(case=dog_case, comment=signed_comment),
+            call(case=cow_case, comment=signed_comment),
+        ]
     )
     assert status_db.as_mock.update_case_comment.call_count == 2
 
@@ -69,7 +82,10 @@ def test_cases_missing_case_raises():
     # THEN a CaseNotFoundError is raised naming the missing cases
     with pytest.raises(CaseNotFoundError) as exc_info:
         cancellation_service.cases(
-            case_ids=cases_ids, comment="a comment", status_db=status_db.as_type
+            case_ids=cases_ids,
+            comment="a comment",
+            user="Ernes.Rutherford",
+            status_db=status_db.as_type,
         )
     assert "missingcow" in str(exc_info.value)
     assert "missinghuman" in str(exc_info.value)
@@ -78,6 +94,6 @@ def test_cases_missing_case_raises():
     assert "existingdog" not in str(exc_info.value)
 
     # THEN no case is modified
-    status_db.as_mock.update_case_is_cancelled.assert_not_called()
+    status_db.as_mock.update_case_cancelled_at.assert_not_called()
     status_db.as_mock.update_case_comment.assert_not_called()
     status_db.as_mock.update_should_deliver_sample.assert_not_called()

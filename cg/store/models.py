@@ -507,8 +507,8 @@ class Case(Base, PriorityMixin):
         types.Enum(*(delivery.value for delivery in DataDelivery))
     )
     id: Mapped[PrimaryKeyInt]
+    cancelled_at: Mapped[datetime | None]
     internal_id: Mapped[UniqueStr]
-    is_cancelled: Mapped[bool] = mapped_column(default=False, nullable=False)
     name: Mapped[Str128]
     ordered_at: Mapped[datetime | None] = mapped_column(default=datetime.now)
     _panels: Mapped[Text | None]
@@ -528,6 +528,10 @@ class Case(Base, PriorityMixin):
     )
     links: Mapped[list["CaseSample"]] = orm.relationship(back_populates="case")
     orders: Mapped[list["Order"]] = orm.relationship(secondary=order_case, back_populates="cases")
+
+    @property
+    def is_cancelled(self) -> bool:
+        return self.cancelled_at is not None
 
     @property
     def cohorts(self) -> list[str]:

@@ -1,3 +1,4 @@
+import os
 from unittest.mock import Mock, create_autospec
 
 import pytest
@@ -5,7 +6,6 @@ from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
 from cg.cli.cancel.cases import cases
-from cg.cli.cancel.cases import os as os_from_cli
 from cg.exc import CgError
 from cg.models.cg_config import CGConfig
 from cg.services import cancellation_service
@@ -23,7 +23,7 @@ def test_cases_cancellation_success(mocker: MockerFixture):
     cancel_cases: Mock = mocker.patch.object(cancellation_service, "cases")
 
     # GIVEN case ids and a comment with a user
-    mocker.patch.dict(os_from_cli.environ, {"SUDO_USER": "Ernes.Rutherford"})
+    mocker.patch.dict(os.environ, {"SUDO_USER": "Ernes.Rutherford"})
     case_ids: list[str] = ["case_1", "case_2"]
     comment = "Customer withdrew the order"
 

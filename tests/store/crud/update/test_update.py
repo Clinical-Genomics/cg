@@ -377,15 +377,17 @@ def test_update_external_sample(store: Store, helpers: StoreHelpers):
     assert updated_external_sample.transferred_at == timestamp_now
 
 
-def test_update_case_is_cancelled(store: Store, helpers: StoreHelpers):
+def test_update_case_cancelled_at(store: Store, helpers: StoreHelpers):
     # GIVEN a case that is not cancelled
     case: Case = helpers.add_case(store=store)
-    assert case.is_cancelled is False
+    assert case.cancelled_at is None
 
     # WHEN marking the case as cancelled
-    store.update_case_is_cancelled(case=case, state=True)
+    cancelled_at = datetime(1908, 12, 10, 13, 37)
+    store.update_case_cancelled_at(case=case, cancelled_at=cancelled_at)
 
-    # THEN the case is cancelled
+    # THEN the case is cancelled at the given time
+    assert case.cancelled_at == cancelled_at
     assert case.is_cancelled is True
 
 
@@ -428,14 +430,14 @@ def test_update_should_deliver_sample(store: Store, helpers: StoreHelpers):
     assert link.should_deliver_sample is False
 
 
-def test_update_case_is_cancelled_does_not_commit(store: Store, helpers: StoreHelpers):
+def test_update_case_cancelled_at_does_not_commit(store: Store, helpers: StoreHelpers):
     # GIVEN a committed case that is not cancelled
     case: Case = helpers.add_case(store=store)
     store.commit_to_store()
 
     # WHEN marking the case as cancelled and then rolling back
-    store.update_case_is_cancelled(case=case, state=True)
+    store.update_case_cancelled_at(case=case, cancelled_at=datetime.now())
     store.rollback()
 
     # THEN the change was not persisted
-    assert case.is_cancelled is False
+    assert case.cancelled_at is None
