@@ -444,6 +444,71 @@ def test_one_of_one_sequenced_samples(
     assert test_case in cases
 
 
+def test_cancelled_case_not_in_cases_to_analyze(
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
+):
+    """Test that a cancelled case does not show up among the cases to analyze."""
+
+    # GIVEN a case with a sequenced sample and no analysis
+    test_case: Case = helpers.add_case(base_store)
+    test_sample: Sample = helpers.add_sample(store=base_store, last_sequenced_at=timestamp_now)
+    link = base_store.relate_sample(
+        case=test_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
+    )
+    base_store.session.add(link)
+
+    # GIVEN that the case would be analyzed if it was not cancelled
+    assert test_case in base_store.get_cases_to_analyze(workflow=Workflow.MIP_DNA)
+
+    # GIVEN that the case is cancelled
+    test_case.cancelled_at = timestamp_now
+
+    # WHEN getting cases to analyze
+    cases: list[Case] = base_store.get_cases_to_analyze(workflow=Workflow.MIP_DNA)
+
+    # THEN the cancelled case is not among the cases to analyze
+    assert test_case not in cases
+
+
+def test_cancelled_case_set_to_analyze_not_in_cases_to_analyze(
+    base_store: Store, helpers: StoreHelpers, timestamp_now: datetime
+):
+    """Test that a cancelled case does not show up among the cases to analyze, even when its
+    action is set to analyze."""
+
+    # GIVEN a case with a sequenced sample and a completed analysis
+    test_sample: Sample = helpers.add_sample(store=base_store, last_sequenced_at=timestamp_now)
+    test_analysis: Analysis = helpers.add_analysis(
+        store=base_store, completed_at=timestamp_now, workflow=Workflow.MIP_DNA
+    )
+    test_case: Case = test_analysis.case
+    link = base_store.relate_sample(
+        case=test_case,
+        sample=test_sample,
+        status=PhenotypeStatus.UNKNOWN,
+        should_deliver_sample=True,
+    )
+    base_store.session.add(link)
+
+    # GIVEN that the case action is set to analyze
+    test_case.action = CaseActions.ANALYZE
+
+    # GIVEN that the case would be analyzed if it was not cancelled
+    assert test_case in base_store.get_cases_to_analyze(workflow=Workflow.MIP_DNA)
+
+    # GIVEN that the case is cancelled
+    test_case.cancelled_at = timestamp_now
+
+    # WHEN getting cases to analyze
+    cases: list[Case] = base_store.get_cases_to_analyze(workflow=Workflow.MIP_DNA)
+
+    # THEN the cancelled case is not among the cases to analyze
+    assert test_case not in cases
+
+
 def test_microsalt_re_analysis(
     base_store: Store, helpers: StoreHelpers, timestamp_now: datetime, timestamp_yesterday: datetime
 ):

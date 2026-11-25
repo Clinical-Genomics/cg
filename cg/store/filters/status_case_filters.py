@@ -136,6 +136,11 @@ def filter_cases_not_analysed(cases: Query, **kwargs) -> Query:
     return cases.filter(and_(not_analyzed_condition, not_in_progress_condition))
 
 
+def filter_cases_not_cancelled(cases: Query, **kwargs) -> Query:
+    """Filter out cancelled cases."""
+    return cases.filter(Case.cancelled_at.is_(None))
+
+
 def filter_cases_with_workflow(cases: Query, workflow: Workflow = None, **kwargs) -> Query:
     """Filter cases with workflow."""
     return cases.filter(Case.data_analysis == workflow) if workflow else cases
@@ -268,6 +273,7 @@ class CaseFilter(Enum):
     IS_RUNNING: Callable = filter_running_cases
     NEW_BY_ORDER_DATE: Callable = filter_newer_cases_by_order_date
     NOT_ANALYSED: Callable = filter_cases_not_analysed
+    NOT_CANCELLED: Callable = filter_cases_not_cancelled
     REPORT_SUPPORTED: Callable = filter_report_supported_data_delivery_cases
     WITH_LOQUSDB_SUPPORTED_WORKFLOW: Callable = filter_cases_with_loqusdb_supported_workflow
     WITH_LOQUSDB_SUPPORTED_SEQUENCING_METHOD: Callable = (

@@ -16,6 +16,7 @@ from cg.store.filters.status_case_filters import (
     filter_cases_for_analysis,
     filter_cases_has_sequence,
     filter_cases_not_analysed,
+    filter_cases_not_cancelled,
     filter_cases_with_loqusdb_supported_sequencing_method,
     filter_cases_with_loqusdb_supported_workflow,
     filter_cases_with_scout_data_delivery,
@@ -1073,6 +1074,40 @@ def test_filter_cases_not_analysed_in_progress(
 
     # THEN the query should return no cases
     assert filtered_cases.count() == 0
+
+
+def test_filter_cases_not_cancelled(base_store: Store, helpers: StoreHelpers):
+    """Test that cancelled cases are filtered out."""
+    # GIVEN a store with one cancelled and one non-cancelled case
+    cancelled_case: Case = helpers.add_case(
+        store=base_store, name="cancelled_case", internal_id="cancelled_case"
+    )
+    cancelled_case.cancelled_at = datetime.now()
+    active_case: Case = helpers.add_case(
+        store=base_store, name="active_case", internal_id="active_case"
+    )
+    cases_query: Query = base_store._get_query(table=Case)
+
+    # WHEN filtering for cases that are not cancelled
+    filtered_cases: Query = filter_cases_not_cancelled(cases=cases_query)
+
+    # THEN only the non-cancelled case is returned
+    assert filtered_cases.all() == [active_case]
+
+
+def test_filter_cases_not_cancelled_no_cancelled_cases(
+    store_with_multiple_cases_and_samples: Store,
+):
+    """Test that all cases are returned when no case is cancelled."""
+    # GIVEN a store where no case is cancelled
+    cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
+    assert all(case.cancelled_at is None for case in cases_query.all())
+
+    # WHEN filtering for cases that are not cancelled
+    filtered_cases: Query = filter_cases_not_cancelled(cases=cases_query)
+
+    # THEN all cases are returned
+    assert filtered_cases.count() == cases_query.count()
 
 
 def test_filter_cases_by_workflow_search_no_matching_workflow(
