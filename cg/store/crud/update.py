@@ -162,8 +162,8 @@ class UpdateMixin(ReadHandler):
         return external_sample
 
     @staticmethod
-    def update_case_cancelled_at(case: Case, cancelled_at: datetime | None) -> None:
-        case.cancelled_at = cancelled_at
+    def update_case_is_cancelled(case: Case, state: bool) -> None:
+        case.is_cancelled = state
 
     @staticmethod
     def update_case_comment(case: Case, comment: str) -> None:

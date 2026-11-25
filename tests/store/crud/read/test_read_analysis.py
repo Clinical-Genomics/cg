@@ -464,7 +464,7 @@ def test_cancelled_case_not_in_cases_to_analyze(
     assert test_case in base_store.get_cases_to_analyze(workflow=Workflow.MIP_DNA)
 
     # GIVEN that the case is cancelled
-    test_case.cancelled_at = timestamp_now
+    test_case.is_cancelled = True
 
     # WHEN getting cases to analyze
     cases: list[Case] = base_store.get_cases_to_analyze(workflow=Workflow.MIP_DNA)
@@ -500,7 +500,7 @@ def test_cancelled_case_set_to_analyze_not_in_cases_to_analyze(
     assert test_case in base_store.get_cases_to_analyze(workflow=Workflow.MIP_DNA)
 
     # GIVEN that the case is cancelled
-    test_case.cancelled_at = timestamp_now
+    test_case.is_cancelled = True
 
     # WHEN getting cases to analyze
     cases: list[Case] = base_store.get_cases_to_analyze(workflow=Workflow.MIP_DNA)

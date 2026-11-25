@@ -1082,7 +1082,7 @@ def test_filter_cases_not_cancelled(base_store: Store, helpers: StoreHelpers):
     cancelled_case: Case = helpers.add_case(
         store=base_store, name="cancelled_case", internal_id="cancelled_case"
     )
-    cancelled_case.cancelled_at = datetime.now()
+    cancelled_case.is_cancelled = True
     active_case: Case = helpers.add_case(
         store=base_store, name="active_case", internal_id="active_case"
     )
@@ -1101,7 +1101,7 @@ def test_filter_cases_not_cancelled_no_cancelled_cases(
     """Test that all cases are returned when no case is cancelled."""
     # GIVEN a store where no case is cancelled
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
-    assert all(case.cancelled_at is None for case in cases_query.all())
+    assert all(not case.is_cancelled for case in cases_query.all())
 
     # WHEN filtering for cases that are not cancelled
     filtered_cases: Query = filter_cases_not_cancelled(cases=cases_query)

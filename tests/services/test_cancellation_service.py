@@ -1,4 +1,3 @@
-from datetime import datetime
 from unittest.mock import call, create_autospec
 
 import pytest
@@ -38,15 +37,11 @@ def test_cases_success():
         case_ids=cases_ids, comment=comment, user=user, status_db=status_db.as_type
     )
 
-    # THEN each case is marked as cancelled at the current time
-    cancelled_at = datetime(1908, 12, 10, 13, 37)
-    status_db.as_mock.update_case_cancelled_at.assert_has_calls(
-        [
-            call(case=dog_case, cancelled_at=cancelled_at),
-            call(case=cow_case, cancelled_at=cancelled_at),
-        ]
+    # THEN each case is marked as cancelled
+    status_db.as_mock.update_case_is_cancelled.assert_has_calls(
+        [call(case=dog_case, state=True), call(case=cow_case, state=True)]
     )
-    assert status_db.as_mock.update_case_cancelled_at.call_count == 2
+    assert status_db.as_mock.update_case_is_cancelled.call_count == 2
 
     # THEN the comment, signed with timestamp and user, is added to each case
     signed_comment = "a comment/ 1908-12-10 13:37 Ernes.Rutherford"
@@ -94,6 +89,6 @@ def test_cases_missing_case_raises():
     assert "existingdog" not in str(exc_info.value)
 
     # THEN no case is modified
-    status_db.as_mock.update_case_cancelled_at.assert_not_called()
+    status_db.as_mock.update_case_is_cancelled.assert_not_called()
     status_db.as_mock.update_case_comment.assert_not_called()
     status_db.as_mock.update_should_deliver_sample.assert_not_called()

@@ -1,4 +1,4 @@
-"""add_cancelled_at_in_case_table
+"""add_is_cancelled_in_case_table
 
 Revision ID: 27bfe479f14c
 Revises: 203421044513
@@ -20,9 +20,14 @@ depends_on = None
 def upgrade():
     op.add_column(
         table_name="case",
-        column=sa.Column(name="cancelled_at", type_=sa.DateTime, nullable=True),
+        column=sa.Column(
+            name="is_cancelled",
+            type_=sa.Boolean,
+            nullable=False,
+            server_default=sa.false(),
+        ),
     )
 
 
 def downgrade():
-    op.drop_column(table_name="case", column_name="cancelled_at")
+    op.drop_column(table_name="case", column_name="is_cancelled")

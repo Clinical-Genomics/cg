@@ -23,12 +23,9 @@ def cases(case_ids: set[str], comment: str, user: str, status_db: Store) -> None
         CaseNotFoundError: If any of the cases do not exist. Nothing is modified then.
     """
     cases_to_cancel: list[Case] = _get_cases_strict(case_ids=case_ids, status_db=status_db)
-    cancelled_at: datetime = datetime.now()
-    signed_comment: str = _sign_comment(comment=comment, user=user, timestamp=cancelled_at)
+    signed_comment: str = _sign_comment(comment=comment, user=user)
     for case in cases_to_cancel:
-        _cancel_case(
-            case=case, comment=signed_comment, cancelled_at=cancelled_at, status_db=status_db
-        )
+        _cancel_case(case=case, comment=signed_comment, status_db=status_db)
 
 
 def _get_cases_strict(case_ids: set[str], status_db: Store) -> list[Case]:
@@ -43,8 +40,8 @@ def _get_cases_strict(case_ids: set[str], status_db: Store) -> list[Case]:
     return found_cases
 
 
-def _cancel_case(case: Case, comment: str, cancelled_at: datetime, status_db: Store) -> None:
-    status_db.update_case_cancelled_at(case=case, cancelled_at=cancelled_at)
+def _cancel_case(case: Case, comment: str, status_db: Store) -> None:
+    status_db.update_case_is_cancelled(case=case, state=True)
     status_db.update_case_comment(case=case, comment=comment)
     LOG.debug(f"Case {case.internal_id} cancelled with {comment=}")
     for link in case.links:
@@ -52,5 +49,6 @@ def _cancel_case(case: Case, comment: str, cancelled_at: datetime, status_db: St
         LOG.debug(f"Case {case.internal_id} will not deliver sample {link.sample.internal_id}")
 
 
-def _sign_comment(comment: str, user: str, timestamp: datetime) -> str:
-    return f"{comment}/ {timestamp.strftime('%Y-%m-%d %H:%M')} {user}"
+def _sign_comment(comment: str, user: str) -> str:
+    timestamp: str = datetime.now().strftime("%Y-%m-%d %H:%M")
+    return f"{comment}/ {timestamp} {user}"

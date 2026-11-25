@@ -138,7 +138,7 @@ def filter_cases_not_analysed(cases: Query, **kwargs) -> Query:
 
 def filter_cases_not_cancelled(cases: Query, **kwargs) -> Query:
     """Filter out cancelled cases."""
-    return cases.filter(Case.cancelled_at.is_(None))
+    return cases.filter(Case.is_cancelled.is_(False))
 
 
 def filter_cases_with_workflow(cases: Query, workflow: Workflow = None, **kwargs) -> Query:
