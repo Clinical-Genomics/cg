@@ -1,5 +1,8 @@
 from enum import StrEnum
-from pydantic import BaseModel, Field
+
+from pydantic import BaseModel, Field, model_validator
+
+from cg.constants.constants import Workflow
 
 
 class OrderSortField(StrEnum):
@@ -20,4 +23,11 @@ class OrdersRequest(BaseModel):
     sort_order: SortOrder | None = Field(alias="sortOrder", default=SortOrder.DESC)
     search: str | None = None
     workflow: str | None = None
+    workflows: list[Workflow] = []
     is_open: bool | None = None
+
+    @model_validator(mode="after")
+    def validate_workflow_filters(self):
+        if self.workflow and self.workflows:
+            raise ValueError("Use either workflow or workflows[], not both")
+        return self

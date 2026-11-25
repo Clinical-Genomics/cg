@@ -197,6 +197,7 @@ class MutaccAutoConfig(BaseModel):
     binary_path: str
     config_path: str
     padding: int = 300
+    reference: Path
 
 
 class LoqusDBDumpFiles(BaseModel):
@@ -403,14 +404,14 @@ class TranaConfig(CommonAppConfig):
     config: str
     launch_directory: str
     params: str
-    pipeline_deliverables: str
+    pipeline_deliverables: Path
     platform: str
     pre_run_script: str
     profile: str
     repository: str
     resources: str
     revision: str
-    root: str
+    root: Path
     slurm: SlurmConfig
     tower_workflow: str
 
