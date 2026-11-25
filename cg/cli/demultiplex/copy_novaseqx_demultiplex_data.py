@@ -6,6 +6,7 @@ from pathlib import Path
 from cg.apps.demultiplex.sample_sheet.utils import add_and_include_sample_sheet_path_to_housekeeper
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb import TrailblazerAPI
+from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants.constants import Workflow
 from cg.constants.demultiplexing import DemultiplexingDirsAndFiles
 from cg.constants.priority import TrailblazerPriority
@@ -236,7 +237,7 @@ def link_onboard_demultiplexed_flow_cell(
         flow_cell_name=flow_cell_id,
         hk_api=hk_api,
     )
-    tb_api.add_pending_analysis(
+    pending_analysis: TrailblazerAnalysis = tb_api.add_pending_analysis(
         case_id=flow_cell_id,
         analysis_type=AnalysisType.OTHER,
         config_path="",
@@ -244,4 +245,4 @@ def link_onboard_demultiplexed_flow_cell(
         priority=TrailblazerPriority.HIGH,
         workflow=Workflow.DEMULTIPLEX,
     )
-    tb_api.set_analysis_status(case_id=flow_cell_id, status=AnalysisStatus.COMPLETED)
+    tb_api.set_analysis_status(analysis_id=pending_analysis.id, status=AnalysisStatus.COMPLETED)
