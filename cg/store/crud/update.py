@@ -161,12 +161,14 @@ class UpdateMixin(ReadHandler):
         external_sample.transferred_at = transferred_at
         return external_sample
 
-    def update_case_is_cancelled(self, case: Case, state: bool) -> None:
+    @staticmethod
+    def update_case_is_cancelled(case: Case, state: bool) -> None:
         case.is_cancelled = state
 
-    def update_case_comment(self, case: Case, comment: str) -> None:
+    @staticmethod
+    def update_case_comment(case: Case, comment: str) -> None:
         case.comment = f"{case.comment} {comment}" if case.comment else comment
-        # TODO: should it get a time stamp
 
-    def update_should_deliver_sample(self, link: CaseSample, state: bool) -> None:
+    @staticmethod
+    def update_should_deliver_sample(link: CaseSample, state: bool) -> None:
         link.should_deliver_sample = state

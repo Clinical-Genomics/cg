@@ -2,6 +2,7 @@ import logging
 
 import rich_click as click
 
+from cg.apps.environ import get_environ_user
 from cg.exc import CgError
 from cg.models.cg_config import CGConfig
 from cg.services import cancellation_service
@@ -29,12 +30,13 @@ def cases(cg_config: CGConfig, comment: str, case_ids: tuple[str, ...]):
         raise click.BadParameter(
             "Please add a reason for the cancellation.", param_hint="--comment"
         )
-
     unique_case_ids: set[str] = set(case_ids)
-
     status_db: Store = cg_config.status_db
+
     try:
-        cancellation_service.cases(case_ids=unique_case_ids, comment=comment, status_db=status_db)
+        cancellation_service.cases(
+            case_ids=unique_case_ids, comment=comment, user=get_environ_user(), status_db=status_db
+        )
         status_db.commit_to_store()
         click.secho(
             message=f"Cancellation successfully performed for: {', '.join(sorted(unique_case_ids))}",

@@ -9,3 +9,8 @@ def environ_email():
     username = os.environ.get("SUDO_USER") or getpass.getuser()
 
     return f"{username}@scilifelab.se"
+
+
+def get_environ_user() -> str:
+    """Guess user from sudo user environment variable or login name."""
+    return os.environ.get("SUDO_USER") or getpass.getuser()
