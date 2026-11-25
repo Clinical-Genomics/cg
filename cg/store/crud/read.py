@@ -333,6 +333,7 @@ class ReadHandler(BaseHandler):
             CaseFilter.BY_CUSTOMER_ENTRY_ID,
             CaseFilter.BY_CASE_SEARCH,
             CaseFilter.WITH_WORKFLOW,
+            CaseFilter.NOT_CANCELLED,
             CaseFilter.ORDER_BY_CREATED_AT,
         ]
 

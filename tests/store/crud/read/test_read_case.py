@@ -4,7 +4,7 @@ import pytest
 
 from cg.constants.constants import SequencingQCStatus
 from cg.exc import CaseNotFoundError
-from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun
+from cg.store.models import Case, IlluminaFlowCell, IlluminaSequencingRun, Sample
 from cg.store.store import Store
 from tests.store_helpers import StoreHelpers
 
@@ -232,3 +232,26 @@ def test_get_cases_for_sequencing_qc_filters_all_supported_scenarios(
         included_failed_internal.internal_id,
         included_pending_external.internal_id,
     }
+
+
+def test_get_cases_by_customer_workflow_and_case_search_excludes_cancelled(
+    base_store: Store, helpers: StoreHelpers
+):
+    """Test that cancelled cases are not returned when searching for cases to re-order."""
+    # GIVEN a customer with one cancelled and one non-cancelled case
+    cancelled_case: Case = helpers.add_case(
+        store=base_store, name="cancelled_case", internal_id="cancelled_case"
+    )
+    cancelled_case.is_cancelled = True
+    active_case: Case = helpers.add_case(
+        store=base_store, name="active_case", internal_id="active_case"
+    )
+    assert cancelled_case.customer == active_case.customer
+
+    # WHEN searching for the customer's cases matching both case names
+    cases: list[Case] = base_store.get_cases_by_customer_workflow_and_case_search(
+        customer=active_case.customer, workflow=None, case_search="_case"
+    )
+
+    # THEN only the non-cancelled case is returned
+    assert cases == [active_case]
