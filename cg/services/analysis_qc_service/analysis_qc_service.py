@@ -26,7 +26,9 @@ def perform_qc(
                 missing_files.append(file)
 
     if missing_files:
-        trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.FAILED)
+        trailblazer_api.set_analysis_status(analysis_id=analysis_id, status=AnalysisStatus.FAILED)
         raise MandatoryFileMissingError(f"Missing files: {missing_files}")
     else:
-        trailblazer_api.set_analysis_status(case_id=case_id, status=AnalysisStatus.COMPLETED)
+        trailblazer_api.set_analysis_status(
+            analysis_id=analysis_id, status=AnalysisStatus.COMPLETED
+        )

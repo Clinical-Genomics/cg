@@ -21,7 +21,7 @@ def store_analysis_output(
     case_deliverables_file = Path(root_directory, case_id, f"{case_id}_deliverables.yaml")
     case_deliverables: list[dict] = read_yaml(case_deliverables_file)
 
-    existing_files = []
+    existing_files: list[dict] = []
     for deliverable in case_deliverables:
         for file in deliverable["paths"]:
             if Path(file).is_file():

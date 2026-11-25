@@ -25,8 +25,10 @@ def test_perform_qc(fs: FakeFilesystem):
             "mandatory": True,
         }
     ]
-    contents = write_yaml_stream(contents)
+    contents: str = write_yaml_stream(contents)
     fs.create_file("/root_directory/case_one/case_one_deliverables.yaml", contents=contents)
+
+    # GIVEN that all mandatory files exist
     fs.create_file("/root_directory/case_one/file1.txt")
 
     # GIVEN a trailblazer api
@@ -48,7 +50,7 @@ def test_perform_qc(fs: FakeFilesystem):
 
     # THEN analysis was marked as completed in trailblazer
     trailblazer_api.as_mock.set_analysis_status.assert_called_once_with(
-        case_id="case_one", status=AnalysisStatus.COMPLETED
+        analysis_id=1, status=AnalysisStatus.COMPLETED
     )
 
 
@@ -88,5 +90,5 @@ def test_perform_qc_mandatory_file_missing(fs: FakeFilesystem):
 
     # THEN a status was set as failed in TB
     trailblazer_api.as_mock.set_analysis_status.assert_called_once_with(
-        case_id="case_one", status=AnalysisStatus.FAILED
+        analysis_id=1, status=AnalysisStatus.FAILED
     )
