@@ -277,7 +277,7 @@ class MutantAnalysisAPI(AnalysisAPI):
 
     def run_qc_on_case(self, case: Case, dry_run: bool) -> None:
         """Run qc check on case, report qc summary on Trailblazer and set analysis status to fail if it fails QC."""
-        analysis: Analysis = case.latest_analysis_strict
+        analysis: Analysis = case.get_latest_analysis_strict()
         try:
             qc_result: MutantQualityResult = self.get_qc_result(case=case)
         except Exception as exception:
@@ -316,7 +316,7 @@ class MutantAnalysisAPI(AnalysisAPI):
         comment = qc_result.summary + (
             f" QC report: {report_file_path}" if not qc_result.passes_qc else ""
         )
-        analysis: Analysis = case.latest_analysis_strict
+        analysis: Analysis = case.get_latest_analysis_strict()
         self.trailblazer_api.add_comment(analysis_id=analysis.trailblazer_id, comment=comment)
 
     def run_qc(self, case_id: str, dry_run: bool) -> None:

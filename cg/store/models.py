@@ -582,14 +582,11 @@ class Case(Base, PriorityMixin):
         )
         return sorted_analyses[0]
 
-    @property
-    def latest_analysis_strict(self) -> Analysis:
-        if latest_analyses := sorted(
-            self.analyses, key=lambda analysis: analysis.created_at, reverse=True
-        ):
-            return latest_analyses[0]
-        else:
+    def get_latest_analysis_strict(self) -> Analysis:
+        if not self.analyses:
             raise AnalysisDoesNotExistError(f"No analyses for case {self.internal_id}")
+        else:
+            return self.analyses[0]
 
     def are_all_samples_control(self) -> bool:
         """Return True if all case samples are controls."""

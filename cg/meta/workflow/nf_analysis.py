@@ -295,7 +295,7 @@ class NfAnalysisAPI(AnalysisAPI):
 
         LOG.info("Validating QC metrics")
         case: Case = self.status_db.get_case_by_internal_id_strict(case_id)
-        analysis: Analysis = case.latest_analysis_strict
+        analysis: Analysis = case.get_latest_analysis_strict()
         try:
             metrics_deliverables_path: Path = self.get_metrics_deliverables_path(case_id=case_id)
             qc_metrics_raw: dict = ReadFile.get_content_from_file(
