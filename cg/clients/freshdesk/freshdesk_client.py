@@ -15,6 +15,7 @@ from cg.exc import (
     FreshdeskGetTicketError,
     FreshdeskUpdateTicketError,
 )
+from cg.utils.http import raise_for_status_with_body
 
 LOG = logging.getLogger(__name__)
 
@@ -36,7 +37,7 @@ class FreshdeskClient:
         response = self.session.post(
             url=f"{self.base_url}{EndPoints.TICKETS}", data=multipart_data, files=files
         )
-        response.raise_for_status()
+        raise_for_status_with_body(response)
         return TicketResponse.model_validate(response.json())
 
     @handle_client_errors
@@ -68,7 +69,7 @@ class FreshdeskClient:
         LOG.debug(f"URL={url}")
         try:
             response = self.session.get(url=url)
-            response.raise_for_status()
+            raise_for_status_with_body(response)
             return TicketResponse.model_validate(response.json())
         except HTTPError as error:
             raise FreshdeskGetTicketError from error
@@ -79,7 +80,7 @@ class FreshdeskClient:
         LOG.debug(f"URL={url}; JSON={json}")
         try:
             response = self.session.put(url=url, json=json)
-            response.raise_for_status()
+            raise_for_status_with_body(response)
             return TicketResponse.model_validate(response.json())
         except HTTPError as error:
             raise FreshdeskUpdateTicketError from error
@@ -92,6 +93,6 @@ class FreshdeskClient:
         LOG.debug(f"URL={url}; JSON={json}")
         try:
             response = self.session.post(url=url, json=json)
-            response.raise_for_status()
+            raise_for_status_with_body(response)
         except HTTPError as error:
             raise FreshdeskDeliveryMessageError from error

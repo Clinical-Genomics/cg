@@ -1,4 +1,4 @@
-from unittest.mock import Mock, create_autospec
+from unittest.mock import Mock, call, create_autospec
 
 import pytest
 from pytest_mock import MockerFixture
@@ -28,6 +28,7 @@ from cg.services.analysis_starter.submitters.seqera_platform.seqera_platform_sub
 def expected_workflow_launch_request_with_resume() -> WorkflowLaunchRequest:
     return WorkflowLaunchRequest(
         launch=LaunchRequest(
+            id="previous_launch_id",
             computeEnvId="normal-id",
             configProfiles=["profile"],
             configText="includeConfig 'path_to_config.config'",
@@ -83,6 +84,7 @@ def test_submit_with_resume(
         pipeline_repository="some.repository",
         pre_run_script="pre-run-script",
         resume=True,
+        workflow_id="previous_workflow_id",
         revision="3.0.0",
         session_id="some_session_id",
         work_dir="work/dir",
@@ -93,13 +95,16 @@ def test_submit_with_resume(
     client = create_autospec(SeqeraPlatformClient)
     client.launch_workflow = Mock(return_value={"workflowId": "some_workflow_id"})
     client.get_workflow = Mock(
-        return_value={
-            "workflow": {
-                "id": "some_id",
-                "runName": "case_id",
-                "sessionId": "some_session_id",
-            }
-        }
+        side_effect=[
+            {"workflow": {"sessionId": "some_session_id", "launchId": "previous_launch_id"}},
+            {
+                "workflow": {
+                    "id": "some_id",
+                    "runName": "case_id",
+                    "sessionId": "some_session_id",
+                }
+            },
+        ]
     )
     seqera_platform_submitter = SeqeraPlatformSubmitter(
         client=client, compute_environment_ids=seqera_platform_config.compute_environments
@@ -116,7 +121,11 @@ def test_submit_with_resume(
 
     # THEN assert that the run request provided to the client is correct
     client.launch_workflow.assert_called_once_with(expected_workflow_launch_request_with_resume)
-    client.get_workflow.assert_called_once_with("some_workflow_id")
+    assert client.get_workflow.call_args_list == [
+        call("previous_workflow_id"),
+        call("some_workflow_id"),
+    ]
+    assert case_config.workflow_id == "previous_workflow_id"
 
 
 def test_submit_no_workflow_id(seqera_platform_config: SeqeraPlatformConfig, mocker: MockerFixture):
@@ -184,3 +193,70 @@ def test_submit_no_session_id(seqera_platform_config: SeqeraPlatformConfig, mock
     # THEN a SeqeraError is raised
     with pytest.raises(SeqeraError):
         seqera_platform_submitter.submit(case_config)
+
+
+@pytest.mark.parametrize(
+    "workflow_id, session_id, workflow_response, error",
+    [
+        (None, "session_id", {}, "workflow ID and session ID"),
+        ("previous_workflow_id", None, {}, "workflow ID and session ID"),
+        ("previous_workflow_id", "session_id", {}, "session does not match"),
+        (
+            "previous_workflow_id",
+            "session_id",
+            {"sessionId": "other_session", "launchId": "launch_id"},
+            "session does not match",
+        ),
+        ("previous_workflow_id", "session_id", {"sessionId": "session_id"}, "No launchId"),
+    ],
+)
+def test_submit_resume_invalid_previous_workflow(
+    workflow_id: str | None,
+    session_id: str | None,
+    workflow_response: dict,
+    error: str,
+    raredisease_case_config: NextflowCaseConfig,
+    seqera_platform_config: SeqeraPlatformConfig,
+    mocker: MockerFixture,
+):
+    # GIVEN a resume request with missing or mismatched previous workflow metadata
+    raredisease_case_config.resume = True
+    raredisease_case_config.workflow_id = workflow_id
+    raredisease_case_config.session_id = session_id
+    client = create_autospec(SeqeraPlatformClient)
+    client.get_workflow.return_value = {"workflow": workflow_response}
+    platform_submitter = SeqeraPlatformSubmitter(
+        client=client, compute_environment_ids=seqera_platform_config.compute_environments
+    )
+    mocker.patch.object(submitter, "read_yaml", return_value={})
+
+    # WHEN submitting, THEN no workflow is launched and an actionable error is raised
+    with pytest.raises(SeqeraError, match=error):
+        platform_submitter.submit(raredisease_case_config)
+    client.launch_workflow.assert_not_called()
+
+
+def test_submit_fresh_launch(
+    raredisease_case_config: NextflowCaseConfig,
+    seqera_platform_config: SeqeraPlatformConfig,
+    mocker: MockerFixture,
+):
+    # GIVEN a fresh launch and a client returning the new workflow and session
+    client = create_autospec(SeqeraPlatformClient)
+    client.launch_workflow.return_value = {"workflowId": "new_workflow_id"}
+    client.get_workflow.return_value = {"workflow": {"sessionId": "new_session_id"}}
+    platform_submitter = SeqeraPlatformSubmitter(
+        client=client, compute_environment_ids=seqera_platform_config.compute_environments
+    )
+    mocker.patch.object(submitter, "read_yaml", return_value={})
+
+    # WHEN submitting the case
+    result = platform_submitter.submit(raredisease_case_config)
+
+    # THEN no previous workflow is looked up and no launch ID is supplied
+    client.get_workflow.assert_called_once_with("new_workflow_id")
+    request = client.launch_workflow.call_args.args[0]
+    assert request.launch.id is None
+    assert request.launch.resume is False
+    assert result.workflow_id == "new_workflow_id"
+    assert result.session_id == "new_session_id"
