@@ -40,18 +40,18 @@ def demultiplex_all(context: CGConfig, sequencing_runs_directory: click.Path, dr
     else:
         sequencing_runs_directory: Path = Path(demultiplex_api.sequencing_runs_dir)
 
-    LOG.info(f"Search for sequencing run ready to demultiplex in {sequencing_runs_directory}")
+    LOG.debug(f"Search for sequencing run ready to demultiplex in {sequencing_runs_directory}")
     for sub_dir in sequencing_runs_directory.iterdir():
         if not sub_dir.is_dir():
             continue
-        LOG.info(f"Found directory {sub_dir}")
+        LOG.debug(f"Found directory {sub_dir}")
         try:
             sequencing_run = IlluminaRunDirectoryData(sequencing_run_path=sub_dir)
         except FlowCellError:
             continue
 
         if not demultiplex_api.is_demultiplexing_possible(sequencing_run=sequencing_run):
-            LOG.warning(f"Can not start demultiplexing for sequencing run {sequencing_run.id}!")
+            LOG.info(f"Can not start demultiplexing for sequencing run {sequencing_run.id}!")
             continue
 
         try:
