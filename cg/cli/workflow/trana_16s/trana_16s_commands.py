@@ -129,14 +129,15 @@ def store(cg_config: CGConfig, case_id: str) -> None:
 def perform_qc_check(cg_config: CGConfig, case_id: str) -> None:
     """
     Perform QC check for a Trana 16S case.
-
     """
+    case: Case = cg_config.status_db.get_case_by_internal_id_strict(case_id)
+    latest_analysis: Analysis = case.get_latest_analysis_strict()
 
     analysis_qc_service.perform_qc(
         root_directory=cg_config.trana_16s.root,
         status_db=cg_config.status_db,
         trailblazer_api=cg_config.trailblazer_api,
-        analysis_id=1,
+        analysis_id=latest_analysis.id,
     )
 
 
