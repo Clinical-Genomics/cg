@@ -51,4 +51,4 @@ def _cancel_case(case: Case, comment: str, status_db: Store) -> None:
 
 def _sign_comment(comment: str, user: str) -> str:
     timestamp: str = datetime.now().strftime("%Y-%m-%d %H:%M")
-    return f"Cancelled with {comment=}/ {timestamp} {user}"
+    return f"Cancelled {timestamp} by {user} {comment=}"
