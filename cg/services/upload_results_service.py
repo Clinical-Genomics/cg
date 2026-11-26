@@ -82,10 +82,10 @@ def _upload_to_customer_inbox(
     else:
         message = f"No files to upload for case {analysis.case_internal_id}"
         trailblazer_api.set_analysis_status(
-            case_id=analysis.case_internal_id, status=AnalysisStatus.FAILED
+            analysis_id=cast(int, analysis.trailblazer_id), status=AnalysisStatus.FAILED
         )
         trailblazer_api.add_comment(
-            case_id=analysis.case_internal_id,
+            analysis_id=cast(int, analysis.trailblazer_id),
             comment=f"ERROR: No files to upload to customer inbox",
         )
         LOG.error(message)
