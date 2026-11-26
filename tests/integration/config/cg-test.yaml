@@ -189,6 +189,39 @@ nallo:
   variant_catalog: {test_root_dir}/variant_catalog.bed
   workflow_bin_path: {test_root_dir}/nallo_workflow_bin_path
 
+oncoflow:
+  compute_env: oncoflow_compute_env
+  conda_env: oncoflow_conda_env
+  config: {test_root_dir}/oncoflow_config.config
+  launch_directory: {test_root_dir}/oncoflow_launch_directory
+  params: {test_root_dir}/oncoflow_params.yaml
+  pipeline_deliverables: "oncoflow_pipeline_deliverables.yaml"
+  platform: {test_root_dir}/platform.config
+  profile: oncoflow_profile
+  rank_model_threshold: 5
+  rank_model_snv: {test_root_dir}/ghxx_oncoflow_rank_model_snvs.ini
+  rank_model_sv: {test_root_dir}/ghxx_oncoflow_rank_model_svs.ini
+  reference: "oncoflow-reference.fasta"
+  resources: {test_root_dir}/oncoflow_resources.config
+  repository: oncoflow_repository
+  revision: oncoflow_revision
+  root: {test_root_dir}/oncoflow_root_path
+  seqera:
+    base_url: "http://localhost:8888/tower"
+    bearer_token: "sequera_bearer_token"
+    compute_environments:
+      express: "3xpr355"
+      high: "h1gh"
+      low: "l0w"
+      normal: "n0rm41"
+    workspace_id: 1234567890
+  slurm:
+    account: "oncoflow_slurm_account"
+    mail_user: "oncoflow_mail_user@scilifelab.se"
+    qos: "low"
+  tower_workflow: oncoflow_tower_workflow
+  workflow_bin_path: {test_root_dir}/oncoflow_workflow_bin_path
+
 raredisease:
   compute_env: raredisease_compute_env
   conda_env: raredisease_conda_env

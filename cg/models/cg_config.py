@@ -466,6 +466,26 @@ class SeqeraPlatformConfig(BaseModel):
     workspace_id: int
 
 
+class OncoflowConfig(CommonAppConfig):
+    conda_binary: str | None = None
+    conda_env: str
+    config: str
+    launch_directory: str
+    params: str
+    pipeline_deliverables: str
+    platform: str
+    pre_run_script: str = ""
+    profile: str
+    repository: str
+    resources: str
+    revision: str
+    root: str
+    seqera: SeqeraPlatformConfig
+    slurm: SlurmConfig
+    tower_workflow: str
+    workflow_bin_path: str
+
+
 class DataFlowConfig(BaseModel):
     archive_repository: str
     database_name: str
@@ -608,6 +628,7 @@ class CGConfig(BaseModel):
     mip_rd_rna: MipConfig | None = Field(None, alias="mip-rd-rna")
     mutant: MutantConfig | None = None
     nallo: NalloConfig | None = None
+    oncoflow: OncoflowConfig | None = None
     raredisease: RarediseaseConfig | None = None
     rnafusion: RnafusionConfig | None = None
     statina: StatinaConfig | None = None
