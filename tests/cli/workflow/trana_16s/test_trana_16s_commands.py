@@ -4,11 +4,16 @@ from click.testing import CliRunner
 from pytest_mock import MockerFixture
 
 from cg.apps.tb.api import TrailblazerAPI
-from cg.cli.workflow.trana_16s.trana_16s_commands import analysis_qc_service, perform_qc_check
+from cg.cli.workflow.trana_16s.trana_16s_commands import (
+    analysis_qc_service,
+    perform_qc_check,
+    upload_results_service,
+)
 from cg.models.cg_config import CGConfig, TranaConfig
 from cg.store.models import Analysis, Case
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
+from cg.cli.workflow.trana_16s.trana_16s_commands import upload
 
 
 def test_perform_qc_check(mocker: MockerFixture):
@@ -45,3 +50,34 @@ def test_perform_qc_check(mocker: MockerFixture):
         trailblazer_api=cg_config.trailblazer_api,
         analysis_id=2,
     )
+
+
+def test_upload(mocker: MockerFixture):
+    # GIVEN a case with an analysis
+    case: Case = create_autospec(Case)
+    case.get_latest_analysis_strict = Mock(return_value=create_autospec(Analysis, id=2))
+
+    # GIVEN a StatusDB
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    status_db.as_type.get_case_by_internal_id_strict = Mock(return_value=case)
+
+    # GIVEN a CGConfig
+    cg_config: CGConfig = create_autospec(
+        CGConfig,
+        trana_16s=create_autospec(TranaConfig, root="root_dir"),
+        status_db=status_db.as_type,
+        trailblazer_api=create_autospec(TrailblazerAPI),
+    )
+
+    # GIVEN an upload_results_service
+    upload_mock = mocker.patch.object(upload_results_service, "upload_results")
+
+    # WHEN calling upload with the case
+    cli_runner = CliRunner()
+    cli_runner.invoke(upload, ["case_id"], obj=cg_config)
+
+    # THEN we should have fetched the case using the provided case id
+    status_db.as_mock.get_case_by_internal_id_strict.assert_called_once_with("case_id")
+
+    # THEN the upload_results_service should have been called
+    upload_mock.assert_called_once_with()  # TODO

@@ -112,6 +112,7 @@ def store(cg_config: CGConfig, case_id: str) -> None:
         click.Abort: If an error occurs during the deliverables file generation, metrics
         validation, or storage processes.
     """
+    # TODO test this
     case: Case = cg_config.status_db.get_case_by_internal_id_strict(case_id)
     latest_analysis: Analysis = case.get_latest_analysis_strict()
     trana_16s_config = cast(TranaConfig, cg_config.trana_16s)
@@ -142,3 +143,9 @@ def perform_qc_check(cg_config: CGConfig, case_id: str) -> None:
 
 
 # TODO: add upload command? also for trana ITS?
+@trana_16s.command("upload")
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def upload(cg_config: CGConfig, case_id: str) -> None:
+
+    pass
