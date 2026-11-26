@@ -11,6 +11,7 @@ from cg.store.crud.read import ReadHandler
 from cg.store.models import (
     Analysis,
     Case,
+    CaseSample,
     ExternalSample,
     IlluminaSampleSequencingMetrics,
     IlluminaSequencingRun,
@@ -159,3 +160,15 @@ class UpdateMixin(ReadHandler):
         )
         external_sample.transferred_at = transferred_at
         return external_sample
+
+    @staticmethod
+    def update_case_is_cancelled(case: Case, state: bool) -> None:
+        case.is_cancelled = state
+
+    @staticmethod
+    def update_case_comment(case: Case, comment: str) -> None:
+        case.comment = f"{case.comment} {comment}" if case.comment else comment
+
+    @staticmethod
+    def update_should_deliver_sample(link: CaseSample, state: bool) -> None:
+        link.should_deliver_sample = state

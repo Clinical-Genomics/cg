@@ -1207,6 +1207,7 @@ class ReadHandler(BaseHandler):
             CaseFilter.PASSING_SEQUENCING_QC,
             CaseFilter.WITH_WORKFLOW,
             CaseFilter.FOR_ANALYSIS,
+            CaseFilter.NOT_CANCELLED,
         ]
         cases = apply_case_filter(
             cases=self._get_case_query_for_analysis_start(),

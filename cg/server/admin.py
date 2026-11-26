@@ -530,13 +530,14 @@ class CaseView(BaseView):
     """Admin view for Model.Case"""
 
     column_default_sort = ("created_at", True)
-    column_editable_list = ["action", "comment"]
+    column_editable_list = ["action", "comment", "is_cancelled"]
     column_list = [
         "internal_id",
         "name",
         "customer",
         "tickets",
         "action",
+        "is_cancelled",
         "priority",
         "ordered_at",
         "aggregated_sequencing_qc",
@@ -553,6 +554,7 @@ class CaseView(BaseView):
         "data_analysis",
         "data_delivery",
         "tickets",
+        "is_cancelled",
     ]
     column_formatters = {
         "customer": view_customer_link,
