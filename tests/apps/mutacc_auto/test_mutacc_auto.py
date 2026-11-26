@@ -1,6 +1,7 @@
 """Tests for cg.apps.mutacc_auto module"""
 
 import subprocess
+from pathlib import Path
 
 import pytest
 
@@ -14,6 +15,7 @@ def mutacc_config():
         config_path="mutacc-auto_config",
         binary_path="mutacc-auto",
         padding=111,
+        reference=Path("/path/to/genome.fa"),
     )
 
 
@@ -40,6 +42,17 @@ def test_instantiate(mutacc_config):
         "--config-file",
         mutacc_config.config_path,
     ]
+
+
+def test_reference_path(mutacc_config: MutaccAutoConfig):
+    """Test that the reference path is taken from the mutacc-auto config."""
+    # GIVEN a mutacc-auto config with a reference
+
+    # WHEN instantiating a mutacc_auto API
+    mutacc_api = MutaccAutoAPI(config=mutacc_config)
+
+    # THEN the reference path is the one from the config
+    assert mutacc_api.reference_path == Path("/path/to/genome.fa")
 
 
 def test_extract_reads(mutacc_auto_api, mocker):

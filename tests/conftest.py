@@ -2040,11 +2040,13 @@ def context_config(
             "binary_path": "echo",
             "config_path": "mutacc-auto-stage-hg19.yaml",
             "padding": 300,
+            "reference": "hg19-genome.fa",
         },
         "mutacc_auto_hg38": {
             "binary_path": "echo",
             "config_path": "mutacc-auto-stage-hg38.yaml",
             "padding": 300,
+            "reference": "hg38-genome.fa",
         },
         "mutant": {
             "binary_path": "echo",
@@ -2607,6 +2609,7 @@ def nallo_context(
         name=nallo_case_id,
         data_analysis=Workflow.NALLO,
     )
+    helpers.add_analysis(store=status_db, case=case_enough_reads, trailblazer_id=1)
 
     sample_enough_reads: Sample = helpers.add_sample(
         status_db,
@@ -2884,6 +2887,7 @@ def raredisease_context(
         name=raredisease_case_id,
         data_analysis=Workflow.RAREDISEASE,
     )
+    helpers.add_analysis(store=status_db, case=case_enough_reads, trailblazer_id=1)
 
     sample_enough_reads: Sample = helpers.add_sample(
         status_db,
@@ -3304,6 +3308,7 @@ def rnafusion_context(
         name=rnafusion_case_id,
         data_analysis=Workflow.RNAFUSION,
     )
+    helpers.add_analysis(store=status_db, case=case_enough_reads, trailblazer_id=1)
 
     sample_rnafusion_case_enough_reads: Sample = helpers.add_sample(
         status_db,
@@ -3637,6 +3642,7 @@ def tomte_context(
         data_analysis=Workflow.TOMTE,
         panels=[GenePanelMasterList.OMIM_AUTO],
     )
+    helpers.add_analysis(store=status_db, case=case_enough_reads, trailblazer_id=1)
 
     sample_enough_reads: Sample = helpers.add_sample(
         status_db,
@@ -3784,6 +3790,7 @@ def taxprofiler_context(
         name=taxprofiler_case_id,
         data_analysis=Workflow.TAXPROFILER,
     )
+    helpers.add_analysis(store=status_db, case=taxprofiler_case, trailblazer_id=1)
 
     taxprofiler_sample: Sample = helpers.add_sample(
         status_db,

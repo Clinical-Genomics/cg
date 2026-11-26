@@ -50,6 +50,6 @@ class RawDataAnalysisService:
             ticket=case.latest_ticket,
         )
         self.trailblazer_api.set_analysis_status(
-            case_id=case.internal_id, status=AnalysisStatus.COMPLETED
+            analysis_id=trailblazer_analysis.id, status=AnalysisStatus.COMPLETED
         )
         return trailblazer_analysis
