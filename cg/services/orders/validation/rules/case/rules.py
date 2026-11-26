@@ -3,6 +3,7 @@ from typing import Counter
 from cg.apps.lims import LimsAPI
 from cg.models.orders.sample_base import StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
+    CaseCancelledError,
     CaseDoesNotExistError,
     CaseNameNotAvailableError,
     CaseOutsideOfCollaborationError,
@@ -82,6 +83,21 @@ def validate_case_internal_ids_exist(
         db_case: DbCase | None = store.get_case_by_internal_id(case.internal_id)
         if not db_case:
             error = CaseDoesNotExistError(case_index=case_index)
+            errors.append(error)
+    return errors
+
+
+def validate_existing_cases_not_cancelled(
+    order: OrderWithCases,
+    store: Store,
+    **kwargs,
+) -> list[CaseCancelledError]:
+    """Validates that no existing case within the order is cancelled."""
+    errors: list[CaseCancelledError] = []
+    for case_index, case in order.enumerated_existing_cases:
+        db_case: DbCase | None = store.get_case_by_internal_id(case.internal_id)
+        if db_case and db_case.is_cancelled:
+            error = CaseCancelledError(case_index=case_index)
             errors.append(error)
     return errors
 

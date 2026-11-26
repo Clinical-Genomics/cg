@@ -1,10 +1,14 @@
+from typing import Callable
 from unittest.mock import Mock, create_autospec
+
+import pytest
 
 from cg.apps.lims import LimsAPI
 from cg.constants import GenePanelMasterList
 from cg.models.orders.constants import OrderType
 from cg.models.orders.sample_base import ContainerEnum, SexEnum, StatusEnum
 from cg.services.orders.validation.errors.case_errors import (
+    CaseCancelledError,
     CaseDoesNotExistError,
     CaseNameNotAvailableError,
     CaseOutsideOfCollaborationError,
@@ -21,29 +25,44 @@ from cg.services.orders.validation.errors.case_errors import (
 from cg.services.orders.validation.models.existing_case import ExistingCase
 from cg.services.orders.validation.models.existing_sample import ExistingSample
 from cg.services.orders.validation.models.order_with_cases import OrderWithCases
+from cg.services.orders.validation.order_types.balsamic.validation_rules import BALSAMIC_CASE_RULES
+from cg.services.orders.validation.order_types.balsamic_umi.validation_rules import (
+    BALSAMIC_UMI_CASE_RULES,
+)
 from cg.services.orders.validation.order_types.mip_dna.constants import MIPDNADeliveryType
 from cg.services.orders.validation.order_types.mip_dna.models.case import MIPDNACase
 from cg.services.orders.validation.order_types.mip_dna.models.order import MIPDNAOrder
 from cg.services.orders.validation.order_types.mip_dna.models.sample import MIPDNASample
+from cg.services.orders.validation.order_types.mip_dna.validation_rules import MIP_DNA_CASE_RULES
+from cg.services.orders.validation.order_types.mip_rna.validation_rules import MIP_RNA_CASE_RULES
+from cg.services.orders.validation.order_types.nallo.validation_rules import NALLO_CASE_RULES
 from cg.services.orders.validation.order_types.raredisease.constants import RarediseaseDeliveryType
 from cg.services.orders.validation.order_types.raredisease.models.case import RarediseaseCase
 from cg.services.orders.validation.order_types.raredisease.models.order import RarediseaseOrder
 from cg.services.orders.validation.order_types.raredisease.models.sample import RarediseaseSample
+from cg.services.orders.validation.order_types.raredisease.validation_rules import (
+    RAREDISEASE_CASE_RULES,
+)
 from cg.services.orders.validation.order_types.rna_fusion.models.order import RNAFusionOrder
 from cg.services.orders.validation.order_types.rna_fusion.models.sample import RNAFusionSample
+from cg.services.orders.validation.order_types.rna_fusion.validation_rules import (
+    RNAFUSION_CASE_RULES,
+)
 from cg.services.orders.validation.order_types.tomte.constants import TomteDeliveryType
 from cg.services.orders.validation.order_types.tomte.models.case import TomteCase
 from cg.services.orders.validation.order_types.tomte.models.order import TomteOrder
 from cg.services.orders.validation.order_types.tomte.models.sample import TomteSample
+from cg.services.orders.validation.order_types.tomte.validation_rules import TOMTE_CASE_RULES
 from cg.services.orders.validation.rules.case.rules import (
-    validate_case_lineal_relations,
-    validate_case_lineal_or_collateral_relations,
     validate_case_internal_ids_exist,
+    validate_case_lineal_or_collateral_relations,
+    validate_case_lineal_relations,
     validate_case_names_available,
     validate_case_names_not_repeated,
     validate_each_new_case_has_an_affected_sample,
     validate_existing_cases_belong_to_collaboration,
     validate_existing_cases_have_an_affected_sample,
+    validate_existing_cases_not_cancelled,
     validate_gene_panels_exist,
     validate_one_sample_per_case,
     validate_samples_have_same_source,
@@ -97,6 +116,95 @@ def test_case_internal_ids_does_not_exist(
 
     # THEN the error should concern the non-existent case
     assert isinstance(errors[0], CaseDoesNotExistError)
+
+
+def test_existing_case_cancelled(
+    valid_order: OrderWithCases, store_with_multiple_cases_and_samples: Store
+):
+    """Test that an error is returned for a cancelled existing case."""
+    # GIVEN an order containing an existing case that is cancelled
+    db_case: Case = store_with_multiple_cases_and_samples.get_cases()[0]
+    db_case.is_cancelled = True
+    existing_case = ExistingCase(internal_id=db_case.internal_id, panels=db_case.panels)
+    valid_order.cases.append(existing_case)
+    case_index: int = len(valid_order.cases) - 1
+
+    # WHEN validating that the existing cases are not cancelled
+    errors: list[CaseCancelledError] = validate_existing_cases_not_cancelled(
+        order=valid_order, store=store_with_multiple_cases_and_samples
+    )
+
+    # THEN one error should be returned for the cancelled case
+    assert len(errors) == 1
+    assert isinstance(errors[0], CaseCancelledError)
+    assert errors[0].case_index == case_index
+
+
+def test_existing_case_not_cancelled(
+    valid_order: OrderWithCases, store_with_multiple_cases_and_samples: Store
+):
+    """Test that no error is returned for an existing case that is not cancelled."""
+    # GIVEN an order containing an existing case that is not cancelled
+    db_case: Case = store_with_multiple_cases_and_samples.get_cases()[0]
+    assert not db_case.is_cancelled
+    existing_case = ExistingCase(internal_id=db_case.internal_id, panels=db_case.panels)
+    valid_order.cases.append(existing_case)
+
+    # WHEN validating that the existing cases are not cancelled
+    errors: list[CaseCancelledError] = validate_existing_cases_not_cancelled(
+        order=valid_order, store=store_with_multiple_cases_and_samples
+    )
+
+    # THEN no errors should be returned
+    assert not errors
+
+
+def test_existing_case_not_cancelled_non_existent_case(
+    valid_order: OrderWithCases, store_with_multiple_cases_and_samples: Store
+):
+    """Test that no error is returned for a non-existent case, since another rule covers it."""
+    # GIVEN an order containing an existing case that does not exist in the database
+    existing_case = ExistingCase(internal_id="Non-existent case", panels=[GenePanelMasterList.AID])
+    valid_order.cases.append(existing_case)
+
+    # WHEN validating that the existing cases are not cancelled
+    errors: list[CaseCancelledError] = validate_existing_cases_not_cancelled(
+        order=valid_order, store=store_with_multiple_cases_and_samples
+    )
+
+    # THEN no errors should be returned
+    assert not errors
+
+
+@pytest.mark.parametrize(
+    "case_rules",
+    [
+        BALSAMIC_CASE_RULES,
+        BALSAMIC_UMI_CASE_RULES,
+        MIP_DNA_CASE_RULES,
+        MIP_RNA_CASE_RULES,
+        NALLO_CASE_RULES,
+        RAREDISEASE_CASE_RULES,
+        RNAFUSION_CASE_RULES,
+        TOMTE_CASE_RULES,
+    ],
+    ids=[
+        "balsamic",
+        "balsamic_umi",
+        "mip_dna",
+        "mip_rna",
+        "nallo",
+        "raredisease",
+        "rna_fusion",
+        "tomte",
+    ],
+)
+def test_existing_cases_not_cancelled_rule_is_registered(case_rules: list[Callable]):
+    """Test that every order type that accepts existing cases blocks cancelled cases."""
+    # GIVEN the case rules of an order type that accepts existing cases
+
+    # THEN the rule blocking cancelled cases should be included
+    assert validate_existing_cases_not_cancelled in case_rules
 
 
 def test_repeated_case_names_not_allowed(order_with_repeated_case_names: OrderWithCases):

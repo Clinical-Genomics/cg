@@ -31,6 +31,11 @@ class CaseDoesNotExistError(CaseError):
     message: str = "The case does not exist"
 
 
+class CaseCancelledError(CaseError):
+    field: str = "internal_id"
+    message: str = "The case is cancelled and cannot be re-ordered"
+
+
 class CaseOutsideOfCollaborationError(CaseError):
     field: str = "internal_id"
     message: str = "Case does not belong to collaboration"

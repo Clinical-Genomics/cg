@@ -5,6 +5,7 @@ from cg.services.orders.validation.rules.case.rules import (
     validate_case_names_available,
     validate_case_names_not_repeated,
     validate_existing_cases_belong_to_collaboration,
+    validate_existing_cases_not_cancelled,
     validate_one_sample_per_case,
 )
 from cg.services.orders.validation.rules.case_sample.rules import (
@@ -38,6 +39,7 @@ from cg.services.orders.validation.rules.case_sample.rules import (
 
 RNAFUSION_CASE_RULES: list[Callable] = [
     validate_case_internal_ids_exist,
+    validate_existing_cases_not_cancelled,
     validate_case_names_available,
     validate_case_names_not_repeated,
     validate_existing_cases_belong_to_collaboration,
