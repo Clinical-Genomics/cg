@@ -24,6 +24,7 @@ def cases(cg_config: CGConfig, comment: str, case_ids: tuple[str, ...]):
         - Set the case value `is_cancelled` to true
         - Set the CaseSample links to no-delivery
         - Blocks case from being analyzed
+        - Blocks case from being re-ordered
     """
     if not comment.strip():
         raise click.BadParameter(
