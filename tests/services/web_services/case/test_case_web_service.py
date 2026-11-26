@@ -6,7 +6,7 @@ from pytest_mock import MockerFixture
 from cg.exc import CaseNotFoundError
 from cg.services import cancellation_service
 from cg.services.web_services.case.service import CaseWebService
-from cg.store.models import Case
+from cg.store.models import Case, User
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -27,6 +27,11 @@ def test_cancel_cases_success(mocker: MockerFixture, store_with_cases: TypedMock
     # GIVEN a case web service
     case_web_service = CaseWebService(store=store_with_cases.as_type)
 
+    # GIVEN a user in the store
+    user: User = create_autospec(User, instance=True)
+    user.name = "Ernest Rutherford"
+    store_with_cases.as_mock.get_user_by_email.return_value = user
+
     # GIVEN a mocked cancellation service
     cancel_cases: Mock = mocker.patch.object(cancellation_service, "cases")
 
@@ -35,11 +40,11 @@ def test_cancel_cases_success(mocker: MockerFixture, store_with_cases: TypedMock
         entry_ids=["1", "2"], user_email="ernes.rutherford@scilifelab.se"
     )
 
-    # THEN the cancellation service is called with the internal ids of the cases
+    # THEN the cancellation service is called with the internal ids of the cases and the user name
     cancel_cases.assert_called_once_with(
         case_ids={"amazingdog", "shittycow"},
         comment="Cancelled in admin view",
-        user="ernes.rutherford@scilifelab.se",
+        user="Ernest Rutherford",
         status_db=store_with_cases.as_type,
     )
 
@@ -49,6 +54,28 @@ def test_cancel_cases_success(mocker: MockerFixture, store_with_cases: TypedMock
 
     # THEN the message names the cancelled cases
     assert message == "Cancelled cases: amazingdog, shittycow"
+
+
+def test_cancel_cases_user_not_found(mocker: MockerFixture, store_with_cases: TypedMock[Store]):
+    # GIVEN a case web service
+    case_web_service = CaseWebService(store=store_with_cases.as_type)
+
+    # GIVEN that no user exists for the given email
+    store_with_cases.as_mock.get_user_by_email.return_value = None
+
+    # GIVEN a mocked cancellation service
+    cancel_cases: Mock = mocker.patch.object(cancellation_service, "cases")
+
+    # WHEN cancelling cases by their entry ids
+    case_web_service.cancel_cases(entry_ids=["1", "2"], user_email="ernes.rutherford@scilifelab.se")
+
+    # THEN the cancellation service is called with the email as the user
+    cancel_cases.assert_called_once_with(
+        case_ids={"amazingdog", "shittycow"},
+        comment="Cancelled in admin view",
+        user="ernes.rutherford@scilifelab.se",
+        status_db=store_with_cases.as_type,
+    )
 
 
 @pytest.mark.parametrize(

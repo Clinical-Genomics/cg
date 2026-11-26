@@ -641,21 +641,22 @@ class CaseView(BaseView):
 
     @action(
         "cancel_cases",
-        "Cancel case",
+        "Cancel cases",
         "Are you sure you want to cancel the selected cases?",
     )
-    def cancel_samples(self, entry_ids: list[str]) -> None:
+    def cancel_cases(self, entry_ids: list[str]) -> None:
         user_email: str | None = session.get("user_email")
         if not user_email:
-            flash("Please provide a user")
+            flash("Failed to cancel cases. Please provide a user.")
             return None
         try:
             case_web_service = CaseWebService(store=db)
-            flash(case_web_service.cancel_cases(entry_ids=entry_ids, user_email=user_email))
+            message: str = case_web_service.cancel_cases(entry_ids=entry_ids, user_email=user_email)
+            flash(message)
         except CgError as error:
-            flash(f"Failed to cancel cases: {error}. No changes were made.", "error")
-        except Exception:
-            flash("Unexpected error when cancelling cases. No changes were made.", "error")
+            flash(f"Failed to cancel cases: {error}", "error")
+        except Exception as error:
+            flash(f"Unexpected error when cancelling cases: {error}", "error")
 
 
 class InvoiceView(BaseView):
