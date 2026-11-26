@@ -7,8 +7,6 @@ from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.cli.workflow.nf_analysis import OPTION_RESUME, OPTION_REVISION
 from cg.constants import Workflow
-from cg.constants.cli_options import COMMENT, FORCE
-from cg.exc import AnalysisDoesNotExistError
 from cg.models.cg_config import CGConfig, TranaConfig
 from cg.services.analysis_qc_service import analysis_qc_service
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
@@ -104,10 +102,8 @@ def start_available(cg_config: CGConfig) -> None:
 
 @trana_16s.command("store")
 @ARGUMENT_CASE_ID
-@COMMENT
-@FORCE
 @click.pass_obj
-def store(cg_config: CGConfig, case_id: str, comment: str | None, force: bool) -> None:
+def store(cg_config: CGConfig, case_id: str) -> None:
     """
     Store deliverable files in Housekeeper. No QC or file validation is performed.
 
@@ -117,9 +113,7 @@ def store(cg_config: CGConfig, case_id: str, comment: str | None, force: bool) -
         validation, or storage processes.
     """
     case: Case = cg_config.status_db.get_case_by_internal_id_strict(case_id)
-    latest_analysis: Analysis | None = case.latest_created_analysis
-    if not latest_analysis:
-        raise AnalysisDoesNotExistError(f"Case {case_id} has no analysis to store")
+    latest_analysis: Analysis = case.get_latest_analysis_strict()
     trana_16s_config = cast(TranaConfig, cg_config.trana_16s)
     store_analysis_service.store_analysis_output(
         analysis_id=latest_analysis.id,
@@ -137,6 +131,7 @@ def perform_qc_check(cg_config: CGConfig, case_id: str) -> None:
     Perform QC check for a Trana 16S case.
 
     """
+
     analysis_qc_service.perform_qc(
         root_directory=cg_config.trana_16s.root,
         status_db=cg_config.status_db,
