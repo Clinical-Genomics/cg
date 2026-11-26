@@ -40,7 +40,7 @@ def test_perform_qc(fs: FakeFilesystem):
         return_value=create_autospec(Analysis, case_internal_id="case_one", id=1)
     )
 
-    # WHEN performing QC
+    # WHEN performing QC and it is successful
     analysis_qc_service.perform_qc(
         root_directory=Path("root_directory"),
         status_db=status_db,
