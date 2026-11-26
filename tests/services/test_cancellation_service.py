@@ -44,7 +44,7 @@ def test_cases_success():
     assert status_db.as_mock.update_case_is_cancelled.call_count == 2
 
     # THEN the comment, signed with timestamp and user, is added to each case
-    signed_comment = "a comment/ 1908-12-10 13:37 Ernes.Rutherford"
+    signed_comment = "Cancelled 1908-12-10 13:37 by Ernes.Rutherford comment='a comment'"
     status_db.as_mock.update_case_comment.assert_has_calls(
         [
             call(case=dog_case, comment=signed_comment),

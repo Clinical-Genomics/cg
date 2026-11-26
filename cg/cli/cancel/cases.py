@@ -21,11 +21,11 @@ def cases(cg_config: CGConfig, comment: str, case_ids: tuple[str, ...]):
 
     \b
     Following actions are performed:
-        - Set the case value `is_cancelled` to true [X]
-        - Set the CaseSample links to no-delivery [X]
+        - Set the case value `is_cancelled` to true
+        - Set the CaseSample links to no-delivery
         - Blocks case from being analyzed
         - Blocks case from being re-ordered
-    """  # TODO: remove the check marks
+    """
     if not comment.strip():
         raise click.BadParameter(
             "Please add a reason for the cancellation.", param_hint="--comment"

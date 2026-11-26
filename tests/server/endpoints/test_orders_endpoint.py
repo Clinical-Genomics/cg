@@ -11,14 +11,24 @@ from cg.store.models import Order
 
 
 @pytest.mark.parametrize(
-    "limit, workflow, expected_orders",
+    "limit, workflow, workflows, expected_order_names, expected_total",
     [
-        (None, Workflow.MIP_DNA, 2),
-        (1, Workflow.MIP_DNA, 1),
-        (2, Workflow.MIP_DNA, 2),
-        (None, Workflow.BALSAMIC, 1),
-        (None, Workflow.FLUFFY, 0),
-        (None, None, 3),
+        (None, Workflow.MIP_DNA, [], ["order", "order_another"], 2),
+        (1, Workflow.MIP_DNA, [], ["order"], 2),
+        (2, Workflow.MIP_DNA, [], ["order", "order_another"], 2),
+        (None, Workflow.BALSAMIC, [], ["order_balsamic"], 1),
+        (None, Workflow.FLUFFY, [], [], 0),
+        (None, None, [], ["order", "order_another", "order_balsamic"], 3),
+        (None, None, [Workflow.MIP_DNA], ["order", "order_another"], 2),
+        (
+            None,
+            None,
+            [Workflow.MIP_DNA, Workflow.BALSAMIC],
+            ["order", "order_another", "order_balsamic"],
+            3,
+        ),
+        (None, None, [Workflow.BALSAMIC, Workflow.FLUFFY], ["order_balsamic"], 1),
+        (1, None, [Workflow.MIP_DNA, Workflow.BALSAMIC], ["order"], 3),
     ],
 )
 def test_orders_endpoint(
@@ -27,12 +37,21 @@ def test_orders_endpoint(
     order_another: Order,
     order_balsamic: Order,
     limit: int | None,
-    workflow: str,
-    expected_orders: int,
+    workflow: str | None,
+    workflows: list[str],
+    expected_order_names: list[str],
+    expected_total: int,
     analysis_summaries: list[AnalysisSummary],
 ):
     """Tests that orders are returned from the orders endpoint"""
     # GIVEN a store with three orders, two of which are MIP-DNA and the last is BALSAMIC
+
+    orders_by_name = {
+        "order": order,
+        "order_another": order_another,
+        "order_balsamic": order_balsamic,
+    }
+    expected_returned_ids = {orders_by_name[name].id for name in expected_order_names}
 
     # WHEN a request is made to get all orders
     endpoint: str = "/api/v1/orders"
@@ -41,13 +60,25 @@ def test_orders_endpoint(
         "get_summaries",
         return_value=analysis_summaries,
     ):
-        response = client.get(endpoint, query_string={"pageSize": limit, "workflow": workflow})
+        response = client.get(
+            endpoint,
+            query_string={
+                "pageSize": limit,
+                "workflow": workflow,
+                "workflows[]": workflows,
+                "sortField": "id",
+                "sortOrder": "asc",
+            },
+        )
 
     # THEN the response should be successful
     assert response.status_code == HTTPStatus.OK
 
-    # THEN the response contains the correct number of orders
-    assert len(response.json["orders"]) == expected_orders
+    # THEN the response contains the correct orders
+    assert len(response.json["orders"]) == len(expected_order_names)
+    assert response.json["total_count"] == expected_total
+    returned_ids = {item["id"] for item in response.json["orders"]}
+    assert returned_ids == expected_returned_ids
 
 
 def test_order_endpoint(
@@ -81,3 +112,23 @@ def test_order_endpoint_not_found(
 
     # THEN the response should be unsuccessful
     assert response.status_code == HTTPStatus.NOT_FOUND
+
+
+@pytest.mark.parametrize(
+    "query_string",
+    [
+        {"workflow": Workflow.MIP_DNA, "workflows[]": [Workflow.BALSAMIC]},
+        {"workflows[]": [Workflow.MIP_DNA, "invalid-workflow"]},
+    ],
+    ids=["conflicting-workflow-filters", "invalid-workflow"],
+)
+def test_orders_endpoint_invalid_workflow_filters(client: FlaskClient, query_string: dict):
+    """Reject conflicting filters and invalid values in repeated workflow parameters."""
+    # GIVEN conflicting workflow filters or an invalid workflow value
+
+    # WHEN requesting orders with those filters
+    response = client.get("/api/v1/orders", query_string=query_string)
+
+    # THEN the response is HTTP 400 with a JSON error
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.json["error"]
