@@ -69,12 +69,19 @@ class HousekeeperAPI:
         return new_bundle
 
     def new_file(
-        self, path: str, checksum: str = None, to_archive: bool = False, tags: list = None
+        self,
+        path: str,
+        checksum: str = None,
+        file_type: str | None = None,
+        to_archive: bool = False,
+        tags: list = None,
     ) -> File:
         """Create a new file."""
         if tags is None:
             tags = []
-        return self._store.new_file(path=path, checksum=checksum, to_archive=to_archive, tags=tags)
+        return self._store.new_file(
+            path=path, checksum=checksum, file_type=file_type, to_archive=to_archive, tags=tags
+        )
 
     def get_file(self, file_id: int) -> File | None:
         """Get a file based on file id."""
