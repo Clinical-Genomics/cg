@@ -532,7 +532,7 @@ class CaseView(BaseView):
     """Admin view for Model.Case"""
 
     column_default_sort = ("created_at", True)
-    column_editable_list = ["action", "comment", "is_cancelled"]
+    column_editable_list = ["action", "comment"]
     column_list = [
         "internal_id",
         "name",
@@ -581,6 +581,7 @@ class CaseView(BaseView):
         "_cohorts",
         "links",
         "synopsis",
+        "is_cancelled",
     ]
     form_extra_fields = {
         "data_analysis": SelectEnumField(enum_class=Workflow),
