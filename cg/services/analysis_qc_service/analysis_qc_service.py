@@ -25,6 +25,11 @@ def perform_qc(
 
     if missing_files:
         trailblazer_api.set_analysis_status(analysis_id=analysis_id, status=AnalysisStatus.FAILED)
+        trailblazer_api.add_comment(
+            analysis_id=analysis_id,
+            comment="Mandatory files missing from case directory",
+        )
+
         raise MandatoryFileMissingError(f"Missing files: {missing_files}")
     else:
         trailblazer_api.set_analysis_status(

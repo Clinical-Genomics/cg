@@ -1,5 +1,5 @@
 from pathlib import Path
-from unittest.mock import ANY, Mock, create_autospec
+from unittest.mock import Mock, create_autospec
 
 import pytest
 from housekeeper.store.models import File
@@ -12,8 +12,8 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants.constants import Workflow
 from cg.constants.priority import Priority, TrailblazerPriority
-from cg.constants.tb import AnalysisStatus, AnalysisType
-from cg.exc import MissingFilesError, MissingUploadKeysError
+from cg.constants.tb import AnalysisType
+from cg.exc import MissingUploadKeysError
 from cg.services import upload_results_service
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.upload_results_service import os as upload_os
