@@ -9,7 +9,7 @@ from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Workflow
-from cg.constants.tb import AnalysisStatus, AnalysisType
+from cg.constants.tb import AnalysisType
 from cg.exc import MissingFilesError, MissingUploadKeysError
 from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
