@@ -1408,20 +1408,15 @@ def test_get_external_sample_strict_external_sample_not_found(store: Store):
 
 
 def test_get_upload_keys_customer_inbox_files(store: Store):
-    """
-    id: Mapped[PrimaryKeyInt]
-    file_type: Mapped[str]
-    workflow: Mapped[Workflow]
-    is_archived: Mapped[bool]
-    scout_key: Mapped[str | None]
-    loqusdb_key: Mapped[str | None]
-    upload_to_customer_inbox: Mapped[bool]
-    chanjo_key: Mapped[str | None]
-    """
-
     # GIVEN upload keys in store
-    upload_keys_to_fetch = UploadKeys(
+    upload_keys_to_fetch1 = UploadKeys(
         file_type="multiqc",
+        upload_to_customer_inbox=True,
+        workflow=Workflow.TRANA_16S,
+        is_archived=False,
+    )
+    upload_keys_to_fetch2 = UploadKeys(
+        file_type="vcf",
         upload_to_customer_inbox=True,
         workflow=Workflow.TRANA_16S,
         is_archived=False,
@@ -1447,7 +1442,8 @@ def test_get_upload_keys_customer_inbox_files(store: Store):
 
     store.add_multiple_items_to_store(
         [
-            upload_keys_to_fetch,
+            upload_keys_to_fetch1,
+            upload_keys_to_fetch2,
             upload_keys_wrong_workflow,
             upload_keys_no_customer_inbox,
             upload_keys_archived,
@@ -1460,4 +1456,4 @@ def test_get_upload_keys_customer_inbox_files(store: Store):
     )
 
     # THEN the correct upload keys were returned
-    assert upload_keys == [upload_keys_to_fetch]
+    assert upload_keys == [upload_keys_to_fetch1, upload_keys_to_fetch2]

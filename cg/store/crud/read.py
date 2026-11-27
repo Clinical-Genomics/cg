@@ -2177,7 +2177,6 @@ class ReadHandler(BaseHandler):
                 f"Could not find external sample with name {sample_name} for customer {customer_id}"
             )
 
-    # TODO: create get upload keys method
     def get_upload_keys(
         self, workflow: Workflow, upload_to_customer_inbox: bool
     ) -> Sequence[UploadKeys]:
