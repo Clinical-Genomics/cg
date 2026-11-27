@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 
 import pytest
+from sqlalchemy import Sequence
 from sqlalchemy.exc import MultipleResultsFound
 from sqlalchemy.orm import Query
 
@@ -35,6 +36,7 @@ from cg.store.models import (
     Organism,
     Pool,
     Sample,
+    UploadKeys,
     User,
 )
 from cg.store.store import Store
@@ -1403,3 +1405,55 @@ def test_get_external_sample_strict_external_sample_not_found(store: Store):
             customer_id=1,
             sample_name="sample-name-1",
         )
+
+
+def test_get_upload_keys_customer_inbox_files(store: Store):
+    # GIVEN upload keys in store
+    upload_keys_to_fetch1 = UploadKeys(
+        file_type="multiqc",
+        upload_to_customer_inbox=True,
+        workflow=Workflow.TRANA_16S,
+        is_archived=False,
+    )
+    upload_keys_to_fetch2 = UploadKeys(
+        file_type="vcf",
+        upload_to_customer_inbox=True,
+        workflow=Workflow.TRANA_16S,
+        is_archived=False,
+    )
+    upload_keys_wrong_workflow = UploadKeys(
+        file_type="multiqc",
+        upload_to_customer_inbox=True,
+        workflow=Workflow.RAREDISEASE,
+        is_archived=False,
+    )
+    upload_keys_no_customer_inbox = UploadKeys(
+        file_type="multiqc",
+        upload_to_customer_inbox=False,
+        workflow=Workflow.TRANA_16S,
+        is_archived=False,
+    )
+    upload_keys_archived = UploadKeys(
+        file_type="multiqc",
+        upload_to_customer_inbox=True,
+        workflow=Workflow.TRANA_16S,
+        is_archived=True,
+    )
+
+    store.add_multiple_items_to_store(
+        [
+            upload_keys_to_fetch1,
+            upload_keys_to_fetch2,
+            upload_keys_wrong_workflow,
+            upload_keys_no_customer_inbox,
+            upload_keys_archived,
+        ]
+    )
+
+    # WHEN getting the upload keys for customer inbox files
+    upload_keys: Sequence[UploadKeys] = store.get_upload_keys(
+        workflow=Workflow.TRANA_16S, upload_to_customer_inbox=True
+    )
+
+    # THEN the correct upload keys were returned
+    assert upload_keys == [upload_keys_to_fetch1, upload_keys_to_fetch2]

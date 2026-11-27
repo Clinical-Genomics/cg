@@ -69,12 +69,19 @@ class HousekeeperAPI:
         return new_bundle
 
     def new_file(
-        self, path: str, checksum: str = None, to_archive: bool = False, tags: list = None
+        self,
+        path: str,
+        checksum: str = None,
+        file_type: str | None = None,
+        to_archive: bool = False,
+        tags: list = None,
     ) -> File:
         """Create a new file."""
         if tags is None:
             tags = []
-        return self._store.new_file(path, checksum, to_archive, tags)
+        return self._store.new_file(
+            path=path, checksum=checksum, file_type=file_type, to_archive=to_archive, tags=tags
+        )
 
     def get_file(self, file_id: int) -> File | None:
         """Get a file based on file id."""
@@ -129,10 +136,15 @@ class HousekeeperAPI:
         tags: set[str] = None,
         version: int | None = None,
         path: str = None,
+        file_types: list[str] | None = None,
     ) -> Query:
         """Fetch files."""
         return self._store.get_files(
-            bundle_name=bundle, tag_names=tags, version_id=version, file_path=path
+            bundle_name=bundle,
+            tag_names=tags,
+            version_id=version,
+            file_path=path,
+            file_types=file_types,
         )
 
     def get_file_insensitive_path(self, path: Path) -> File | None:

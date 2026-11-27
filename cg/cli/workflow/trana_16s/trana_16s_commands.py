@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from typing import cast
 
 import click
@@ -7,11 +8,15 @@ from cg.cli.utils import CLICK_CONTEXT_SETTINGS
 from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.cli.workflow.nf_analysis import OPTION_RESUME, OPTION_REVISION
 from cg.constants import Workflow
-from cg.models.cg_config import CGConfig
+from cg.models.cg_config import CGConfig, TranaConfig
+from cg.services import upload_results_service
+from cg.services.analysis_qc_service import analysis_qc_service
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
 from cg.services.analysis_starter.factories.configurator_factory import ConfiguratorFactory
 from cg.services.analysis_starter.factories.starter_factory import AnalysisStarterFactory
+from cg.services.storing_service import store_analysis_service
+from cg.store.models import Analysis, Case
 
 LOG = logging.getLogger(__name__)
 
@@ -95,3 +100,68 @@ def start_available(cg_config: CGConfig) -> None:
     succeeded: bool = analysis_starter.start_available()
     if not succeeded:
         raise click.Abort
+
+
+@trana_16s.command("qc-check")
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def perform_qc_check(cg_config: CGConfig, case_id: str) -> None:
+    """
+    Perform QC check to the latest analysis of a case.
+    Raises:
+        AnalysisDoesNotExistError: if the case has no analyses
+    """
+    case: Case = cg_config.status_db.get_case_by_internal_id_strict(case_id)
+    latest_analysis: Analysis = case.get_latest_analysis_strict()
+    analysis_qc_service.perform_qc(
+        root_directory=cg_config.trana_16s.root,
+        status_db=cg_config.status_db,
+        trailblazer_api=cg_config.trailblazer_api,
+        analysis_id=latest_analysis.id,
+    )
+
+
+@trana_16s.command("store")
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def store(cg_config: CGConfig, case_id: str) -> None:
+    """
+    Store deliverable files of the latest analysis of a case in Housekeeper.
+
+    Raises:
+        AnalysisDoesNotExistError: if the case has no analyses
+        click.Abort: If an error occurs during the deliverables file generation, metrics
+        validation, or storage processes.
+    """
+    case: Case = cg_config.status_db.get_case_by_internal_id_strict(case_id)
+    latest_analysis: Analysis = case.get_latest_analysis_strict()
+    trana_16s_config = cast(TranaConfig, cg_config.trana_16s)
+    store_analysis_service.store_analysis_output(
+        analysis_id=latest_analysis.id,
+        root_directory=trana_16s_config.root,
+        housekeeper_api=cg_config.housekeeper_api,
+        status_db=cg_config.status_db,
+    )
+
+
+# TODO: also for trana ITS?
+@trana_16s.command("upload")
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def upload(cg_config: CGConfig, case_id: str) -> None:
+    """
+    Upload deliverables files for the latest analysis of a case to the appropriate destinations.
+
+    Raises:
+        AnalysisDoesNotExistError: if the case has no analyses
+    """
+    case: Case = cg_config.status_db.get_case_by_internal_id_strict(case_id)
+    latest_analysis: Analysis = case.get_latest_analysis_strict()
+    upload_results_service.upload_results(
+        analysis=latest_analysis,
+        base_delivery_path=Path(cg_config.delivery_path),
+        housekeeper_api=cg_config.housekeeper_api,
+        rsync_service=cg_config.delivery_rsync_service,
+        status_db=cg_config.status_db,
+        trailblazer_api=cg_config.trailblazer_api,
+    )

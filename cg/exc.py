@@ -186,6 +186,12 @@ class MissingAnalysisRunDirectory(CgError):
     """
 
 
+class MissingUploadKeysError(CgError):
+    """
+    Error raised when no upload keys are found.
+    """
+
+
 class OrderError(CgError):
     """
     Exception related to orders.
@@ -423,3 +429,7 @@ class MissingNegativeControlError(CgError):
 
 class MultipleNegativeControlsError(CgError):
     """Exception raised when a case has multiple a negative control"""
+
+
+class MandatoryFileMissingError(CgError):
+    """Exception raised when mandatory file is missing"""

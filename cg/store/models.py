@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from pathlib import Path
 from typing import Annotated, cast
 
 import sqlalchemy
@@ -557,6 +558,11 @@ class Case(Base, PriorityMixin):
         return not DataDelivery(self.data_delivery).excludes_customer_inbox_delivery
 
     @property
+    def needs_analysis_uploaded_to_customer_inbox(self) -> bool:
+        """Returns True if the case has an analysis that needs to be uploaded to the customer inbox."""
+        return "analysis" in self.data_delivery
+
+    @property
     def original_order(self) -> "Order | None":
         if not self.orders:
             return None
@@ -587,6 +593,9 @@ class Case(Base, PriorityMixin):
             raise AnalysisDoesNotExistError(f"No analyses for case {self.internal_id}")
         else:
             return self.analyses[0]
+
+    def get_deliverables_file(self, root_directory: Path) -> Path:
+        return Path(root_directory, self.internal_id, f"{self.internal_id}_deliverables.yaml")
 
     def are_all_samples_control(self) -> bool:
         """Return True if all case samples are controls."""
@@ -1446,3 +1455,15 @@ class OrderTypeApplication(Base):
     application: Mapped[Application] = orm.relationship(
         "Application", back_populates="order_type_applications"
     )
+
+
+class UploadKeys(Base):
+    __tablename__ = "upload_keys"
+    id: Mapped[PrimaryKeyInt]
+    file_type: Mapped[str]
+    workflow: Mapped[Workflow]
+    is_archived: Mapped[bool]
+    scout_key: Mapped[str | None]
+    loqusdb_key: Mapped[str | None]
+    upload_to_customer_inbox: Mapped[bool]
+    chanjo_key: Mapped[str | None]

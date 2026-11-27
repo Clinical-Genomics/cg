@@ -7,6 +7,7 @@ from typing import cast
 from unittest.mock import Mock, call, create_autospec
 
 import pytest
+from pyfakefs.fake_filesystem import FakeFilesystem
 
 from cg.apps.slurm.slurm_api import SlurmAPI
 from cg.constants import Workflow
@@ -14,7 +15,7 @@ from cg.constants.priority import SlurmAccount, SlurmQos
 from cg.exc import CgError
 from cg.models.slurm.sbatch import Sbatch
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
-from cg.store.models import Analysis, Case, Customer
+from cg.store.models import Analysis, Case, Customer, Order
 from cg.store.store import Store
 
 
@@ -240,6 +241,108 @@ def test_concatenate_rsync_commands_mutant(
     # THEN the correct folder should be added to the source path
     assert report_path.name in command
     assert covid_destination_path.as_posix() in command
+
+
+@pytest.mark.freeze_time("2025-06-11 10:05:01")
+def test_run_rsync_for_analysis(
+    created_sbatch_information: str,
+    rsync_destination_host: str,
+    inbox_path: str,
+    first_job_number: int,
+    second_job_number: int,
+    rsync_base_path: str,
+    rsync_delivery_path: str,
+    rsync_destination_path: str,
+    rsync_mail_user: str,
+    rsync_service: DeliveryRsyncService,
+    slurm_api_mock: SlurmAPI,
+    fs: FakeFilesystem,
+):
+    """Test for running rsync on a single case using SLURM."""
+    # GIVEN an analysis linked to a case
+    customer: Customer = create_autospec(Customer, internal_id="cust000")
+    ticket: int = 123456
+    case: Case = create_autospec(Case, customer=customer, internal_id="case_one")
+    order: Order = create_autospec(Order, ticket_id=ticket)
+
+    analysis: Analysis = create_autospec(
+        Analysis, case=case, case_internal_id="case_one", order=order, id=42
+    )
+
+    # GIVEN some folders to sync
+    dir_one = fs.create_dir(directory_path="/path/to/dir_one")
+    dir_two = fs.create_dir(directory_path="/path/to/dir_two")
+    folders_to_deliver = {Path(dir_one.path), Path(dir_two.path)}
+
+    # WHEN run_rsync_for_case is run
+    sbatch_number: int = rsync_service.run_rsync_for_analysis(
+        analysis=analysis,
+        folders_to_deliver=folders_to_deliver,
+    )
+
+    # THEN two jobs are created with the correct commands and parameters
+    _, first_call_kwargs = slurm_api_mock.generate_sbatch_content.call_args_list[0]
+    _, second_call_kwargs = slurm_api_mock.generate_sbatch_content.call_args_list[1]
+
+    sbatch_first_job: Sbatch = first_call_kwargs["sbatch_parameters"]
+    sbatch_second_job: Sbatch = second_call_kwargs["sbatch_parameters"]
+
+    expected_create_inbox_command = f"""
+ssh {rsync_destination_host} "mkdir -p {inbox_path}/{customer.internal_id}/inbox/{ticket}"
+"""
+
+    assert sbatch_first_job == Sbatch(
+        job_name=f"{ticket}_create_inbox",
+        number_tasks=1,
+        memory=1,
+        account=rsync_service.account,
+        log_dir=f"{rsync_base_path}/{case.internal_id}_250611_10_05_01_000000",
+        email=rsync_mail_user,
+        hours=24,
+        quality_of_service=SlurmQos.LOW,
+        commands=expected_create_inbox_command,
+        error='\necho "Create inbox failed"\n',
+    )
+
+    assert sbatch_second_job.job_name == f"{case.internal_id}_rsync"
+    assert sbatch_second_job.dependency == f"--dependency=afterok:{first_job_number}"
+
+    expected_rsync_commands: list[str] = [
+        (
+            f"rsync -rvL {rsync_delivery_path}/{customer.internal_id}/inbox/{ticket}/{type} "
+            f"{rsync_destination_path}/{customer.internal_id}/inbox/{ticket}"
+        )
+        for type in ["dir_one", "dir_two"]
+    ]
+    expected_rsync_commands.append(
+        "path/to/nats_binary pub --jetstream --server nats://example.nats.server:4222 --tlsca "
+        "path/to/ca_cert.pem --tlscert path/to/client_cert.pem --tlskey "
+        "path/to/client_key.pem --token $(cat path/to/token) cg-test.analysis.upload_completed "
+        r'"{\"cg.analysis_id\": 42, \"uploaded_at\": \"$(date +%Y-%m-%dT%H:%M:%S)\"}"'
+    )
+
+    for command in expected_rsync_commands:
+        assert command in sbatch_second_job.commands
+
+    # THEN both job are correctly submitted
+    first_call, second_call = slurm_api_mock.submit_sbatch.mock_calls
+
+    assert first_call == call(
+        sbatch_content=created_sbatch_information,
+        sbatch_path=Path(
+            f"{rsync_base_path}/{case.internal_id}_250611_10_05_01_000000/{ticket}_create_inbox.sh"
+        ),
+    )
+
+    assert second_call == call(
+        sbatch_content=created_sbatch_information,
+        sbatch_path=Path(
+            f"{rsync_base_path}/{case.internal_id}_250611_10_05_01_000000/{case.internal_id}_rsync.sh"
+        ),
+    )
+
+    # THEN the created job number of the file transfer job is returned
+    assert sbatch_number == second_job_number
 
 
 @pytest.mark.freeze_time("2025-06-11 10:05:01")

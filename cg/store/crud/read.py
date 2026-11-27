@@ -121,6 +121,7 @@ from cg.store.models import (
     RunDevice,
     Sample,
     SampleRunMetrics,
+    UploadKeys,
     User,
 )
 
@@ -2175,6 +2176,21 @@ class ReadHandler(BaseHandler):
             raise ExternalSampleNotFoundError(
                 f"Could not find external sample with name {sample_name} for customer {customer_id}"
             )
+
+    def get_upload_keys(
+        self, workflow: Workflow, upload_to_customer_inbox: bool
+    ) -> list[UploadKeys]:
+        return list(
+            self.session.scalars(
+                select(UploadKeys).where(
+                    and_(
+                        UploadKeys.upload_to_customer_inbox.is_(upload_to_customer_inbox),
+                        UploadKeys.workflow == workflow,
+                        UploadKeys.is_archived.is_(False),
+                    )
+                )
+            ).all()
+        )
 
 
 def _paginate(query: Query, page: int, page_size: int) -> tuple[list, int]:

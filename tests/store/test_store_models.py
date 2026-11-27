@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import pytest
 
 from cg.constants.constants import ControlOptions, DataDelivery
@@ -74,6 +76,51 @@ def test_case_is_to_be_uploaded_to_customer_inbox(
 
     # THEN the value should be as expected
     assert should_be_uploaded == is_to_be_uploaded
+
+
+@pytest.mark.parametrize(
+    "data_delivery, needs_analysis",
+    [
+        (DataDelivery.ANALYSIS_FILES, True),
+        (DataDelivery.ANALYSIS_SCOUT, True),
+        (DataDelivery.BAM, False),
+        (DataDelivery.FASTQ, False),
+        (DataDelivery.FASTQ_SCOUT, False),
+        (DataDelivery.FASTQ_QC, False),
+        (DataDelivery.FASTQ_ANALYSIS, True),
+        (DataDelivery.FASTQ_QC_ANALYSIS, True),
+        (DataDelivery.FASTQ_ANALYSIS_SCOUT, True),
+        (DataDelivery.NIPT_VIEWER, False),
+        (DataDelivery.NO_DELIVERY, False),
+        (DataDelivery.RAW_DATA_ANALYSIS, True),
+        (DataDelivery.RAW_DATA_ANALYSIS_SCOUT, True),
+        (DataDelivery.RAW_DATA_SCOUT, False),
+        (DataDelivery.SCOUT, False),
+        (DataDelivery.STATINA, False),
+    ],
+)
+def test_case_needs_analysis_uploaded_to_customer_inbox(
+    data_delivery: DataDelivery, needs_analysis: bool
+):
+    # GIVEN a case with a data delivery
+    case = Case(data_delivery=data_delivery)
+
+    # WHEN checking if the case has an analysis that needs to be uploaded to the customer inbox
+    needs_analysis_uploaded: bool = case.needs_analysis_uploaded_to_customer_inbox
+
+    # THEN the value should be as expected
+    assert needs_analysis_uploaded == needs_analysis
+
+
+def test_get_deliverables_file():
+    # GIVEN a case with internal id
+    case = Case(internal_id="case_1")
+
+    # WHEN getting the deliverables file name for the case
+    deliverables_file: Path = case.get_deliverables_file(root_directory="/path/to/root")
+
+    # THEN the Path should be as expected
+    assert deliverables_file.as_posix() == "/path/to/root/case_1/case_1_deliverables.yaml"
 
 
 def test_microbial_sample_to_dict(microbial_store: Store, helpers):
