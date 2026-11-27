@@ -558,6 +558,11 @@ class Case(Base, PriorityMixin):
         return not DataDelivery(self.data_delivery).excludes_customer_inbox_delivery
 
     @property
+    def needs_analysis_uploaded_to_customer_inbox(self) -> bool:
+        """Returns True if the case has an analysis that needs to be uploaded to the customer inbox."""
+        return "analysis" in self.data_delivery
+
+    @property
     def original_order(self) -> "Order | None":
         if not self.orders:
             return None

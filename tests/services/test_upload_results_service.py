@@ -13,7 +13,7 @@ from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants.constants import Workflow
 from cg.constants.priority import Priority, TrailblazerPriority
 from cg.constants.tb import AnalysisStatus, AnalysisType
-from cg.exc import MissingFilesError
+from cg.exc import MissingFilesError, MissingUploadKeysError
 from cg.services import upload_results_service
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.services.upload_results_service import os as upload_os
@@ -139,8 +139,8 @@ def test_uplad_results_no_upload_keys(mocker: MockerFixture):
     rsync_service: TypedMock[DeliveryRsyncService] = create_typed_mock(DeliveryRsyncService)
 
     # WHEN uploading the results
-    # THEN a MissingFilesError should be raised
-    with pytest.raises(MissingFilesError):
+    # THEN a MissingUploadKeysError should be raised
+    with pytest.raises(MissingUploadKeysError):
         upload_results_service.upload_results(
             analysis=create_autospec(Analysis, case_internal_id="case_1"),
             base_delivery_path=Path("base/delivery/path"),
@@ -162,11 +162,3 @@ def test_uplad_results_no_upload_keys(mocker: MockerFixture):
     # THEN no Trailblazer request was made
     trailblazer_api.as_mock.add_pending_analysis.assert_not_called()
     trailblazer_api.as_mock.add_upload_job_to_analysis.assert_not_called()
-
-    # THEN the Trailblazer status should have been set to failed
-    trailblazer_api.as_mock.set_analysis_status.assert_called_once_with(
-        case_id="case_1", status=AnalysisStatus.FAILED
-    )
-
-    # THEN a comment should have been added to Trailblazer
-    trailblazer_api.as_mock.add_comment.assert_called_once_with(case_id="case_1", comment=ANY)

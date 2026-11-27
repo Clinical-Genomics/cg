@@ -44,17 +44,19 @@ def _upload_to_customer_inbox(
     rsync_service: DeliveryRsyncService,
     status_db: Store,
     trailblazer_api: TrailblazerAPI,
-):
-
-    case_delivery_directory: Path = _link_analysis_files(
-        analysis=analysis,
-        base_delivery_path=base_delivery_path,
-        housekeeper_api=housekeeper_api,
-        status_db=status_db,
-    )
+) -> None:
+    folders_to_deliver = set()
+    if analysis.case.needs_analysis_uploaded_to_customer_inbox:
+        case_delivery_directory: Path = _link_analysis_files(
+            analysis=analysis,
+            base_delivery_path=base_delivery_path,
+            housekeeper_api=housekeeper_api,
+            status_db=status_db,
+        )
+        folders_to_deliver.add(case_delivery_directory)
 
     slurm_job_id: int = rsync_service.run_rsync_for_analysis(
-        analysis=analysis, folders_to_deliver={case_delivery_directory}
+        analysis=analysis, folders_to_deliver=folders_to_deliver
     )
 
     tb_rsync_analysis: TrailblazerAnalysis = trailblazer_api.add_pending_analysis(
