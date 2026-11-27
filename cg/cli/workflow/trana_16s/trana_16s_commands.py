@@ -102,6 +102,24 @@ def start_available(cg_config: CGConfig) -> None:
         raise click.Abort
 
 
+@trana_16s.command("qc-check")
+@ARGUMENT_CASE_ID
+@click.pass_obj
+def perform_qc_check(cg_config: CGConfig, case_id: str) -> None:
+    """
+    Perform QC check for a Trana 16S case.
+    """
+    case: Case = cg_config.status_db.get_case_by_internal_id_strict(case_id)
+    latest_analysis: Analysis = case.get_latest_analysis_strict()
+
+    analysis_qc_service.perform_qc(
+        root_directory=cg_config.trana_16s.root,
+        status_db=cg_config.status_db,
+        trailblazer_api=cg_config.trailblazer_api,
+        analysis_id=latest_analysis.id,
+    )
+
+
 @trana_16s.command("store")
 @ARGUMENT_CASE_ID
 @click.pass_obj
@@ -122,24 +140,6 @@ def store(cg_config: CGConfig, case_id: str) -> None:
         root_directory=trana_16s_config.root,
         housekeeper_api=cg_config.housekeeper_api,
         status_db=cg_config.status_db,
-    )
-
-
-@trana_16s.command("qc-check")
-@ARGUMENT_CASE_ID
-@click.pass_obj
-def perform_qc_check(cg_config: CGConfig, case_id: str) -> None:
-    """
-    Perform QC check for a Trana 16S case.
-    """
-    case: Case = cg_config.status_db.get_case_by_internal_id_strict(case_id)
-    latest_analysis: Analysis = case.get_latest_analysis_strict()
-
-    analysis_qc_service.perform_qc(
-        root_directory=cg_config.trana_16s.root,
-        status_db=cg_config.status_db,
-        trailblazer_api=cg_config.trailblazer_api,
-        analysis_id=latest_analysis.id,
     )
 
 
