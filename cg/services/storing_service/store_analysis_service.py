@@ -37,8 +37,6 @@ def store_analysis_output(
     )
     housekeeper_api.include(version)
     housekeeper_api.add_commit(bundle)
-    # TODO: Make only one commit
-    # housekeeper_api.add_commit(version)
     status_db.update_analysis_housekeeper_version_id(
         analysis_id=analysis_id, version_id=cast(int, version.id)
     )

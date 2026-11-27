@@ -14,7 +14,7 @@ from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
 
-@pytest.mark.freeze_time()
+@pytest.mark.freeze_time
 def test_store_pipeline_output_success(fs: FakeFilesystem):
     # GIVEN a case_deliverables file for a given case
     contents = [
@@ -72,7 +72,7 @@ def test_store_pipeline_output_success(fs: FakeFilesystem):
     # THEN the housekeeper bundle for the case should have been created
     expected_bundle_data = {
         "name": "case_id",
-        "created_at": "?",
+        "created_at": datetime.now(),
         "files": [
             {
                 "path": "/root_directory/case_id/file2.txt",
@@ -98,8 +98,7 @@ def test_store_pipeline_output_success(fs: FakeFilesystem):
 
     # THEN the version should have been included
     housekeeper_api.as_mock.include.assert_called_once_with(version)
-    housekeeper_api.as_mock.add_commit.assert_any_call(bundle)
-    housekeeper_api.as_mock.add_commit.assert_any_call(version)
+    housekeeper_api.as_mock.add_commit.assert_called_once_with(bundle)
 
     # THEN the analysis in StatusDB was updated with a Housekeeper version
     status_db.as_mock.update_analysis_housekeeper_version_id.assert_called_once_with(

@@ -1469,4 +1469,4 @@ class UploadKeys(Base):
     scout_key: Mapped[str | None]
     loqusdb_key: Mapped[str | None]
     upload_to_customer_inbox: Mapped[bool]
-    chanjo_key: Mapped[str]
+    chanjo_key: Mapped[str | None]

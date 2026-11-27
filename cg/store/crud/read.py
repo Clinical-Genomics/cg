@@ -2178,7 +2178,9 @@ class ReadHandler(BaseHandler):
             )
 
     # TODO: create get upload keys method
-    def get_upload_keys(self, workflow: Workflow, upload_to_customer_inbox: bool):
+    def get_upload_keys(
+        self, workflow: Workflow, upload_to_customer_inbox: bool
+    ) -> Sequence[UploadKeys]:
         return self.session.scalars(
             select(UploadKeys).where(
                 and_(
