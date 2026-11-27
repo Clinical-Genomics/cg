@@ -1,5 +1,6 @@
 from cg.server.dto.cases.requests import CasesRequest
-from cg.store.models import Case, Customer
+from cg.services import cancellation_service
+from cg.store.models import Case, Customer, User
 from cg.store.store import Store
 
 
@@ -27,3 +28,24 @@ class CaseWebService:
             offset=(request.page - 1) * request.page_size,
             limit=request.page_size,
         )
+
+    def cancel_cases(self, entry_ids: list[str], user_email: str) -> str:
+        case_ids: set[str] = {
+            self.store.get_case_by_entry_id(entry_id).internal_id for entry_id in entry_ids
+        }
+        try:
+            cancellation_service.cases(
+                case_ids=case_ids,
+                comment="Cancelled in admin view",
+                user=self._get_username(user_email),
+                status_db=self.store,
+            )
+            self.store.commit_to_store()
+            return f"Cancelled cases: {', '.join(sorted(case_ids))}"
+        except Exception:
+            self.store.rollback()
+            raise
+
+    def _get_username(self, user_email: str) -> str:
+        user: User | None = self.store.get_user_by_email(user_email)
+        return user.name if user else user_email

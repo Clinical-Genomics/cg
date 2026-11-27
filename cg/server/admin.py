@@ -13,10 +13,12 @@ from sqlalchemy import inspect
 from wtforms.form import Form
 
 from cg.constants.constants import NG_UL_SUFFIX, CaseActions, DataDelivery, Workflow
+from cg.exc import CgError
 from cg.models.orders.constants import OrderType
 from cg.server.app_config import app_config
 from cg.server.ext import applications_service, db, sample_service
 from cg.server.utils import MultiCheckboxField
+from cg.services.web_services.case.service import CaseWebService
 from cg.store.models import Application
 from cg.utils.flask.enum import SelectEnumField
 from cg.utils.number_formatter import Si
@@ -530,7 +532,7 @@ class CaseView(BaseView):
     """Admin view for Model.Case"""
 
     column_default_sort = ("created_at", True)
-    column_editable_list = ["action", "comment", "is_cancelled"]
+    column_editable_list = ["action", "comment"]
     column_list = [
         "internal_id",
         "name",
@@ -579,6 +581,7 @@ class CaseView(BaseView):
         "_cohorts",
         "links",
         "synopsis",
+        "is_cancelled",
     ]
     form_extra_fields = {
         "data_analysis": SelectEnumField(enum_class=Workflow),
@@ -636,6 +639,25 @@ class CaseView(BaseView):
                 raise
 
             flash(gettext(f"Failed to set case action. {str(ex)}"))
+
+    @action(
+        "cancel_cases",
+        "Cancel cases",
+        "Are you sure you want to cancel the selected cases?",
+    )
+    def cancel_cases(self, entry_ids: list[str]) -> None:
+        user_email: str | None = session.get("user_email")
+        if not user_email:
+            flash("Failed to cancel cases. Please provide a user.")
+            return None
+        try:
+            case_web_service = CaseWebService(store=db)
+            message: str = case_web_service.cancel_cases(entry_ids=entry_ids, user_email=user_email)
+            flash(message)
+        except CgError as error:
+            flash(f"Failed to cancel cases: {error}", "error")
+        except Exception as error:
+            flash(f"Unexpected error when cancelling cases: {error}", "error")
 
 
 class InvoiceView(BaseView):
