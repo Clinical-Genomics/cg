@@ -11,7 +11,6 @@ from cg.io.yaml import write_yaml_stream
 from cg.services.analysis_qc_service import analysis_qc_service
 from cg.store.models import Analysis, Case
 from cg.store.store import Store
-from tests.conftest import case_id
 from tests.typed_mock import TypedMock, create_typed_mock
 
 
@@ -36,8 +35,12 @@ def test_perform_qc(fs: FakeFilesystem):
 
     # GIVEN a StatusDB with an analysis linked to a case
     status_db: Store = create_autospec(Store)
+    case: Case = create_autospec(Case)
+    case.get_deliverables_file = Mock(
+        return_value=Path("/root_directory/case_one/case_one_deliverables.yaml")
+    )
     status_db.get_analysis_by_entry_id_strict = Mock(
-        return_value=create_autospec(Analysis, case_internal_id="case_one", id=1)
+        return_value=create_autospec(Analysis, case=case, case_internal_id="case_one", id=1)
     )
 
     # WHEN performing QC and it is successful

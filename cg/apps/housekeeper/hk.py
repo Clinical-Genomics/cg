@@ -74,7 +74,7 @@ class HousekeeperAPI:
         """Create a new file."""
         if tags is None:
             tags = []
-        return self._store.new_file(path, checksum, to_archive, tags)
+        return self._store.new_file(path=path, checksum=checksum, to_archive=to_archive, tags=tags)
 
     def get_file(self, file_id: int) -> File | None:
         """Get a file based on file id."""
