@@ -9,6 +9,8 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.cli.workflow.trana_16s.trana_16s_commands import (
     analysis_qc_service,
     perform_qc_check,
+    store,
+    store_analysis_service,
     upload,
     upload_results_service,
 )
@@ -55,7 +57,7 @@ def test_perform_qc_check(mocker: MockerFixture):
     )
 
 
-def test_store():
+def test_store(mocker: MockerFixture):
 
     # GIVEN a case with an analysis
     case: Case = create_autospec(Case)
@@ -68,16 +70,26 @@ def test_store():
     # GIVEN a CGConfig
     cg_config: CGConfig = create_autospec(
         CGConfig,
+        housekeeper_api=create_autospec(HousekeeperAPI),
         trana_16s=create_autospec(TranaConfig, root="root_dir"),
         status_db=status_db.as_type,
         trailblazer_api=create_autospec(TrailblazerAPI),
     )
+
+    # GIVEN a StoreAnalysisService
+    store_mock = mocker.patch.object(store_analysis_service, "store_analysis_output")
 
     # WHEN calling store with the analysis
     cli_runner = CliRunner()
     cli_runner.invoke(store, ["case_id"], obj=cg_config)
 
     # THEN the store_analysis_output was called with the right parameters
+    store_mock.assert_called_once_with(
+        analysis_id=2,
+        root_directory="root_dir",
+        housekeeper_api=cg_config.housekeeper_api,
+        status_db=status_db.as_type,
+    )
 
 
 def test_upload(mocker: MockerFixture):
