@@ -2179,16 +2179,18 @@ class ReadHandler(BaseHandler):
 
     def get_upload_keys(
         self, workflow: Workflow, upload_to_customer_inbox: bool
-    ) -> Sequence[UploadKeys]:
-        return self.session.scalars(
-            select(UploadKeys).where(
-                and_(
-                    UploadKeys.upload_to_customer_inbox.is_(upload_to_customer_inbox),
-                    UploadKeys.workflow == workflow,
-                    UploadKeys.is_archived.is_(False),
+    ) -> list[UploadKeys]:
+        return list(
+            self.session.scalars(
+                select(UploadKeys).where(
+                    and_(
+                        UploadKeys.upload_to_customer_inbox.is_(upload_to_customer_inbox),
+                        UploadKeys.workflow == workflow,
+                        UploadKeys.is_archived.is_(False),
+                    )
                 )
-            )
-        ).all()
+            ).all()
+        )
 
 
 def _paginate(query: Query, page: int, page_size: int) -> tuple[list, int]:

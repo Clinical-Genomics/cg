@@ -46,17 +46,14 @@ def _upload_to_customer_inbox(
     trailblazer_api: TrailblazerAPI,
 ):
 
-    case_delivery_directory: Path = _create_case_delivery_directory(
-        analysis=analysis, base_delivery_path=base_delivery_path
-    )
-    linked_analysis_files: list[Path] = _link_analysis_files(
+    case_delivery_directory: Path = _link_analysis_files(
         analysis=analysis,
-        case_delivery_directory=case_delivery_directory,
+        base_delivery_path=base_delivery_path,
         housekeeper_api=housekeeper_api,
         status_db=status_db,
     )
 
-    if linked_analysis_files:
+    if case_delivery_directory:
         slurm_job_id: int = rsync_service.run_rsync_for_analysis(
             analysis=analysis, folders_to_deliver={case_delivery_directory}
         )
@@ -108,11 +105,14 @@ def _create_case_delivery_directory(analysis: Analysis, base_delivery_path: Path
 
 def _link_analysis_files(
     analysis: Analysis,
-    case_delivery_directory: Path,
+    base_delivery_path: Path,
     housekeeper_api: HousekeeperAPI,
     status_db: Store,
-) -> list[Path]:
+) -> Path:
 
+    case_delivery_directory: Path = _create_case_delivery_directory(
+        analysis=analysis, base_delivery_path=base_delivery_path
+    )
     upload_keys_list: list[UploadKeys] = status_db.get_upload_keys(
         workflow=analysis.workflow, upload_to_customer_inbox=True
     )
@@ -134,4 +134,4 @@ def _link_analysis_files(
         destination_path = Path(case_delivery_directory, source_path.name)
         linked_paths.append(destination_path)
         os.link(src=source_path, dst=destination_path)
-    return linked_paths
+    return case_delivery_directory
