@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 from typing import cast
 
 import click
@@ -8,6 +9,7 @@ from cg.cli.workflow.commands import ARGUMENT_CASE_ID
 from cg.cli.workflow.nf_analysis import OPTION_RESUME, OPTION_REVISION
 from cg.constants import Workflow
 from cg.models.cg_config import CGConfig, TranaConfig
+from cg.services import upload_results_service
 from cg.services.analysis_qc_service import analysis_qc_service
 from cg.services.analysis_starter.analysis_starter import AnalysisStarter
 from cg.services.analysis_starter.configurator.implementations.nextflow import NextflowConfigurator
@@ -142,10 +144,18 @@ def perform_qc_check(cg_config: CGConfig, case_id: str) -> None:
     )
 
 
-# TODO: add upload command? also for trana ITS?
+# TODO: also for trana ITS?
 @trana_16s.command("upload")
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def upload(cg_config: CGConfig, case_id: str) -> None:
-
-    pass
+    case: Case = cg_config.status_db.get_case_by_internal_id_strict(case_id)
+    latest_analysis: Analysis = case.get_latest_analysis_strict()
+    upload_results_service.upload_results(
+        analysis=latest_analysis,
+        base_delivery_path=Path(cg_config.delivery_path),
+        housekeeper_api=cg_config.housekeeper_api,
+        rsync_service=cg_config.delivery_rsync_service,
+        status_db=cg_config.status_db,
+        trailblazer_api=cg_config.trailblazer_api,
+    )
