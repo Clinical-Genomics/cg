@@ -259,7 +259,7 @@ def test_run_rsync_for_analysis(
     fs: FakeFilesystem,
 ):
     """Test for running rsync on a single case using SLURM."""
-    # GIVEN a valid case, related to a customer and ticket exists
+    # GIVEN an analysis linked to a case
     customer: Customer = create_autospec(Customer, internal_id="cust000")
     ticket: int = 123456
     case: Case = create_autospec(Case, customer=customer, internal_id="case_one")
