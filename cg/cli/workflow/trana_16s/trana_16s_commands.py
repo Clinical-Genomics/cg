@@ -107,11 +107,12 @@ def start_available(cg_config: CGConfig) -> None:
 @click.pass_obj
 def perform_qc_check(cg_config: CGConfig, case_id: str) -> None:
     """
-    Perform QC check for a Trana 16S case.
+    Perform QC check to the latest analysis of a case.
+    Raises:
+        AnalysisDoesNotExistError: if the case has no analyses
     """
     case: Case = cg_config.status_db.get_case_by_internal_id_strict(case_id)
     latest_analysis: Analysis = case.get_latest_analysis_strict()
-
     analysis_qc_service.perform_qc(
         root_directory=cg_config.trana_16s.root,
         status_db=cg_config.status_db,
@@ -125,7 +126,7 @@ def perform_qc_check(cg_config: CGConfig, case_id: str) -> None:
 @click.pass_obj
 def store(cg_config: CGConfig, case_id: str) -> None:
     """
-    Store deliverable files in Housekeeper. No QC or file validation is performed.
+    Store deliverable files of the latest analysis of a case in Housekeeper.
 
     Raises:
         AnalysisDoesNotExistError: if the case has no analyses
@@ -148,6 +149,12 @@ def store(cg_config: CGConfig, case_id: str) -> None:
 @ARGUMENT_CASE_ID
 @click.pass_obj
 def upload(cg_config: CGConfig, case_id: str) -> None:
+    """
+    Upload deliverables files for the latest analysis of a case to the appropriate destinations.
+
+    Raises:
+        AnalysisDoesNotExistError: if the case has no analyses
+    """
     case: Case = cg_config.status_db.get_case_by_internal_id_strict(case_id)
     latest_analysis: Analysis = case.get_latest_analysis_strict()
     upload_results_service.upload_results(
