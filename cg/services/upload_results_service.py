@@ -10,7 +10,7 @@ from cg.apps.tb.api import TrailblazerAPI
 from cg.apps.tb.models import TrailblazerAnalysis
 from cg.constants import Workflow
 from cg.constants.tb import AnalysisStatus, AnalysisType
-from cg.exc import MissingFilesError
+from cg.exc import MissingFilesError, MissingUploadKeysError
 from cg.meta.workflow.utils.utils import MAP_TO_TRAILBLAZER_PRIORITY
 from cg.services.deliver_files.rsync.service import DeliveryRsyncService
 from cg.store.models import Analysis, Case, UploadKeys
@@ -53,40 +53,28 @@ def _upload_to_customer_inbox(
         status_db=status_db,
     )
 
-    if case_delivery_directory:
-        slurm_job_id: int = rsync_service.run_rsync_for_analysis(
-            analysis=analysis, folders_to_deliver={case_delivery_directory}
-        )
+    slurm_job_id: int = rsync_service.run_rsync_for_analysis(
+        analysis=analysis, folders_to_deliver={case_delivery_directory}
+    )
 
-        tb_rsync_analysis: TrailblazerAnalysis = trailblazer_api.add_pending_analysis(
-            case_id=f"{analysis.case_internal_id}_rsync",
-            analysis_type=AnalysisType.OTHER,
-            config_path="",
-            order_id=analysis.order_id,
-            out_dir=rsync_service.log_dir.as_posix(),
-            priority=MAP_TO_TRAILBLAZER_PRIORITY[analysis.case.priority],
-            workflow=Workflow.RSYNC,
-            ticket=str(analysis.order.ticket_id),
-        )
+    tb_rsync_analysis: TrailblazerAnalysis = trailblazer_api.add_pending_analysis(
+        case_id=f"{analysis.case_internal_id}_rsync",
+        analysis_type=AnalysisType.OTHER,
+        config_path="",
+        order_id=analysis.order_id,
+        out_dir=rsync_service.log_dir.as_posix(),
+        priority=MAP_TO_TRAILBLAZER_PRIORITY[analysis.case.priority],
+        workflow=Workflow.RSYNC,
+        ticket=str(analysis.order.ticket_id),
+    )
 
-        trailblazer_api.add_upload_job_to_analysis(
-            analysis_id=tb_rsync_analysis.id, slurm_id=slurm_job_id
-        )
+    trailblazer_api.add_upload_job_to_analysis(
+        analysis_id=tb_rsync_analysis.id, slurm_id=slurm_job_id
+    )
 
-        trailblazer_api.add_upload_job_to_analysis(
-            analysis_id=cast(int, analysis.trailblazer_id), slurm_id=slurm_job_id
-        )
-    else:
-        message = f"No files to upload for case {analysis.case_internal_id}"
-        trailblazer_api.set_analysis_status(
-            analysis_id=cast(int, analysis.trailblazer_id), status=AnalysisStatus.FAILED
-        )
-        trailblazer_api.add_comment(
-            analysis_id=cast(int, analysis.trailblazer_id),
-            comment=f"ERROR: No files to upload to customer inbox",
-        )
-        LOG.error(message)
-        raise MissingFilesError(message)
+    trailblazer_api.add_upload_job_to_analysis(
+        analysis_id=cast(int, analysis.trailblazer_id), slurm_id=slurm_job_id
+    )
 
 
 def _create_case_delivery_directory(analysis: Analysis, base_delivery_path: Path) -> Path:
@@ -120,7 +108,9 @@ def _link_analysis_files(
         LOG.error(
             f"No upload keys to upload to customer inbox found for case: {analysis.case_internal_id}"
         )
-        return []
+        raise MissingUploadKeysError(
+            f"No upload keys found for caesar delivery of workflow {analysis.workflow}"
+        )
 
     file_types: list[str] = [upload_keys.file_type for upload_keys in upload_keys_list]
 
@@ -128,10 +118,16 @@ def _link_analysis_files(
         file_types=file_types, version=analysis.housekeeper_version_id
     ).all()
 
-    linked_paths = list()
+    linked_paths = []
     for file in files:
         source_path = Path(file.full_path)
         destination_path = Path(case_delivery_directory, source_path.name)
         linked_paths.append(destination_path)
         os.link(src=source_path, dst=destination_path)
+
+    if not linked_paths:
+        raise MissingFilesError(
+            f"No analysis files could be linked for case {analysis.case_internal_id}."
+        )
+
     return case_delivery_directory

@@ -186,6 +186,12 @@ class MissingAnalysisRunDirectory(CgError):
     """
 
 
+class MissingUploadKeysError(CgError):
+    """
+    Error raised when no upload keys are found.
+    """
+
+
 class OrderError(CgError):
     """
     Exception related to orders.
