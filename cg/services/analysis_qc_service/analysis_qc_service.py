@@ -15,9 +15,7 @@ def perform_qc(
     analysis_id: int, root_directory: Path, status_db: Store, trailblazer_api: TrailblazerAPI
 ) -> None:
     analysis: Analysis = status_db.get_analysis_by_entry_id_strict(analysis_id)
-    case_id = analysis.case_internal_id
-    case_deliverables_file = Path(root_directory, case_id, f"{case_id}_deliverables.yaml")
-    case_deliverables: list[dict] = read_yaml(case_deliverables_file)
+    case_deliverables: list[dict] = read_yaml(analysis.case.get_deliverables_file(root_directory))
 
     missing_files = []
     for deliverable in case_deliverables:

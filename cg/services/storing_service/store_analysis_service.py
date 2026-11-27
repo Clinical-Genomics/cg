@@ -17,9 +17,8 @@ def store_analysis_output(
     """
     analysis: Analysis = status_db.get_analysis_by_entry_id_strict(analysis_id)
     case_id: str = analysis.case_internal_id
-    # TODO find a better location for the definition of this path
-    case_deliverables_file = Path(root_directory, case_id, f"{case_id}_deliverables.yaml")
-    case_deliverables: list[dict] = read_yaml(case_deliverables_file)
+
+    case_deliverables: list[dict] = read_yaml(analysis.case.get_deliverables_file(root_directory))
 
     existing_files: list[dict] = []
     for deliverable in case_deliverables:
@@ -29,17 +28,17 @@ def store_analysis_output(
                     "path": file,
                     "file_type": deliverable["file_type"],
                     "tags": [deliverable["id"]],
-                    # TODO: Set "archive" to False
+                    "archive": False,
                 }
                 existing_files.append(file_data)
 
     bundle, version = housekeeper_api.add_bundle(
-        bundle_data={"name": case_id, "files": existing_files}  # TODO: Set created or created_at
+        bundle_data={"name": case_id, "files": existing_files, "created_at": datetime.now()}
     )
     housekeeper_api.include(version)
     housekeeper_api.add_commit(bundle)
     # TODO: Make only one commit
-    housekeeper_api.add_commit(version)
+    # housekeeper_api.add_commit(version)
     status_db.update_analysis_housekeeper_version_id(
         analysis_id=analysis_id, version_id=cast(int, version.id)
     )

@@ -9,7 +9,7 @@ from pyfakefs.fake_filesystem import FakeFilesystem
 from cg.apps.housekeeper.hk import HousekeeperAPI
 from cg.io.yaml import write_yaml_stream
 from cg.services.storing_service import store_analysis_service
-from cg.store.models import Analysis
+from cg.store.models import Analysis, Case
 from cg.store.store import Store
 from tests.typed_mock import TypedMock, create_typed_mock
 
@@ -53,8 +53,12 @@ def test_store_pipeline_output_success(fs: FakeFilesystem):
 
     # GIVEN a StatusDB with an analysis linked to a case
     status_db: TypedMock[Store] = create_typed_mock(Store)
+    case: Case = create_autospec(Case)
+    case.get_deliverables_file = Mock(
+        return_value=Path("/root_directory/case_id/case_id_deliverables.yaml")
+    )
     status_db.as_type.get_analysis_by_entry_id_strict = Mock(
-        return_value=create_autospec(Analysis, case_internal_id="case_id", id=1)
+        return_value=create_autospec(Analysis, case=case, case_internal_id="case_id", id=1)
     )
 
     # WHEN storing the pipeline outputs
@@ -68,21 +72,25 @@ def test_store_pipeline_output_success(fs: FakeFilesystem):
     # THEN the housekeeper bundle for the case should have been created
     expected_bundle_data = {
         "name": "case_id",
+        "created_at": "?",
         "files": [
             {
                 "path": "/root_directory/case_id/file2.txt",
                 "file_type": "a_second_type_of_file",
                 "tags": ["sample_id"],
+                "archive": False,
             },
             {
                 "path": "/root_directory/case_id/file3.txt",
                 "file_type": "a_second_type_of_file",
                 "tags": ["sample_id"],
+                "archive": False,
             },
             {
                 "path": "/root_directory/case_id/file4.txt",
                 "file_type": "a_third_type_of_file",
                 "tags": ["case_id"],
+                "archive": False,
             },
         ],
     }

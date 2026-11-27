@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from pathlib import Path
 from typing import Annotated, cast
 
 import sqlalchemy
@@ -595,6 +596,9 @@ class Case(Base, PriorityMixin):
             raise AnalysisDoesNotExistError(f"No analyses for case {self.internal_id}")
         else:
             return self.analyses[0]
+
+    def get_deliverables_file(self, root_directory: Path) -> Path:
+        return Path(root_directory, self.internal_id, f"{self.internal_id}_deliverables.yaml")
 
     def are_all_samples_control(self) -> bool:
         """Return True if all case samples are controls."""
