@@ -1032,7 +1032,7 @@ def test_filter_cases_not_analysed_no_cases(
     # GIVEN a store containing only cases that have been analyzed
     cases_query: Query = store_with_multiple_cases_and_samples._get_query(table=Case)
     for case in cases_query.all():
-        case.analyses.append(Analysis(completed_at=datetime.now()))
+        case.analyses.append(Analysis(completed_at=datetime.now(), workflow=Workflow.RAREDISEASE))
 
     # WHEN filtering cases for cases that have not been analyzed
     filtered_cases: Query = filter_cases_not_analysed(cases=cases_query)

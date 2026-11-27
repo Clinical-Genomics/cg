@@ -301,7 +301,7 @@ class Analysis(Base):
     __tablename__ = "analysis"
 
     id: Mapped[PrimaryKeyInt]
-    workflow: Mapped[str | None] = mapped_column(
+    workflow: Mapped[Workflow] = mapped_column(
         types.Enum(*(workflow.value for workflow in Workflow))
     )
     workflow_version: Mapped[Str64 | None]
@@ -504,7 +504,7 @@ class Case(Base, PriorityMixin):
     data_analysis: Mapped[Workflow] = mapped_column(
         types.Enum(*(workflow.value for workflow in Workflow))
     )
-    data_delivery: Mapped[str | None] = mapped_column(
+    data_delivery: Mapped[DataDelivery] = mapped_column(
         types.Enum(*(delivery.value for delivery in DataDelivery))
     )
     id: Mapped[PrimaryKeyInt]
