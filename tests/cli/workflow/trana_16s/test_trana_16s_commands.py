@@ -55,6 +55,31 @@ def test_perform_qc_check(mocker: MockerFixture):
     )
 
 
+def test_store():
+
+    # GIVEN a case with an analysis
+    case: Case = create_autospec(Case)
+    case.get_latest_analysis_strict = Mock(return_value=create_autospec(Analysis, id=2))
+
+    # GIVEN a StatusDB
+    status_db: TypedMock[Store] = create_typed_mock(Store)
+    status_db.as_type.get_case_by_internal_id_strict = Mock(return_value=case)
+
+    # GIVEN a CGConfig
+    cg_config: CGConfig = create_autospec(
+        CGConfig,
+        trana_16s=create_autospec(TranaConfig, root="root_dir"),
+        status_db=status_db.as_type,
+        trailblazer_api=create_autospec(TrailblazerAPI),
+    )
+
+    # WHEN calling store with the analysis
+    cli_runner = CliRunner()
+    cli_runner.invoke(store, ["case_id"], obj=cg_config)
+
+    # THEN the store_analysis_output was called with the right parameters
+
+
 def test_upload(mocker: MockerFixture):
     # GIVEN a case with an analysis
     case: Case = create_autospec(Case)
